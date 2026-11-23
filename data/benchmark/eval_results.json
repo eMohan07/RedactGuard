@@ -2,13 +2,13 @@
   "synthetic_split": {
     "split_name": "Synthetic Benchmark (Core)",
     "document_count": 18,
-    "precision": 0.7477,
+    "precision": 0.7843,
     "recall": 0.9756,
-    "f1_score": 0.8466,
+    "f1_score": 0.8696,
     "true_positives": 80,
-    "false_positives": 27,
+    "false_positives": 22,
     "false_negatives": 2,
-    "sec_per_doc": 0.0111,
+    "sec_per_doc": 0.0273,
     "missed_pii": [
       {
         "document": "doc_08_hr_incident.txt",
@@ -30,13 +30,7 @@
       },
       {
         "document": "doc_03_vendor_invoice.txt",
-        "text": "Acme Solutions",
-        "category": "NAME",
-        "confidence": 0.9
-      },
-      {
-        "document": "doc_03_vendor_invoice.txt",
-        "text": "Pvt Ltd",
+        "text": "Acme Solutions Pvt",
         "category": "NAME",
         "confidence": 0.9
       },
@@ -60,12 +54,6 @@
       },
       {
         "document": "doc_05_signature_block.txt",
-        "text": "Managing Director",
-        "category": "NAME",
-        "confidence": 0.9
-      },
-      {
-        "document": "doc_05_signature_block.txt",
         "text": "Apex Logistics",
         "category": "NAME",
         "confidence": 0.9
@@ -73,12 +61,6 @@
       {
         "document": "doc_07_email_thread.txt",
         "text": "Case Reference",
-        "category": "NAME",
-        "confidence": 0.9
-      },
-      {
-        "document": "doc_08_hr_incident.txt",
-        "text": "Sales Executive",
         "category": "NAME",
         "confidence": 0.9
       },
@@ -117,12 +99,6 @@
         "text": "Flat",
         "category": "NAME",
         "confidence": 0.93
-      },
-      {
-        "document": "doc_12_executive_bio.txt",
-        "text": "Vice President",
-        "category": "NAME",
-        "confidence": 0.9
       },
       {
         "document": "doc_13_patient_discharge.txt",
@@ -174,12 +150,6 @@
       },
       {
         "document": "doc_06_two_column.pdf",
-        "text": "Attending Physician",
-        "category": "NAME",
-        "confidence": 0.9
-      },
-      {
-        "document": "doc_06_two_column.pdf",
         "text": "Primary Contact",
         "category": "NAME",
         "confidence": 0.9
@@ -189,13 +159,13 @@
   "unseen_split": {
     "split_name": "Held-Out Dev Set (Multi-domain)",
     "document_count": 5,
-    "precision": 0.6667,
+    "precision": 0.7119,
     "recall": 0.9767,
-    "f1_score": 0.7925,
+    "f1_score": 0.8235,
     "true_positives": 42,
-    "false_positives": 21,
+    "false_positives": 17,
     "false_negatives": 1,
-    "sec_per_doc": 0.0195,
+    "sec_per_doc": 0.048,
     "missed_pii": [
       {
         "document": "unseen_04_academic_transcript.txt",
@@ -206,31 +176,13 @@
     "false_positive_instances": [
       {
         "document": "unseen_01_public_nda.txt",
-        "text": "Apex Technologies",
-        "category": "NAME",
-        "confidence": 0.9
-      },
-      {
-        "document": "unseen_01_public_nda.txt",
-        "text": "Managing Director",
+        "text": "Apex Technologies Inc",
         "category": "NAME",
         "confidence": 0.9
       },
       {
         "document": "unseen_02_clinical_discharge.txt",
-        "text": "Mount Sinai",
-        "category": "NAME",
-        "confidence": 0.9
-      },
-      {
-        "document": "unseen_02_clinical_discharge.txt",
-        "text": "Community Health",
-        "category": "NAME",
-        "confidence": 0.9
-      },
-      {
-        "document": "unseen_02_clinical_discharge.txt",
-        "text": "Attending Physician",
+        "text": "Sinai Community Health",
         "category": "NAME",
         "confidence": 0.9
       },
@@ -260,7 +212,7 @@
       },
       {
         "document": "unseen_03_it_incident_log.txt",
-        "text": "Site Reliability",
+        "text": "Senior Site Reliability",
         "category": "NAME",
         "confidence": 0.9
       },
@@ -308,13 +260,7 @@
       },
       {
         "document": "unseen_04_academic_transcript.txt",
-        "text": "Faculty Advisor",
-        "category": "NAME",
-        "confidence": 0.9
-      },
-      {
-        "document": "unseen_04_academic_transcript.txt",
-        "text": "Advanced Machine",
+        "text": "Advanced Machine Learning",
         "category": "NAME",
         "confidence": 0.9
       },
@@ -335,13 +281,13 @@
   "combined_overall": {
     "split_name": "Combined Overall Benchmark",
     "document_count": 23,
-    "precision": 0.7176,
+    "precision": 0.7578,
     "recall": 0.976,
-    "f1_score": 0.8271,
+    "f1_score": 0.8531,
     "true_positives": 122,
-    "false_positives": 48,
+    "false_positives": 39,
     "false_negatives": 3,
-    "sec_per_doc": 0.0037,
+    "sec_per_doc": 0.0074,
     "missed_pii": [
       {
         "document": "doc_08_hr_incident.txt",
@@ -368,13 +314,7 @@
       },
       {
         "document": "doc_03_vendor_invoice.txt",
-        "text": "Acme Solutions",
-        "category": "NAME",
-        "confidence": 0.9
-      },
-      {
-        "document": "doc_03_vendor_invoice.txt",
-        "text": "Pvt Ltd",
+        "text": "Acme Solutions Pvt",
         "category": "NAME",
         "confidence": 0.9
       },
@@ -398,12 +338,6 @@
       },
       {
         "document": "doc_05_signature_block.txt",
-        "text": "Managing Director",
-        "category": "NAME",
-        "confidence": 0.9
-      },
-      {
-        "document": "doc_05_signature_block.txt",
         "text": "Apex Logistics",
         "category": "NAME",
         "confidence": 0.9
@@ -411,12 +345,6 @@
       {
         "document": "doc_07_email_thread.txt",
         "text": "Case Reference",
-        "category": "NAME",
-        "confidence": 0.9
-      },
-      {
-        "document": "doc_08_hr_incident.txt",
-        "text": "Sales Executive",
         "category": "NAME",
         "confidence": 0.9
       },
@@ -455,12 +383,6 @@
         "text": "Flat",
         "category": "NAME",
         "confidence": 0.93
-      },
-      {
-        "document": "doc_12_executive_bio.txt",
-        "text": "Vice President",
-        "category": "NAME",
-        "confidence": 0.9
       },
       {
         "document": "doc_13_patient_discharge.txt",
@@ -512,43 +434,19 @@
       },
       {
         "document": "doc_06_two_column.pdf",
-        "text": "Attending Physician",
-        "category": "NAME",
-        "confidence": 0.9
-      },
-      {
-        "document": "doc_06_two_column.pdf",
         "text": "Primary Contact",
         "category": "NAME",
         "confidence": 0.9
       },
       {
         "document": "unseen_01_public_nda.txt",
-        "text": "Apex Technologies",
-        "category": "NAME",
-        "confidence": 0.9
-      },
-      {
-        "document": "unseen_01_public_nda.txt",
-        "text": "Managing Director",
+        "text": "Apex Technologies Inc",
         "category": "NAME",
         "confidence": 0.9
       },
       {
         "document": "unseen_02_clinical_discharge.txt",
-        "text": "Mount Sinai",
-        "category": "NAME",
-        "confidence": 0.9
-      },
-      {
-        "document": "unseen_02_clinical_discharge.txt",
-        "text": "Community Health",
-        "category": "NAME",
-        "confidence": 0.9
-      },
-      {
-        "document": "unseen_02_clinical_discharge.txt",
-        "text": "Attending Physician",
+        "text": "Sinai Community Health",
         "category": "NAME",
         "confidence": 0.9
       },
@@ -578,7 +476,7 @@
       },
       {
         "document": "unseen_03_it_incident_log.txt",
-        "text": "Site Reliability",
+        "text": "Senior Site Reliability",
         "category": "NAME",
         "confidence": 0.9
       },
@@ -626,13 +524,7 @@
       },
       {
         "document": "unseen_04_academic_transcript.txt",
-        "text": "Faculty Advisor",
-        "category": "NAME",
-        "confidence": 0.9
-      },
-      {
-        "document": "unseen_04_academic_transcript.txt",
-        "text": "Advanced Machine",
+        "text": "Advanced Machine Learning",
         "category": "NAME",
         "confidence": 0.9
       },
@@ -650,6 +542,6 @@
       }
     ]
   },
-  "peak_ram_mb": 0.41,
+  "peak_ram_mb": 0.42,
   "leak_failures": 0
 }

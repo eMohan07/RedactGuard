@@ -1132,13 +1132,16 @@
         🧹 Reset AI Memory
       </button>
     </div>
-    <!-- Model & Engine Status Visibility -->
-    <div class="sidebar-footer-row" style="margin-top: 6px; padding-top: 6px; border-top: 1px solid var(--sidebar-border); font-size: 0.68rem; color: var(--text-muted); flex-direction: column; gap: 2px;">
-      <div id="lblGlinerStatus" style="display: flex; justify-content: space-between; width: 100%;">
-        <span>GLiNER NER:</span> <span style="font-weight: 600;">Checking...</span>
+    <!-- Detection Engines Status Visibility -->
+    <div class="sidebar-footer-row" style="margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--sidebar-border); font-size: 0.70rem; color: var(--text-muted); flex-direction: column; gap: 4px;" title="Local offline engine status for NER entity detection and safe summarization">
+      <div style="font-weight: 600; font-size: 0.73rem; color: var(--text-secondary); display: flex; align-items: center; gap: 4px; margin-bottom: 2px;">
+        🤖 <span>Local Detection Engines</span>
       </div>
-      <div id="lblSlmStatus" style="display: flex; justify-content: space-between; width: 100%;">
-        <span>Ollama SLM:</span> <span style="font-weight: 600;">Checking...</span>
+      <div id="lblGlinerStatus" style="display: flex; justify-content: space-between; width: 100%; align-items: center;">
+        <span>GLiNER NER:</span> <b style="color: var(--gpt-green); font-size: 0.68rem;">⚡ Rules Active</b>
+      </div>
+      <div id="lblSlmStatus" style="display: flex; justify-content: space-between; width: 100%; align-items: center;">
+        <span>Ollama SLM:</span> <b style="color: var(--text-muted); font-size: 0.68rem;">📝 Extractive Active</b>
       </div>
     </div>
   </div>
@@ -1276,7 +1279,7 @@
             <button class="btn-outline btn-sm" type="button" style="margin-left: auto;">Browse File</button>
           </div>
 
-          <div id="redactedViewer" style="display: none; font-family: var(--font-mono); background: var(--preview-box-bg); padding: 12px; border-radius: 8px; border: 1px solid var(--preview-box-border);"></div>
+          <div id="redactedViewer" style="display: none; font-family: var(--font-mono); background: var(--preview-box-bg); padding: 14px; border-radius: 8px; border: 1px solid var(--preview-box-border); white-space: pre-wrap; line-height: 1.8; word-break: break-word;"></div>
           
           <div id="analysisViewer" style="display: none;">
             <h4 style="margin-bottom: 12px; color: var(--text-primary);">📊 Analysis & Decision Breakdown</h4>
@@ -1295,9 +1298,9 @@
             </table>
           </div>
 
-          <div id="summaryViewer" style="display: none; padding: 16px; background: var(--gpt-green-soft); border-radius: 8px; border: 1px solid var(--gpt-green-border); line-height: 1.8;">
+          <div id="summaryViewer" style="display: none; padding: 16px; background: var(--gpt-green-soft); border-radius: 8px; border: 1px solid var(--gpt-green-border); line-height: 1.8; white-space: pre-wrap;">
             <h4 style="color: var(--gpt-green); margin-bottom: 8px;">📝 Zero-Leak Executive Summary</h4>
-            <div id="summaryViewerText">Click "Safe Summary" at the top to generate a privacy-preserving summary.</div>
+            <div id="summaryViewerText" style="white-space: pre-wrap; word-break: break-word;">Click "Safe Summary" at the top to generate a privacy-preserving summary.</div>
           </div>
 
           <!-- Selection Popup -->
@@ -2251,10 +2254,19 @@ document.getElementById('btnDeselectAll').onclick = async () => {
 let currentSelection = "";
 docViewer.addEventListener('mouseup', () => {
   const sel = window.getSelection();
-  const str = sel ? sel.toString().trim() : "";
+  let str = sel ? sel.toString().trim() : "";
+  // Strip outer quotes, brackets, and trailing sentence punctuation
+  str = str.replace(/^[«"'`“”‘’(\[{]+|[»"'`“”‘’\)\]}]+$/g, '').replace(/[:,;]+$/, '').trim();
+  if (str.endsWith('.') && !/^[A-Za-z]\.$|^(?:Mr|Mrs|Ms|Dr|Prof)\.$/i.test(str)) {
+    str = str.slice(0, -1).trim();
+  }
   if (str && str.length > 1) {
     currentSelection = str;
-    selectedTextSnippet.textContent = `"${str.substring(0, 20)}..."`;
+    selectedTextSnippet.textContent = `"${str.substring(0, 24)}"`;
+    // Smart default: if capitalized name or title, default category to NAME
+    if (/^(?:(?:Dr\.|Mr\.|Mrs\.|Ms\.|Prof\.)\s+)?[A-Z][a-z]+(?:\s+[A-Z][a-z]+)*$/i.test(str) || /^[A-Z]\.\s*[A-Z][a-z]+$/.test(str)) {
+      if (selCategory) selCategory.value = "NAME";
+    }
     try {
       const range = sel.getRangeAt(0);
       const rect = range.getBoundingClientRect();
@@ -2538,13 +2550,18 @@ async function checkSystemStatus() {
       const glinerEl = document.getElementById('lblGlinerStatus');
       const slmEl = document.getElementById('lblSlmStatus');
       if (glinerEl) {
-        glinerEl.innerHTML = `<span>GLiNER NER:</span> <b style="color:${data.gliner_available ? 'var(--gpt-green)' : 'var(--text-muted)'}">${data.gliner_available ? 'Ready (Local)' : 'Off (Rules active)'}</b>`;
+        glinerEl.innerHTML = `<span>GLiNER NER:</span> <b style="color:${data.gliner_available ? 'var(--gpt-green)' : 'var(--text-muted)'}; font-size: 0.68rem;">${data.gliner_available ? '🟢 Ready (Local)' : '⚡ Rules Active'}</b>`;
       }
       if (slmEl) {
-        slmEl.innerHTML = `<span>Ollama SLM:</span> <b style="color:${data.slm_available ? 'var(--gpt-green)' : 'var(--text-muted)'}">${data.slm_available ? 'Active' : 'Off (Extractive active)'}</b>`;
+        slmEl.innerHTML = `<span>Ollama SLM:</span> <b style="color:${data.slm_available ? 'var(--gpt-green)' : 'var(--text-muted)'}; font-size: 0.68rem;">${data.slm_available ? '🟢 Active' : '📝 Extractive Active'}</b>`;
       }
     }
-  } catch (err) {}
+  } catch (err) {
+    const glinerEl = document.getElementById('lblGlinerStatus');
+    const slmEl = document.getElementById('lblSlmStatus');
+    if (glinerEl) glinerEl.innerHTML = `<span>GLiNER NER:</span> <b style="color:var(--text-muted); font-size: 0.68rem;">⚡ Rules Active</b>`;
+    if (slmEl) slmEl.innerHTML = `<span>Ollama SLM:</span> <b style="color:var(--text-muted); font-size: 0.68rem;">📝 Extractive Active</b>`;
+  }
 }
 checkSystemStatus();
 

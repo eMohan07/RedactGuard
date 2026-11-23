@@ -39,7 +39,17 @@ class SafeSummarizer:
         Returns (summary_text, engine_used).
         """
         prompt = f"""You are an offline privacy-preserving document analyst.
-Write a clear, concise 3-4 sentence summary of the following document.
+Write a clear, structured summary of the following document.
+Format your response with clean section headers, ensuring every header is immediately followed by a newline:
+Document Title:
+[Title]
+
+Executive Summary:
+[Summary sentences]
+
+Privacy & Entity Protection:
+[Confidentiality statement]
+
 MANDATORY PRIVACY RULES:
 - Never guess or attempt to reconstruct any personal identities, contact info, or identifiers.
 - Refer strictly to entities using their placeholder tags (e.g. [NAME_1], [EMAIL_1]) or generic roles.
@@ -48,7 +58,7 @@ MANDATORY PRIVACY RULES:
 Sanitized Document Text:
 \"\"\"{redacted_text}\"\"\"
 
-Executive Summary:"""
+Document Title:"""
 
         # 1. Try local generative SLM (Ollama)
         try:
@@ -95,7 +105,7 @@ Executive Summary:"""
         candidate_sentences = []
         for line in lines[1:]:
             # Skip pure key-value headers like "Date: ...", "Email: ...", "Phone: ..."
-            if re.match(r"^(?:date|email|phone|address|vitals|fax|attn|to|from|cc|subject|ref|status|patient name|attendees)[:\s]", line, re.IGNORECASE):
+            if re.match(r"^(?:date|email|phone|address|vitals|fax|attn|to|from|cc|subject|ref|status|patient name|attendees|attending physician|primary contact|doctor|officer|emergency phone)[:\s]", line, re.IGNORECASE):
                 continue
             # Split line into sentences
             for sent in re.split(r"(?<=[.!?])\s+", line):
@@ -139,8 +149,10 @@ Executive Summary:"""
         entity_summary = f"All private references ({len(entities_found)} unique entities) have been permanently masked." if entities_found else "Zero sensitive personal items were detected."
 
         return (
-            f"Summary for {title}: {body_synthesis} "
-            f"{entity_summary} The document maintains complete confidentiality with zero identifiable data."
+            f"Document Title:\n{title}\n\n"
+            f"Executive Summary:\n{body_synthesis}\n\n"
+            f"Privacy & Entity Protection:\n{entity_summary}\n\n"
+            f"Verification Status:\nThe document maintains complete confidentiality with zero identifiable data."
         )
 
     def audit_summary_leaks(self, summary: str, removed_spans: List[DetectedSpan]) -> Tuple[str, List[Dict[str, Any]]]:

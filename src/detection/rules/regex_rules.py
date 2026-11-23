@@ -36,6 +36,7 @@ DISALLOWED_NAME_TOKENS = {
     "escalations", "pilot", "regarding", "feedback", "query", "issue", "delivery",
     "committee", "board", "council", "commission", "division", "team", "organization",
     "architect", "engineer", "specialist", "officer", "manager", "lead", "developer",
+    "attending", "physician", "executive", "director", "president", "advisor",
     "passport", "license", "licence", "dl", "pan", "ssn", "aadhaar", "epic", "voter"
 }
 
@@ -81,8 +82,8 @@ def is_valid_name(name_str: str) -> bool:
     tokens = [t.lower().strip(".,") for t in clean.split() if t.strip(".,")]
     if not tokens:
         return False
-    # Reject if ends with or begins with a street/address suffix (e.g. Dr. Strange Ave)
-    if tokens[-1] in STREET_SUFFIXES or tokens[0] in STREET_SUFFIXES:
+    # Reject if ends with an address/street suffix (e.g. Dr. Strange Ave, Elm Street)
+    if tokens[-1] in STREET_SUFFIXES:
         return False
     # Filter out organizations / committees
     if any(t in ORGANIZATION_KEYWORDS for t in tokens):
@@ -315,7 +316,7 @@ RECOGNIZERS = [
             },
             # Standalone Honorific names: Mr. O'Connor, Dr. Kenneth O'Connor, Dr. Arvind Patel
             {
-                "regex": r"\b(?:Dr\.|Mr\.|Mrs\.|Ms\.|Prof\.)\s+((?:(?:O'|D'|Mc|Mac|Al-)?[A-Z][a-z]+(?:-[A-Z][a-z]+)?|[A-Z]\.)(?:\s+(?:(?:O'|D'|Mc|Mac|Al-)?[A-Z][a-z]+(?:-[A-Z][a-z]+)?|[A-Z]\.)){0,2})\b",
+                "regex": r"\b(?:Dr\.|Mr\.|Mrs\.|Ms\.|Prof\.)[^\S\r\n]+((?:(?:O'|D'|Mc|Mac|Al-)?[A-Z][a-z]+(?:-[A-Z][a-z]+)?|[A-Z]\.)(?:[^\S\r\n]+(?:(?:O'|D'|Mc|Mac|Al-)?[A-Z][a-z]+(?:-[A-Z][a-z]+)?|[A-Z]\.)){0,2})\b",
                 "score": 0.94,
                 "group": 0
             }
@@ -374,30 +375,58 @@ def detect_by_rules(text: str, page_num: int = 1) -> List[DetectedSpan]:
                         accepted=True
                     ))
 
-    # Running-text Proper Name Detection (e.g. "Yesterday Priya Nair met Amit Verma...")
-    word_pat = re.compile(r"\b(?:(?:O'|D'|Mc|Mac|Al-)?[A-Z][a-z]+(?:-[A-Z][a-z]+)?)\b")
+    # Running-text Proper Name Detection (e.g. "Yesterday Priya Nair met Amit Verma...", "Sneha R. Deshmukh")
+    word_pat = re.compile(r"\b(?:(?:O'|D'|Mc|Mac|Al-)?[A-Z][a-z]+(?:-[A-Z][a-z]+)?|[A-Z]\.)\b")
     cap_words = [(m.group(0), m.start(), m.end()) for m in word_pat.finditer(text)]
+
+    # Check 3-word names (e.g. "Sneha R. Deshmukh", "Vikram Singh Rathore")
+    for i in range(len(cap_words) - 2):
+        w1, s1, e1 = cap_words[i]
+        w2, s2, e2 = cap_words[i + 1]
+        w3, s3, e3 = cap_words[i + 2]
+        if s2 == e1 + 1 and s3 == e2 + 1 and text[e1:s2] == ' ' and text[e2:s3] == ' ':
+            w1_l, w2_l, w3_l = w1.lower().rstrip('.'), w2.lower().rstrip('.'), w3.lower().rstrip('.')
+            if (w1_l not in COMMON_STOPWORDS and w3_l not in COMMON_STOPWORDS and
+                w1_l not in DISALLOWED_NAME_TOKENS and w3_l not in DISALLOWED_NAME_TOKENS and
+                w3_l not in STREET_SUFFIXES):
+                full_cand = f"{w1} {w2} {w3}"
+                if is_valid_name(full_cand):
+                    detected.append(DetectedSpan(
+                        id=str(uuid.uuid4())[:8],
+                        text=full_cand,
+                        category="NAME",
+                        start_char=s1,
+                        end_char=e3,
+                        page_num=page_num,
+                        source="rule:RunningTextName",
+                        confidence=0.89,
+                        accepted=True
+                    ))
+
+    # Check 2-word names
     for i in range(len(cap_words) - 1):
         w1, s1, e1 = cap_words[i]
         w2, s2, e2 = cap_words[i + 1]
         # Only horizontal whitespace between words (never across newlines)
         if s2 == e1 + 1 and text[e1:s2] == ' ':
-            w1_l = w1.lower()
-            w2_l = w2.lower()
+            w1_l = w1.lower().rstrip('.')
+            w2_l = w2.lower().rstrip('.')
             if (w1_l not in COMMON_STOPWORDS and w2_l not in COMMON_STOPWORDS and
                 w1_l not in DISALLOWED_NAME_TOKENS and w2_l not in DISALLOWED_NAME_TOKENS and
-                w1_l not in STREET_SUFFIXES and w2_l not in STREET_SUFFIXES):
-                detected.append(DetectedSpan(
-                    id=str(uuid.uuid4())[:8],
-                    text=f"{w1} {w2}",
-                    category="NAME",
-                    start_char=s1,
-                    end_char=e2,
-                    page_num=page_num,
-                    source="rule:RunningTextName",
-                    confidence=0.88,
-                    accepted=True
-                ))
+                w2_l not in STREET_SUFFIXES):
+                full_cand = f"{w1} {w2}"
+                if is_valid_name(full_cand):
+                    detected.append(DetectedSpan(
+                        id=str(uuid.uuid4())[:8],
+                        text=full_cand,
+                        category="NAME",
+                        start_char=s1,
+                        end_char=e2,
+                        page_num=page_num,
+                        source="rule:RunningTextName",
+                        confidence=0.88,
+                        accepted=True
+                    ))
 
     # Coreference Name Propagation:
     # Propagate detected full names across the document

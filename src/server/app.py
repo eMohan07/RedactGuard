@@ -295,14 +295,43 @@ async def add_manual_span(req: AddSpanRequest):
         raise HTTPException(status_code=404, detail="Session not found")
 
     full_text = sess["doc_data"].full_text
-    search_term = req.text.strip()
-    if not search_term:
+    raw_term = req.text.strip()
+    if not raw_term:
         raise HTTPException(status_code=400, detail="Text cannot be empty")
 
     import re
-    # 1. Find all occurrences of the phrase across the document text using word boundaries
-    pattern = re.compile(r"\b" + re.escape(search_term) + r"\b", re.IGNORECASE)
+    # Clean surrounding quotes, brackets, and trailing colons/commas
+    search_term = re.sub(r'^[«"\'`“”‘’\(\[\{]+|[»"\'`“”‘’\)\]\}]+$', '', raw_term).rstrip(':,;')
+    if search_term.endswith('.') and not re.match(r'^[A-Za-z]\.$|^(?:Mr|Mrs|Ms|Dr|Prof)\.$', search_term, re.IGNORECASE):
+        search_term = search_term[:-1].strip()
+    if not search_term:
+        search_term = raw_term
+
+    # 1. Find all occurrences using robust boundary detection
+    prefix = r"\b" if re.match(r"^\w", search_term) else r"(?<!\w)"
+    suffix = r"\b" if re.search(r"\w$", search_term) else r"(?!\w)"
+    pattern = re.compile(prefix + re.escape(search_term) + suffix, re.IGNORECASE)
     matches_found = list(pattern.finditer(full_text))
+
+    # Fallback to exact literal substring search if boundary search yielded no matches
+    if not matches_found:
+        idx = 0
+        term_lower = search_term.lower()
+        full_lower = full_text.lower()
+        while True:
+            pos = full_lower.find(term_lower, idx)
+            if pos == -1:
+                break
+            m_val = full_text[pos:pos + len(search_term)]
+            class SubstringMatch:
+                def __init__(self, start_pos, val):
+                    self._start = start_pos
+                    self._val = val
+                def start(self): return self._start
+                def end(self): return self._start + len(self._val)
+                def group(self, _=0): return self._val
+            matches_found.append(SubstringMatch(pos, m_val))
+            idx = pos + len(search_term)
 
     if not matches_found and (req.start_char is None or req.end_char is None):
         raise HTTPException(status_code=400, detail="Text phrase not found in document text")
@@ -387,9 +416,38 @@ async def redact_similar(req: RedactSimilarRequest):
 
     import re
     full_text = sess["doc_data"].full_text
-    pattern = re.compile(r"\b" + re.escape(req.text) + r"\b", re.IGNORECASE)
+    raw_term = req.text.strip()
+    search_term = re.sub(r'^[«"\'`“”‘’\(\[\{]+|[»"\'`“”‘’\)\]\}]+$', '', raw_term).rstrip(':,;')
+    if search_term.endswith('.') and not re.match(r'^[A-Za-z]\.$|^(?:Mr|Mrs|Ms|Dr|Prof)\.$', search_term, re.IGNORECASE):
+        search_term = search_term[:-1].strip()
+    if not search_term:
+        search_term = raw_term
 
-    for match in pattern.finditer(full_text):
+    prefix = r"\b" if re.match(r"^\w", search_term) else r"(?<!\w)"
+    suffix = r"\b" if re.search(r"\w$", search_term) else r"(?!\w)"
+    pattern = re.compile(prefix + re.escape(search_term) + suffix, re.IGNORECASE)
+    matches_found = list(pattern.finditer(full_text))
+
+    if not matches_found:
+        idx = 0
+        term_lower = search_term.lower()
+        full_lower = full_text.lower()
+        while True:
+            pos = full_lower.find(term_lower, idx)
+            if pos == -1:
+                break
+            m_val = full_text[pos:pos + len(search_term)]
+            class SubstringMatch:
+                def __init__(self, start_pos, val):
+                    self._start = start_pos
+                    self._val = val
+                def start(self): return self._start
+                def end(self): return self._start + len(self._val)
+                def group(self, _=0): return self._val
+            matches_found.append(SubstringMatch(pos, m_val))
+            idx = pos + len(search_term)
+
+    for match in matches_found:
         m_start = match.start()
         m_end = match.end()
         m_val = match.group(0)

@@ -5,7 +5,7 @@
 [![Streamlit](https://img.shields.io/badge/Streamlit-1.30+-FF4B4B.svg)](https://streamlit.io/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Local Offline](https://img.shields.io/badge/Cloud%20Telemetry-Zero%20%28100%25%20Offline%29-brightgreen.svg)](#-offline-privacy-guarantees--telemetry-suppression)
-[![Combined F1](https://img.shields.io/badge/Overall%20F1-82.71%25%20%28Strict%29-success.svg)](#-evaluation-benchmark--transparent-performance)
+[![Combined F1](https://img.shields.io/badge/Overall%20F1-85.31%25%20%28Strict%29-success.svg)](#-evaluation-benchmark--transparent-performance)
 
 > **Domain**: Cybersecurity | Applied AI / NLP | Privacy-Preserving Computing  
 > **Problem Statement**: PS 3 — Privacy-Aware Document Redaction and Summary Tool
@@ -125,9 +125,9 @@ python scripts/evaluate.py
 
 | Evaluation Split | Document Count | Precision | Recall | F1 Score | Speed (s/doc) |
 | :--- | :---: | :---: | :---: | :---: | :---: |
-| **Synthetic Benchmark (Core)** | 18 docs | 74.77% | 97.56% | 84.66% | 0.0111 s |
-| **Held-Out Dev Set (Multi-domain)** | 5 docs | 66.67% | 97.67% | 79.25% | 0.0195 s |
-| **Combined Overall Benchmark** | **23 docs** | **71.76%** | **97.60%** | **82.71%** | **0.0037 s** |
+| **Synthetic Benchmark (Core)** | 18 docs | 78.43% | 97.56% | 86.96% | 0.0273 s |
+| **Held-Out Dev Set (Multi-domain)** | 5 docs | 71.19% | 97.67% | 82.35% | 0.0480 s |
+| **Combined Overall Benchmark** | **23 docs** | **75.78%** | **97.60%** | **85.31%** | **0.0074 s** |
 
 - **Strict Span Matching**: Evaluated using strict span start/end boundaries and category matching (no lenient substring credit).
 - **Zero Data Leakage**: In all 23 documents, high-confidence detection achieved **97.60% recall** with zero sensitive entity leaks in exported files.
