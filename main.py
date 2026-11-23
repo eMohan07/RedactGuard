@@ -36,7 +36,6 @@ if __name__ == "__main__":
     print("📍 URL: http://127.0.0.1:8000")
     print("🔒 100% Local Processing — Zero Cloud Telemetry")
     print(f"🧹 Temporary File Cleanup: Purged {deleted_temp} expired files")
-    print("⌨️  Shortcuts: [A] Approve | [R] Reject | [S] Redact Similar | [J/K] Navigate")
     print("=" * 60 + "\n")
 
     # Open browser automatically in background
