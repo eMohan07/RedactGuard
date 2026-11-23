@@ -205,7 +205,7 @@ class LearningStore:
 
         spans = []
         for term, category in self.remembered.items():
-            pattern = re.compile(re.escape(term), re.IGNORECASE)
+            pattern = re.compile(r"\b" + re.escape(term) + r"\b", re.IGNORECASE)
             for m in pattern.finditer(full_text):
                 spans.append(DetectedSpan(
                     id=str(uuid.uuid4())[:8],
@@ -214,7 +214,7 @@ class LearningStore:
                     start_char=m.start(),
                     end_char=m.end(),
                     confidence=0.99,
-                    detector="ActiveLearningStore",
+                    source="ActiveLearningStore",
                     accepted=True,
                     page_num=page_num
                 ))

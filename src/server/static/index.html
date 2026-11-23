@@ -6,9 +6,6 @@
 <link rel="icon" type="image/png" href="/static/favicon.png">
 <link rel="apple-touch-icon" href="/static/favicon.png">
 <title>RedactGuard — Private · Offline · Verified</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
   :root {
     /* ChatGPT Dark Theme (Default) */
@@ -95,8 +92,8 @@
     --brand-guard: #38bdf8;
     --brand-sub: #94a3b8;
 
-    --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    --font-mono: 'JetBrains Mono', 'SF Mono', Consolas, Menlo, monospace;
+    --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    --font-mono: 'SF Mono', 'Segoe UI Mono', 'Roboto Mono', Menlo, Consolas, monospace;
   }
 
   /* Light Theme Override - Balanced, modern, high-contrast */
@@ -1135,6 +1132,15 @@
         🧹 Reset AI Memory
       </button>
     </div>
+    <!-- Model & Engine Status Visibility -->
+    <div class="sidebar-footer-row" style="margin-top: 6px; padding-top: 6px; border-top: 1px solid var(--sidebar-border); font-size: 0.68rem; color: var(--text-muted); flex-direction: column; gap: 2px;">
+      <div id="lblGlinerStatus" style="display: flex; justify-content: space-between; width: 100%;">
+        <span>GLiNER NER:</span> <span style="font-weight: 600;">Checking...</span>
+      </div>
+      <div id="lblSlmStatus" style="display: flex; justify-content: space-between; width: 100%;">
+        <span>Ollama SLM:</span> <span style="font-weight: 600;">Checking...</span>
+      </div>
+    </div>
   </div>
 </aside>
 
@@ -1216,11 +1222,15 @@
       <div class="chatgpt-input-box">
         <textarea class="chatgpt-textarea" id="directTextInput" rows="3" placeholder="Paste your document text here (clinical notes, customer records, NDA agreements, invoices, transcripts)..."></textarea>
         <div class="chatgpt-input-actions">
-          <div style="display: flex; gap: 8px; align-items: center;">
+          <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
             <button class="btn-outline btn-sm" onclick="document.getElementById('fileInput').click()">
               📎 Attach PDF / TXT
             </button>
             <input type="text" id="directDocName" placeholder="Document Name (e.g. report.txt)" style="padding: 4px 8px; font-size: 0.75rem; width: 170px;">
+            <label style="display: flex; align-items: center; gap: 5px; font-size: 0.74rem; color: var(--text-muted); cursor: pointer;" title="Enable local Ollama SLM neural analysis">
+              <input type="checkbox" id="chkUseSLM" style="cursor: pointer;">
+              <span>SLM Assist</span>
+            </label>
           </div>
           <button class="btn-primary btn-sm" id="btnAnalyzeDirect">
             🚀 Analyze & Redact
@@ -1680,6 +1690,10 @@ async function uploadFileDirectly(file) {
   if (!file) return;
   const formData = new FormData();
   formData.append('file', file);
+  const chkUseSLM = document.getElementById('chkUseSLM');
+  if (chkUseSLM && chkUseSLM.checked) {
+    formData.append('use_slm', 'true');
+  }
   docTitle.textContent = `Analyzing ${file.name}...`;
 
   try {
@@ -1741,11 +1755,13 @@ btnAnalyzeDirect.addEventListener('click', async () => {
 
 async function analyzeTextDirectly(text, filename) {
   docTitle.textContent = `Scanning ${filename}...`;
+  const chkUseSLM = document.getElementById('chkUseSLM');
+  const useSlm = chkUseSLM ? chkUseSLM.checked : false;
   try {
     const res = await fetch('/api/analyze_text', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ text: text, filename: filename, use_slm: false })
+      body: JSON.stringify({ text: text, filename: filename, use_slm: useSlm })
     });
     if (!res.ok) {
       const err = await res.json();
@@ -2150,6 +2166,7 @@ async function toggleSpan(spanId, accepted) {
     currentSession.spans = data.spans;
     currentSession.tag_map = data.tag_map;
     currentSession.ambiguity_flags = data.ambiguity_flags;
+    cachedSummary = "";
     saveHistoryItem(currentSession);
     renderDocument();
     renderCandidates();
@@ -2176,6 +2193,7 @@ async function redactSimilar(text, category) {
     currentSession.spans = data.spans;
     currentSession.tag_map = data.tag_map;
     currentSession.ambiguity_flags = data.ambiguity_flags;
+    cachedSummary = "";
     saveHistoryItem(currentSession);
     renderDocument();
     renderCandidates();
@@ -2199,6 +2217,7 @@ document.getElementById('btnSelectAll').onclick = async () => {
     currentSession.spans = data.spans;
     currentSession.tag_map = data.tag_map;
     currentSession.ambiguity_flags = data.ambiguity_flags;
+    cachedSummary = "";
     saveHistoryItem(currentSession);
     renderDocument();
     renderCandidates();
@@ -2219,6 +2238,7 @@ document.getElementById('btnDeselectAll').onclick = async () => {
     currentSession.spans = data.spans;
     currentSession.tag_map = data.tag_map;
     currentSession.ambiguity_flags = data.ambiguity_flags;
+    cachedSummary = "";
     saveHistoryItem(currentSession);
     renderDocument();
     renderCandidates();
@@ -2272,6 +2292,7 @@ async function addManualSpan(text, category) {
     currentSession.tag_map = data.tag_map;
     currentSession.ambiguity_flags = data.ambiguity_flags;
     candidateCount.textContent = currentSession.spans.length;
+    cachedSummary = "";
     saveHistoryItem(currentSession);
     renderDocument();
     renderCandidates();
@@ -2451,13 +2472,81 @@ function downloadSummaryFile() {
   window.location.href = `/api/export_summary/${currentSession.session_id}?mask_style=${maskStyle}&_t=${ts}`;
 }
 
-// Export Verified Document
+// Export Verified Document with Review Gating
 document.getElementById('btnExport').addEventListener('click', () => {
   if (!currentSession) { alert("Please upload a document first."); return; }
+  
+  // Review Gating Check: warn if any detected items are unreviewed / excluded
+  const pendingReview = (currentSession.spans || []).filter(s => !s.accepted && s.confidence >= 0.60);
+  if (pendingReview.length > 0) {
+    const proceed = confirm(`Review Gate Notice: There are ${pendingReview.length} detected candidate(s) currently excluded from redaction.\n\nDo you want to proceed with export anyway?`);
+    if (!proceed) return;
+  }
+
   const maskStyle = maskStyleSelect ? maskStyleSelect.value : "INDEXED";
   const ts = new Date().getTime();
   window.location.href = `/api/export/${currentSession.session_id}?format=${currentSession.file_type}&mask_style=${maskStyle}&_t=${ts}`;
 });
+
+// Keyboard Shortcuts: A (Approve), R (Reject), S (Similar), N/J (Next), P/K (Previous)
+document.addEventListener('keydown', (e) => {
+  const activeEl = document.activeElement;
+  if (activeEl && (activeEl.tagName === 'INPUT' || activeEl.tagName === 'TEXTAREA' || activeEl.isContentEditable)) {
+    return;
+  }
+  if (!currentSession || !currentSession.spans || currentSession.spans.length === 0) {
+    return;
+  }
+
+  const key = e.key.toUpperCase();
+  const spans = currentSession.spans;
+
+  if (key === 'A') {
+    if (selectedSpanId) {
+      e.preventDefault();
+      toggleSpan(selectedSpanId, true);
+    }
+  } else if (key === 'R') {
+    if (selectedSpanId) {
+      e.preventDefault();
+      toggleSpan(selectedSpanId, false);
+    }
+  } else if (key === 'S') {
+    if (selectedSpanId) {
+      e.preventDefault();
+      redactSimilarById(selectedSpanId);
+    }
+  } else if (key === 'N' || key === 'J') {
+    e.preventDefault();
+    let idx = spans.findIndex(s => s.id === selectedSpanId);
+    idx = (idx === -1 || idx >= spans.length - 1) ? 0 : idx + 1;
+    focusSpan(spans[idx].id);
+  } else if (key === 'P' || key === 'K') {
+    e.preventDefault();
+    let idx = spans.findIndex(s => s.id === selectedSpanId);
+    idx = (idx <= 0) ? spans.length - 1 : idx - 1;
+    focusSpan(spans[idx].id);
+  }
+});
+
+// Live Engine Status Checker
+async function checkSystemStatus() {
+  try {
+    const res = await fetch('/api/system_status');
+    if (res.ok) {
+      const data = await res.json();
+      const glinerEl = document.getElementById('lblGlinerStatus');
+      const slmEl = document.getElementById('lblSlmStatus');
+      if (glinerEl) {
+        glinerEl.innerHTML = `<span>GLiNER NER:</span> <b style="color:${data.gliner_available ? 'var(--gpt-green)' : 'var(--text-muted)'}">${data.gliner_available ? 'Ready (Local)' : 'Off (Rules active)'}</b>`;
+      }
+      if (slmEl) {
+        slmEl.innerHTML = `<span>Ollama SLM:</span> <b style="color:${data.slm_available ? 'var(--gpt-green)' : 'var(--text-muted)'}">${data.slm_available ? 'Active' : 'Off (Extractive active)'}</b>`;
+      }
+    }
+  } catch (err) {}
+}
+checkSystemStatus();
 
 function escapeHtml(str) {
   if (!str) return "";

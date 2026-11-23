@@ -125,11 +125,11 @@ def redact_pdf(
                 replacement_tag = f"[REDACTED: {span.category}]"
 
             if span.bboxes:
-                for b in span.bboxes:
+                for idx, b in enumerate(span.bboxes):
                     rect = fitz.Rect(b[0], b[1], b[2], b[3])
                     page.add_redact_annot(
                         rect,
-                        text=replacement_tag,
+                        text=replacement_tag if idx == 0 else "",
                         fill=(0, 0, 0),
                         text_color=(1, 1, 1)
                     )

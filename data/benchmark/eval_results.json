@@ -1,14 +1,14 @@
 {
   "synthetic_split": {
-    "split_name": "Synthetic Benchmark (Self-Generated)",
+    "split_name": "Synthetic Benchmark (Core)",
     "document_count": 18,
-    "precision": 0.9877,
+    "precision": 0.7477,
     "recall": 0.9756,
-    "f1_score": 0.9816,
+    "f1_score": 0.8466,
     "true_positives": 80,
-    "false_positives": 1,
+    "false_positives": 27,
     "false_negatives": 2,
-    "sec_per_doc": 0.0494,
+    "sec_per_doc": 0.0111,
     "missed_pii": [
       {
         "document": "doc_08_hr_incident.txt",
@@ -23,25 +23,307 @@
     ],
     "false_positive_instances": [
       {
-        "document": "doc_12_executive_bio.txt",
-        "text": "Tanvi",
+        "document": "doc_01_meeting_notes.txt",
+        "text": "Discussion Points",
         "category": "NAME",
-        "confidence": 0.8
+        "confidence": 0.9
+      },
+      {
+        "document": "doc_03_vendor_invoice.txt",
+        "text": "Acme Solutions",
+        "category": "NAME",
+        "confidence": 0.9
+      },
+      {
+        "document": "doc_03_vendor_invoice.txt",
+        "text": "Pvt Ltd",
+        "category": "NAME",
+        "confidence": 0.9
+      },
+      {
+        "document": "doc_03_vendor_invoice.txt",
+        "text": "Amount Due",
+        "category": "NAME",
+        "confidence": 0.9
+      },
+      {
+        "document": "doc_04_offer_letter.txt",
+        "text": "Permanent Account",
+        "category": "NAME",
+        "confidence": 0.9
+      },
+      {
+        "document": "doc_04_offer_letter.txt",
+        "text": "Official Contact",
+        "category": "NAME",
+        "confidence": 0.9
+      },
+      {
+        "document": "doc_05_signature_block.txt",
+        "text": "Managing Director",
+        "category": "NAME",
+        "confidence": 0.9
+      },
+      {
+        "document": "doc_05_signature_block.txt",
+        "text": "Apex Logistics",
+        "category": "NAME",
+        "confidence": 0.9
+      },
+      {
+        "document": "doc_07_email_thread.txt",
+        "text": "Case Reference",
+        "category": "NAME",
+        "confidence": 0.9
+      },
+      {
+        "document": "doc_08_hr_incident.txt",
+        "text": "Sales Executive",
+        "category": "NAME",
+        "confidence": 0.9
+      },
+      {
+        "document": "doc_09_bank_statement.txt",
+        "text": "Account Holder",
+        "category": "NAME",
+        "confidence": 0.9
+      },
+      {
+        "document": "doc_09_bank_statement.txt",
+        "text": "Savings Account",
+        "category": "NAME",
+        "confidence": 0.9
+      },
+      {
+        "document": "doc_09_bank_statement.txt",
+        "text": "Transaction Reference",
+        "category": "NAME",
+        "confidence": 0.9
+      },
+      {
+        "document": "doc_10_consulting_agreement.txt",
+        "text": "Nova Analytics",
+        "category": "NAME",
+        "confidence": 0.9
+      },
+      {
+        "document": "doc_11_landline_inquiry.txt",
+        "text": "Registered Landline",
+        "category": "NAME",
+        "confidence": 0.9
+      },
+      {
+        "document": "doc_11_landline_inquiry.txt",
+        "text": "Flat",
+        "category": "NAME",
+        "confidence": 0.93
+      },
+      {
+        "document": "doc_12_executive_bio.txt",
+        "text": "Vice President",
+        "category": "NAME",
+        "confidence": 0.9
+      },
+      {
+        "document": "doc_13_patient_discharge.txt",
+        "text": "Emergency Contact",
+        "category": "NAME",
+        "confidence": 0.9
+      },
+      {
+        "document": "doc_13_patient_discharge.txt",
+        "text": "Tab Paracetamol",
+        "category": "NAME",
+        "confidence": 0.9
+      },
+      {
+        "document": "doc_14_lease_agreement.txt",
+        "text": "Leased Premises",
+        "category": "NAME",
+        "confidence": 0.9
+      },
+      {
+        "document": "doc_14_lease_agreement.txt",
+        "text": "Security Deposit",
+        "category": "NAME",
+        "confidence": 0.9
+      },
+      {
+        "document": "doc_15_travel_itinerary.txt",
+        "text": "Booking Reference",
+        "category": "NAME",
+        "confidence": 0.9
+      },
+      {
+        "document": "doc_15_travel_itinerary.txt",
+        "text": "Frequent Flyer",
+        "category": "NAME",
+        "confidence": 0.9
+      },
+      {
+        "document": "doc_16_performance_review.txt",
+        "text": "Cloud Operations",
+        "category": "NAME",
+        "confidence": 0.9
+      },
+      {
+        "document": "doc_17_support_ticket.txt",
+        "text": "User Name",
+        "category": "NAME",
+        "confidence": 0.9
+      },
+      {
+        "document": "doc_06_two_column.pdf",
+        "text": "Attending Physician",
+        "category": "NAME",
+        "confidence": 0.9
+      },
+      {
+        "document": "doc_06_two_column.pdf",
+        "text": "Primary Contact",
+        "category": "NAME",
+        "confidence": 0.9
       }
     ]
   },
   "unseen_split": {
-    "split_name": "Unseen Manually Written & Public Dataset",
+    "split_name": "Held-Out Dev Set (Multi-domain)",
     "document_count": 5,
-    "precision": 0.9773,
-    "recall": 1.0,
-    "f1_score": 0.9885,
-    "true_positives": 43,
-    "false_positives": 1,
-    "false_negatives": 0,
-    "sec_per_doc": 0.0764,
-    "missed_pii": [],
+    "precision": 0.6667,
+    "recall": 0.9767,
+    "f1_score": 0.7925,
+    "true_positives": 42,
+    "false_positives": 21,
+    "false_negatives": 1,
+    "sec_per_doc": 0.0195,
+    "missed_pii": [
+      {
+        "document": "unseen_04_academic_transcript.txt",
+        "text": "Roll No: 21BCE1042",
+        "type": "ID"
+      }
+    ],
     "false_positive_instances": [
+      {
+        "document": "unseen_01_public_nda.txt",
+        "text": "Apex Technologies",
+        "category": "NAME",
+        "confidence": 0.9
+      },
+      {
+        "document": "unseen_01_public_nda.txt",
+        "text": "Managing Director",
+        "category": "NAME",
+        "confidence": 0.9
+      },
+      {
+        "document": "unseen_02_clinical_discharge.txt",
+        "text": "Mount Sinai",
+        "category": "NAME",
+        "confidence": 0.9
+      },
+      {
+        "document": "unseen_02_clinical_discharge.txt",
+        "text": "Community Health",
+        "category": "NAME",
+        "confidence": 0.9
+      },
+      {
+        "document": "unseen_02_clinical_discharge.txt",
+        "text": "Attending Physician",
+        "category": "NAME",
+        "confidence": 0.9
+      },
+      {
+        "document": "unseen_02_clinical_discharge.txt",
+        "text": "Social Security",
+        "category": "NAME",
+        "confidence": 0.9
+      },
+      {
+        "document": "unseen_02_clinical_discharge.txt",
+        "text": "Emergency Contact",
+        "category": "NAME",
+        "confidence": 0.9
+      },
+      {
+        "document": "unseen_02_clinical_discharge.txt",
+        "text": "Prescribed Atorvastatin",
+        "category": "NAME",
+        "confidence": 0.9
+      },
+      {
+        "document": "unseen_03_it_incident_log.txt",
+        "text": "Reported By",
+        "category": "NAME",
+        "confidence": 0.9
+      },
+      {
+        "document": "unseen_03_it_incident_log.txt",
+        "text": "Site Reliability",
+        "category": "NAME",
+        "confidence": 0.9
+      },
+      {
+        "document": "unseen_03_it_incident_log.txt",
+        "text": "Affected Host",
+        "category": "NAME",
+        "confidence": 0.9
+      },
+      {
+        "document": "unseen_03_it_incident_log.txt",
+        "text": "Compromised Account",
+        "category": "NAME",
+        "confidence": 0.9
+      },
+      {
+        "document": "unseen_03_it_incident_log.txt",
+        "text": "Immediate Mitigation",
+        "category": "NAME",
+        "confidence": 0.9
+      },
+      {
+        "document": "unseen_03_it_incident_log.txt",
+        "text": "Access Key",
+        "category": "NAME",
+        "confidence": 0.9
+      },
+      {
+        "document": "unseen_04_academic_transcript.txt",
+        "text": "Indian Institute",
+        "category": "NAME",
+        "confidence": 0.9
+      },
+      {
+        "document": "unseen_04_academic_transcript.txt",
+        "text": "Student Name",
+        "category": "NAME",
+        "confidence": 0.9
+      },
+      {
+        "document": "unseen_04_academic_transcript.txt",
+        "text": "21BCE1042",
+        "category": "ID",
+        "confidence": 0.99
+      },
+      {
+        "document": "unseen_04_academic_transcript.txt",
+        "text": "Faculty Advisor",
+        "category": "NAME",
+        "confidence": 0.9
+      },
+      {
+        "document": "unseen_04_academic_transcript.txt",
+        "text": "Advanced Machine",
+        "category": "NAME",
+        "confidence": 0.9
+      },
+      {
+        "document": "unseen_05_corporate_grievance.txt",
+        "text": "Internal Grievance",
+        "category": "NAME",
+        "confidence": 0.9
+      },
       {
         "document": "unseen_05_corporate_grievance.txt",
         "text": "Ananya Roy",
@@ -53,13 +335,13 @@
   "combined_overall": {
     "split_name": "Combined Overall Benchmark",
     "document_count": 23,
-    "precision": 0.984,
-    "recall": 0.984,
-    "f1_score": 0.984,
-    "true_positives": 123,
-    "false_positives": 2,
-    "false_negatives": 2,
-    "sec_per_doc": 0.011,
+    "precision": 0.7176,
+    "recall": 0.976,
+    "f1_score": 0.8271,
+    "true_positives": 122,
+    "false_positives": 48,
+    "false_negatives": 3,
+    "sec_per_doc": 0.0037,
     "missed_pii": [
       {
         "document": "doc_08_hr_incident.txt",
@@ -70,14 +352,295 @@
         "document": "doc_08_hr_incident.txt",
         "text": "Sharma",
         "type": "NAME"
+      },
+      {
+        "document": "unseen_04_academic_transcript.txt",
+        "text": "Roll No: 21BCE1042",
+        "type": "ID"
       }
     ],
     "false_positive_instances": [
       {
-        "document": "doc_12_executive_bio.txt",
-        "text": "Tanvi",
+        "document": "doc_01_meeting_notes.txt",
+        "text": "Discussion Points",
         "category": "NAME",
-        "confidence": 0.8
+        "confidence": 0.9
+      },
+      {
+        "document": "doc_03_vendor_invoice.txt",
+        "text": "Acme Solutions",
+        "category": "NAME",
+        "confidence": 0.9
+      },
+      {
+        "document": "doc_03_vendor_invoice.txt",
+        "text": "Pvt Ltd",
+        "category": "NAME",
+        "confidence": 0.9
+      },
+      {
+        "document": "doc_03_vendor_invoice.txt",
+        "text": "Amount Due",
+        "category": "NAME",
+        "confidence": 0.9
+      },
+      {
+        "document": "doc_04_offer_letter.txt",
+        "text": "Permanent Account",
+        "category": "NAME",
+        "confidence": 0.9
+      },
+      {
+        "document": "doc_04_offer_letter.txt",
+        "text": "Official Contact",
+        "category": "NAME",
+        "confidence": 0.9
+      },
+      {
+        "document": "doc_05_signature_block.txt",
+        "text": "Managing Director",
+        "category": "NAME",
+        "confidence": 0.9
+      },
+      {
+        "document": "doc_05_signature_block.txt",
+        "text": "Apex Logistics",
+        "category": "NAME",
+        "confidence": 0.9
+      },
+      {
+        "document": "doc_07_email_thread.txt",
+        "text": "Case Reference",
+        "category": "NAME",
+        "confidence": 0.9
+      },
+      {
+        "document": "doc_08_hr_incident.txt",
+        "text": "Sales Executive",
+        "category": "NAME",
+        "confidence": 0.9
+      },
+      {
+        "document": "doc_09_bank_statement.txt",
+        "text": "Account Holder",
+        "category": "NAME",
+        "confidence": 0.9
+      },
+      {
+        "document": "doc_09_bank_statement.txt",
+        "text": "Savings Account",
+        "category": "NAME",
+        "confidence": 0.9
+      },
+      {
+        "document": "doc_09_bank_statement.txt",
+        "text": "Transaction Reference",
+        "category": "NAME",
+        "confidence": 0.9
+      },
+      {
+        "document": "doc_10_consulting_agreement.txt",
+        "text": "Nova Analytics",
+        "category": "NAME",
+        "confidence": 0.9
+      },
+      {
+        "document": "doc_11_landline_inquiry.txt",
+        "text": "Registered Landline",
+        "category": "NAME",
+        "confidence": 0.9
+      },
+      {
+        "document": "doc_11_landline_inquiry.txt",
+        "text": "Flat",
+        "category": "NAME",
+        "confidence": 0.93
+      },
+      {
+        "document": "doc_12_executive_bio.txt",
+        "text": "Vice President",
+        "category": "NAME",
+        "confidence": 0.9
+      },
+      {
+        "document": "doc_13_patient_discharge.txt",
+        "text": "Emergency Contact",
+        "category": "NAME",
+        "confidence": 0.9
+      },
+      {
+        "document": "doc_13_patient_discharge.txt",
+        "text": "Tab Paracetamol",
+        "category": "NAME",
+        "confidence": 0.9
+      },
+      {
+        "document": "doc_14_lease_agreement.txt",
+        "text": "Leased Premises",
+        "category": "NAME",
+        "confidence": 0.9
+      },
+      {
+        "document": "doc_14_lease_agreement.txt",
+        "text": "Security Deposit",
+        "category": "NAME",
+        "confidence": 0.9
+      },
+      {
+        "document": "doc_15_travel_itinerary.txt",
+        "text": "Booking Reference",
+        "category": "NAME",
+        "confidence": 0.9
+      },
+      {
+        "document": "doc_15_travel_itinerary.txt",
+        "text": "Frequent Flyer",
+        "category": "NAME",
+        "confidence": 0.9
+      },
+      {
+        "document": "doc_16_performance_review.txt",
+        "text": "Cloud Operations",
+        "category": "NAME",
+        "confidence": 0.9
+      },
+      {
+        "document": "doc_17_support_ticket.txt",
+        "text": "User Name",
+        "category": "NAME",
+        "confidence": 0.9
+      },
+      {
+        "document": "doc_06_two_column.pdf",
+        "text": "Attending Physician",
+        "category": "NAME",
+        "confidence": 0.9
+      },
+      {
+        "document": "doc_06_two_column.pdf",
+        "text": "Primary Contact",
+        "category": "NAME",
+        "confidence": 0.9
+      },
+      {
+        "document": "unseen_01_public_nda.txt",
+        "text": "Apex Technologies",
+        "category": "NAME",
+        "confidence": 0.9
+      },
+      {
+        "document": "unseen_01_public_nda.txt",
+        "text": "Managing Director",
+        "category": "NAME",
+        "confidence": 0.9
+      },
+      {
+        "document": "unseen_02_clinical_discharge.txt",
+        "text": "Mount Sinai",
+        "category": "NAME",
+        "confidence": 0.9
+      },
+      {
+        "document": "unseen_02_clinical_discharge.txt",
+        "text": "Community Health",
+        "category": "NAME",
+        "confidence": 0.9
+      },
+      {
+        "document": "unseen_02_clinical_discharge.txt",
+        "text": "Attending Physician",
+        "category": "NAME",
+        "confidence": 0.9
+      },
+      {
+        "document": "unseen_02_clinical_discharge.txt",
+        "text": "Social Security",
+        "category": "NAME",
+        "confidence": 0.9
+      },
+      {
+        "document": "unseen_02_clinical_discharge.txt",
+        "text": "Emergency Contact",
+        "category": "NAME",
+        "confidence": 0.9
+      },
+      {
+        "document": "unseen_02_clinical_discharge.txt",
+        "text": "Prescribed Atorvastatin",
+        "category": "NAME",
+        "confidence": 0.9
+      },
+      {
+        "document": "unseen_03_it_incident_log.txt",
+        "text": "Reported By",
+        "category": "NAME",
+        "confidence": 0.9
+      },
+      {
+        "document": "unseen_03_it_incident_log.txt",
+        "text": "Site Reliability",
+        "category": "NAME",
+        "confidence": 0.9
+      },
+      {
+        "document": "unseen_03_it_incident_log.txt",
+        "text": "Affected Host",
+        "category": "NAME",
+        "confidence": 0.9
+      },
+      {
+        "document": "unseen_03_it_incident_log.txt",
+        "text": "Compromised Account",
+        "category": "NAME",
+        "confidence": 0.9
+      },
+      {
+        "document": "unseen_03_it_incident_log.txt",
+        "text": "Immediate Mitigation",
+        "category": "NAME",
+        "confidence": 0.9
+      },
+      {
+        "document": "unseen_03_it_incident_log.txt",
+        "text": "Access Key",
+        "category": "NAME",
+        "confidence": 0.9
+      },
+      {
+        "document": "unseen_04_academic_transcript.txt",
+        "text": "Indian Institute",
+        "category": "NAME",
+        "confidence": 0.9
+      },
+      {
+        "document": "unseen_04_academic_transcript.txt",
+        "text": "Student Name",
+        "category": "NAME",
+        "confidence": 0.9
+      },
+      {
+        "document": "unseen_04_academic_transcript.txt",
+        "text": "21BCE1042",
+        "category": "ID",
+        "confidence": 0.99
+      },
+      {
+        "document": "unseen_04_academic_transcript.txt",
+        "text": "Faculty Advisor",
+        "category": "NAME",
+        "confidence": 0.9
+      },
+      {
+        "document": "unseen_04_academic_transcript.txt",
+        "text": "Advanced Machine",
+        "category": "NAME",
+        "confidence": 0.9
+      },
+      {
+        "document": "unseen_05_corporate_grievance.txt",
+        "text": "Internal Grievance",
+        "category": "NAME",
+        "confidence": 0.9
       },
       {
         "document": "unseen_05_corporate_grievance.txt",
@@ -87,6 +650,6 @@
       }
     ]
   },
-  "peak_ram_mb": 0.38,
+  "peak_ram_mb": 0.41,
   "leak_failures": 0
 }

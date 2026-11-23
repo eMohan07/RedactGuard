@@ -82,33 +82,64 @@ Executive Summary:"""
 
     def _generate_extractive_summary(self, redacted_text: str) -> str:
         """
-        Synthesizes a cohesive executive summary directly from sanitized sentences,
-        preserving placeholder entity integrity without external LLM dependencies.
+        Synthesizes an intelligent executive summary directly from sanitized sentences,
+        prioritizing key substantive findings, actions, and placeholder entity references
+        without external LLM dependencies.
         """
         lines = [line.strip() for line in redacted_text.splitlines() if line.strip()]
         if not lines:
             return "Empty document; no text available to summarize."
 
         title = lines[0] if len(lines) > 0 else "Document"
-        # Find lines with substantive narrative or findings
+        # Extract sentence candidates across all non-header lines
         candidate_sentences = []
         for line in lines[1:]:
-            # Skip pure key-value headers like "Date: ..." or "Email: ..."
-            if re.match(r"^(?:date|email|phone|address|vitals|fax)[:\s]", line, re.IGNORECASE):
+            # Skip pure key-value headers like "Date: ...", "Email: ...", "Phone: ..."
+            if re.match(r"^(?:date|email|phone|address|vitals|fax|attn|to|from|cc|subject|ref|status|patient name|attendees)[:\s]", line, re.IGNORECASE):
                 continue
-            if len(line) > 25:
-                candidate_sentences.append(line)
+            # Split line into sentences
+            for sent in re.split(r"(?<=[.!?])\s+", line):
+                sent_clean = sent.strip()
+                if len(sent_clean) >= 20 and not sent_clean.startswith("#"):
+                    candidate_sentences.append(sent_clean)
 
-        # Select top 2-3 most descriptive sentences
-        selected = candidate_sentences[:3] if candidate_sentences else lines[:2]
-        body_synthesis = " ".join(selected)
+        KEY_TOPIC_WORDS = {
+            "agreed", "diagnosed", "reported", "decided", "discussed", "finding", 
+            "summary", "incident", "approved", "payment", "due", "status", "scheduled", 
+            "recommended", "resolved", "action", "reviewed", "plan", "treatment", 
+            "confirmed", "concluded", "advised", "condition", "complaint", "assessment"
+        }
+
+        # Score sentences: boost for substantive action words and entity placeholder mentions
+        scored_sentences = []
+        for s in candidate_sentences:
+            score = 0
+            words = set(s.lower().split())
+            score += len(words.intersection(KEY_TOPIC_WORDS)) * 3
+            # Boost sentences that reference masked entities (key interactions)
+            entity_refs = len(re.findall(r"\[[A-Z]+(?:_\d+)?\]", s))
+            score += entity_refs * 2
+            if len(s) > 40:
+                score += 1
+            scored_sentences.append((score, s))
+
+        # Sort descending by score, take top 2-3 unique sentences, preserve original document order
+        scored_sentences.sort(key=lambda x: -x[0])
+        top_selected = [s for score, s in scored_sentences[:3]]
+        
+        # Re-order according to document appearance
+        ordered_selected = [s for s in candidate_sentences if s in top_selected][:3]
+        if not ordered_selected:
+            ordered_selected = candidate_sentences[:2] if candidate_sentences else lines[:2]
+
+        body_synthesis = " ".join(ordered_selected)
 
         # Count placeholders
-        entities_found = set(re.findall(r"\[[A-Z]+_\d+\]", redacted_text))
+        entities_found = set(re.findall(r"\[[A-Z]+(?:_\d+)?\]", redacted_text))
         entity_summary = f"All private references ({len(entities_found)} unique entities) have been permanently masked." if entities_found else "Zero sensitive personal items were detected."
 
         return (
-            f"This sanitized record pertains to {title}. {body_synthesis} "
+            f"Summary for {title}: {body_synthesis} "
             f"{entity_summary} The document maintains complete confidentiality with zero identifiable data."
         )
 

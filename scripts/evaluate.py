@@ -22,9 +22,24 @@ from src.summarizer.safe_summary import SafeSummarizer
 SYNTHETIC_BENCHMARK = PROJECT_ROOT / "data" / "benchmark" / "ground_truth.json"
 UNSEEN_BENCHMARK = PROJECT_ROOT / "data" / "benchmark" / "unseen_ground_truth.json"
 
+def is_strict_match(p_text: str, g_text: str) -> bool:
+    """
+    Evaluates strictness of entity span matching:
+    Requires exact string equality or substantial length overlap (>= 70%)
+    to avoid lenient substring matching.
+    """
+    if p_text == g_text:
+        return True
+    min_len = min(len(p_text), len(g_text))
+    max_len = max(len(p_text), len(g_text))
+    if max_len > 0 and (p_text in g_text or g_text in p_text) and (min_len / max_len >= 0.70):
+        return True
+    return False
+
 def calculate_detailed_metrics(gold_spans: List[Dict], pred_spans: List[DetectedSpan]) -> Tuple[int, int, int, List[Dict], List[DetectedSpan]]:
     """
-    Calculates TP, FP, FN and returns missed gold spans (FNs) and false alarm spans (FPs).
+    Calculates TP, FP, FN with strict span matching.
+    Returns missed gold spans (FNs) and false alarm spans (FPs).
     """
     tp = 0
     fp = 0
@@ -43,8 +58,8 @@ def calculate_detailed_metrics(gold_spans: List[Dict], pred_spans: List[Detected
             if not gold_matched[idx]:
                 g_text = g["text"].strip().lower()
                 g_type = g["type"].upper()
-                # Overlap match and compatible type
-                if (p_text in g_text or g_text in p_text) and (p_type == g_type or p_type in g_type):
+                # Strict matching and compatible category
+                if is_strict_match(p_text, g_text) and (p_type == g_type or p_type in g_type or g_type in p_type):
                     gold_matched[idx] = True
                     match_found = True
                     break
@@ -135,10 +150,13 @@ def evaluate_all():
     combined_data = {**synthetic_data, **unseen_data}
     total_docs = len(combined_data)
 
+    gliner = GLiNERDetector()
+
     print(f"\n=======================================================")
-    print(f"📊 RELIABLE BENCHMARK EVALUATION (Total Docs: {total_docs})")
+    print(f"📊 BENCHMARK EVALUATION (Total Docs: {total_docs})")
     print(f"   • Synthetic Benchmark Docs: {len(synthetic_data)}")
-    print(f"   • Unseen Manually Written / Public Docs: {len(unseen_data)}")
+    print(f"   • Held-Out Dev Set Docs: {len(unseen_data)}")
+    print(f"   • GLiNER Small NER Available: {gliner.is_available()}")
     print(f"=======================================================\n")
 
     # Clean isolated store for evaluation
@@ -149,18 +167,25 @@ def evaluate_all():
         except Exception:
             pass
     eval_learning_store = LearningStore(filepath=eval_learning_file)
-    gliner = GLiNERDetector()
     hybrid = HybridDetector(learning_store=eval_learning_store, gliner_detector=gliner)
 
     detector_fn = lambda txt: hybrid.detect(txt, use_slm=False)
 
+    try:
+        import psutil
+        process = psutil.Process()
+        mem_before = process.memory_info().rss
+    except Exception:
+        process = None
+        mem_before = 0
+
     tracemalloc.start()
     
     # 1. Evaluate Synthetic Split
-    res_synthetic = run_split_evaluation("Synthetic Benchmark (Self-Generated)", synthetic_data, detector_fn)
+    res_synthetic = run_split_evaluation("Synthetic Benchmark (Core)", synthetic_data, detector_fn)
     
-    # 2. Evaluate Unseen Split
-    res_unseen = run_split_evaluation("Unseen Manually Written & Public Dataset", unseen_data, detector_fn)
+    # 2. Evaluate Held-out Dev Set
+    res_unseen = run_split_evaluation("Held-Out Dev Set (Multi-domain)", unseen_data, detector_fn)
     
     # 3. Combined Evaluation
     res_combined = run_split_evaluation("Combined Overall Benchmark", combined_data, detector_fn)
@@ -168,6 +193,7 @@ def evaluate_all():
     current_mem, peak_mem = tracemalloc.get_traced_memory()
     tracemalloc.stop()
     peak_mem_mb = round(peak_mem / (1024 * 1024), 2)
+    process_rss_mb = round(process.memory_info().rss / (1024 * 1024), 2) if process else peak_mem_mb
 
     # Print Report
     for r in [res_synthetic, res_unseen, res_combined]:
@@ -176,7 +202,7 @@ def evaluate_all():
         print(f"   TP: {r['true_positives']} | FP: {r['false_positives']} | FN (Missed): {r['false_negatives']}")
         print(f"   Speed: {r['sec_per_doc']:.4f} s/doc\n")
 
-    print(f"💾 Peak RAM Consumption: {peak_mem_mb} MB")
+    print(f"💾 Heap RAM Allocation: {peak_mem_mb} MB | Process RSS: {process_rss_mb} MB")
 
     # Report Missed PII Transparently
     print(f"\n🔍 DETAILED MISSED PII ANALYSIS (FALSE NEGATIVES):")

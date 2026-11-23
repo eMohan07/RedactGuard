@@ -10,13 +10,13 @@ import tempfile
 import uuid
 from typing import List, Dict, Any, Optional
 from fastapi import FastAPI, File, UploadFile, HTTPException, Form
-from fastapi.responses import HTMLResponse, FileResponse, JSONResponse, PlainTextResponse
+from fastapi.responses import HTMLResponse, FileResponse, JSONResponse, PlainTextResponse, Response
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
 from config import ensure_directories
 from src.ingestion.text_loader import load_text_file
-from src.ingestion.pdf_loader import load_pdf_file, ScannedPDFError, EmptyDocumentError
+from src.ingestion.pdf_loader import load_pdf_file, map_spans_to_word_boxes, ScannedPDFError, EmptyDocumentError
 from src.detection.hybrid_detector import HybridDetector
 from src.detection.schemas import DetectedSpan
 from src.detection.entity_linker import EntityLinker
@@ -59,7 +59,7 @@ async def upload_document(file: UploadFile = File(...), use_slm: bool = Form(Fal
     if suffix not in [".txt", ".pdf"]:
         raise HTTPException(status_code=400, detail="Only .txt and text-based .pdf files are supported.")
 
-    with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as tmp:
+    with tempfile.NamedTemporaryFile(dir=config.UPLOAD_DIR, delete=False, suffix=suffix) as tmp:
         content = await file.read()
         tmp.write(content)
         tmp_path = Path(tmp.name)
@@ -73,6 +73,17 @@ async def upload_document(file: UploadFile = File(...), use_slm: bool = Form(Fal
 
         # Detect PII (GLiNER + Presidio + Validators + Learning)
         spans = detector.detect(doc_data.full_text, use_slm=use_slm)
+
+        # Map spans to exact word bounding boxes and page numbers for PDFs
+        if doc_data.file_type == "pdf" and doc_data.word_boxes:
+            map_spans_to_word_boxes(spans, doc_data.word_boxes)
+
+        # Review Gating: auto-accept high confidence (>= 0.85); leave low/medium confidence pending review
+        for s in spans:
+            if s.source == "manual":
+                s.accepted = True
+            else:
+                s.accepted = (s.confidence >= 0.85)
 
         # Quasi-identifier scan
         warnings = PrivacyAdvisor.scan_warnings(doc_data.full_text)
@@ -160,6 +171,12 @@ async def analyze_direct_text(req: DirectTextRequest):
     )
     
     spans = detector.detect(doc_data.full_text, use_slm=req.use_slm)
+    # Review Gating: auto-accept high confidence (>= 0.85); leave low/medium confidence pending review
+    for s in spans:
+        if s.source == "manual":
+            s.accepted = True
+        else:
+            s.accepted = (s.confidence >= 0.85)
     warnings = PrivacyAdvisor.scan_warnings(doc_data.full_text)
     tag_map, ambiguity_flags = EntityLinker.cluster_entities([s for s in spans if s.accepted])
     
@@ -183,6 +200,14 @@ async def analyze_direct_text(req: DirectTextRequest):
         "warnings": [w.__dict__ for w in warnings],
         "tag_map": tag_map,
         "ambiguity_flags": ambiguity_flags,
+        "learning_stats": learning_store.get_stats()
+    }
+
+@app.get("/api/system_status")
+async def get_system_status():
+    return {
+        "gliner_available": detector.gliner_detector.is_available(),
+        "slm_available": detector.slm_client.is_available(),
         "learning_stats": learning_store.get_stats()
     }
 
@@ -275,8 +300,8 @@ async def add_manual_span(req: AddSpanRequest):
         raise HTTPException(status_code=400, detail="Text cannot be empty")
 
     import re
-    # 1. Find all occurrences of the phrase across the document text
-    pattern = re.compile(re.escape(search_term), re.IGNORECASE)
+    # 1. Find all occurrences of the phrase across the document text using word boundaries
+    pattern = re.compile(r"\b" + re.escape(search_term) + r"\b", re.IGNORECASE)
     matches_found = list(pattern.finditer(full_text))
 
     if not matches_found and (req.start_char is None or req.end_char is None):
@@ -328,6 +353,8 @@ async def add_manual_span(req: AddSpanRequest):
                     s.accepted = True
 
     sess["spans"].sort(key=lambda s: s.start_char)
+    if sess["doc_data"].file_type == "pdf" and sess["doc_data"].word_boxes:
+        map_spans_to_word_boxes(sess["spans"], sess["doc_data"].word_boxes)
     learning_store.record_correction(
         search_term, 
         req.category, 
@@ -360,7 +387,7 @@ async def redact_similar(req: RedactSimilarRequest):
 
     import re
     full_text = sess["doc_data"].full_text
-    pattern = re.compile(re.escape(req.text), re.IGNORECASE)
+    pattern = re.compile(r"\b" + re.escape(req.text) + r"\b", re.IGNORECASE)
 
     for match in pattern.finditer(full_text):
         m_start = match.start()
@@ -385,6 +412,8 @@ async def redact_similar(req: RedactSimilarRequest):
             sess["spans"].append(new_span)
 
     sess["spans"].sort(key=lambda s: s.start_char)
+    if sess["doc_data"].file_type == "pdf" and sess["doc_data"].word_boxes:
+        map_spans_to_word_boxes(sess["spans"], sess["doc_data"].word_boxes)
     learning_store.record_correction(req.text, req.category, action="approve", filename=sess["doc_data"].filename)
     tag_map, ambiguity_flags = EntityLinker.cluster_entities([s for s in sess["spans"] if s.accepted])
     sess["tag_map"] = tag_map
@@ -415,7 +444,34 @@ async def apply_generalization(req: GeneralizeRequest):
     sess["doc_data"].full_text = new_text
     sess["warnings"] = PrivacyAdvisor.scan_warnings(new_text)
 
-    sess["spans"] = detector.detect(new_text, use_slm=False)
+    # Preserve previous user approvals and manual additions across generalization
+    prev_accepted_texts = {s.text.strip(): s.accepted for s in sess["spans"]}
+    prev_manual_spans = [s for s in sess["spans"] if s.source in ("manual", "similar")]
+
+    new_spans = detector.detect(new_text, use_slm=False)
+    for s in new_spans:
+        if s.text.strip() in prev_accepted_texts:
+            s.accepted = prev_accepted_texts[s.text.strip()]
+        else:
+            s.accepted = (s.confidence >= 0.85)
+
+    for ms in prev_manual_spans:
+        if ms.text in new_text:
+            idx = new_text.find(ms.text)
+            if not any(s.start_char == idx and s.end_char == idx + len(ms.text) for s in new_spans):
+                new_spans.append(DetectedSpan(
+                    id=ms.id,
+                    text=ms.text,
+                    category=ms.category,
+                    start_char=idx,
+                    end_char=idx + len(ms.text),
+                    source=ms.source,
+                    confidence=ms.confidence,
+                    accepted=ms.accepted
+                ))
+
+    new_spans.sort(key=lambda s: s.start_char)
+    sess["spans"] = new_spans
     tag_map, ambiguity_flags = EntityLinker.cluster_entities([s for s in sess["spans"] if s.accepted])
     sess["tag_map"] = tag_map
     sess["ambiguity_flags"] = ambiguity_flags
@@ -477,17 +533,18 @@ async def export_summary_file(session_id: str, mask_style: str = "INDEXED", pres
     if not sess:
         raise HTTPException(status_code=404, detail="Session not found")
     
-    if not sess.get("summary") or sess.get("summary_mask_style") != mask_style:
-        redacted_text, _ = redact_text_with_placeholders(
-            sess["doc_data"].full_text, 
-            sess["spans"], 
-            mask_style=mask_style,
-            preserve_length=preserve_length
-        )
-        summarizer = SafeSummarizer()
-        summary, _ = summarizer.summarize_redacted_only(redacted_text)
-        sess["summary"] = summary
-        sess["summary_mask_style"] = mask_style
+    # Always regenerate and run leak audit to guarantee freshness and safety
+    redacted_text, _ = redact_text_with_placeholders(
+        sess["doc_data"].full_text, 
+        sess["spans"], 
+        mask_style=mask_style,
+        preserve_length=preserve_length
+    )
+    summarizer = SafeSummarizer()
+    raw_summary, _ = summarizer.summarize_redacted_only(redacted_text)
+    purged_summary, _ = summarizer.audit_summary_leaks(raw_summary, sess["spans"])
+    sess["summary"] = purged_summary
+    sess["summary_mask_style"] = mask_style
 
     filename = f"summary_{mask_style.lower()}_{sess['doc_data'].filename}.txt"
     return PlainTextResponse(
@@ -535,7 +592,7 @@ async def export_redacted(
     session_id: str, 
     format: str = "txt", 
     mask_style: str = "INDEXED",
-    preserve_length: bool = True
+    preserve_length: bool = False
 ):
     # Auto-cleanup expired files
     LearningStore.cleanup_old_files([config.UPLOAD_DIR, config.OUTPUT_DIR], max_age_seconds=1800)

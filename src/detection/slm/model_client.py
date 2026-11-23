@@ -14,6 +14,14 @@ class LocalSLMClient:
         self.base_url = base_url
         self.model = model
 
+    def is_available(self) -> bool:
+        """Checks if local Ollama daemon is active and responsive."""
+        try:
+            r = requests.get(f"{self.base_url}/api/tags", timeout=1.0)
+            return r.status_code == 200
+        except Exception:
+            return False
+
     def detect_entities(self, text_chunk: str, start_offset: int = 0, page_num: int = 1) -> list[DetectedSpan]:
         """
         Prompts the local model to identify named entities (NAME, EMAIL, PHONE, ADDRESS, ID)

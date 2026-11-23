@@ -9,18 +9,47 @@ class VerificationFailedError(Exception):
     """Raised when the post-redaction re-read audit discovers residual sensitive text."""
     pass
 
+def merge_overlapping_spans(spans: List[DetectedSpan]) -> List[DetectedSpan]:
+    """
+    Merges overlapping or nested spans into unified non-overlapping spans.
+    Prevents malformed redaction output (e.g. [NAME_1]1]) when multiple spans overlap.
+    """
+    if not spans:
+        return []
+    sorted_s = sorted(spans, key=lambda s: (s.start_char, -s.end_char))
+    merged: List[DetectedSpan] = []
+
+    for s in sorted_s:
+        if not merged:
+            merged.append(s)
+            continue
+        cur = merged[-1]
+        if s.start_char < cur.end_char:
+            # Overlap detected: extend current span boundaries if s extends further
+            if s.end_char > cur.end_char:
+                cur.end_char = s.end_char
+                if len(s.text) > len(cur.text):
+                    cur.text = s.text
+                    cur.category = s.category
+            if s.bboxes:
+                cur.bboxes = (cur.bboxes or []) + s.bboxes
+        else:
+            merged.append(s)
+    return merged
+
 def redact_text_with_placeholders(
     full_text: str, 
     spans: List[DetectedSpan],
     mask_style: str = "INDEXED",
     hmac_key: Optional[bytes] = None,
-    preserve_length: bool = True
+    preserve_length: bool = False
 ) -> Tuple[str, Dict[str, str]]:
     """
     Applies redactions with entity-linked placeholders (e.g. [NAME_1], [EMAIL_1]).
-    Default mask style is INDEXED.
+    Default mask style is INDEXED with fixed-width privacy preservation (preserve_length=False).
     
     Security enhancements:
+    - Automatically resolves overlapping spans before applying edits.
     - HASH: Uses session-specific keyed HMAC-SHA256 instead of short plain SHA-256 to prevent dictionary/rainbow-table attacks.
     - ASTERISK / BLOCK: By default, uses fixed-width masks (preserve_length=False) to avoid revealing character counts.
     
@@ -29,6 +58,9 @@ def redact_text_with_placeholders(
     active_spans = [s for s in spans if s.accepted]
     if not active_spans:
         return full_text, {}
+
+    # Merge overlapping accepted spans to avoid offset collisions
+    active_spans = merge_overlapping_spans(active_spans)
 
     # Ephemeral session key for HMAC hashing if not provided
     if hmac_key is None:
@@ -65,7 +97,7 @@ def redact_text(
     spans: List[DetectedSpan], 
     mask_style: str = "INDEXED",
     hmac_key: Optional[bytes] = None,
-    preserve_length: bool = True
+    preserve_length: bool = False
 ) -> str:
     """Convenience wrapper returning just the redacted string."""
     redacted, _ = redact_text_with_placeholders(

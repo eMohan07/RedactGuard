@@ -2,6 +2,7 @@
 __pycache__/
 *.py[cod]
 *$py.class
+.pytest_cache/
 
 # Environments
 .venv/
@@ -10,10 +11,17 @@ ENV/
 env/
 
 # Redacted outputs and uploaded files
-uploads/
-outputs/
+uploads/*
+!uploads/.gitkeep
+outputs/*
+!outputs/.gitkeep
 data/cache/
 models/
+
+# Sensitive data and local encryption keys
+data/.security_key
+data/*.jsonl
+data/learned_patterns.json
 
 # Distribution / packaging
 dist/

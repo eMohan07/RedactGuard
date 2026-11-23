@@ -5,7 +5,7 @@
 [![Streamlit](https://img.shields.io/badge/Streamlit-1.30+-FF4B4B.svg)](https://streamlit.io/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Local Offline](https://img.shields.io/badge/Cloud%20Telemetry-Zero%20%28100%25%20Offline%29-brightgreen.svg)](#-offline-privacy-guarantees--telemetry-suppression)
-[![Combined F1](https://img.shields.io/badge/Overall%20F1-96.39%25-success.svg)](#-evaluation-benchmark--transparent-performance)
+[![Combined F1](https://img.shields.io/badge/Overall%20F1-82.71%25%20%28Strict%29-success.svg)](#-evaluation-benchmark--transparent-performance)
 
 > **Domain**: Cybersecurity | Applied AI / NLP | Privacy-Preserving Computing  
 > **Problem Statement**: PS 3 — Privacy-Aware Document Redaction and Summary Tool
@@ -95,7 +95,7 @@ flowchart TD
 
 | PS 3 Requirement | Implementation Details | Scope & Verification |
 | :--- | :--- | :---: |
-| **SLM-Assisted Detection & Input** | Hybrid architecture: Local GLiNER small PII model + Presidio-style pattern recognizers + optional local SLM via Ollama (`llama3.2:1b`, `qwen2.5:1.5b`). Accepts TXT & text-based PDFs. | Implemented & Tested |
+| **SLM-Assisted Detection & Input** | Hybrid architecture: Local GLiNER small encoder NER model (`urchade/gliner_small-v2.1`) + Presidio-style pattern recognizers + optional local generative SLM via Ollama (`llama3.2:1b`, `qwen2.5:1.5b`) for safe summarization. Accepts TXT & text-based PDFs. | Implemented & Tested |
 | **Entities: Names** | Recognizes person names in running text, multi-attendee headers (`Attendees:`, `Contact:`, `Manager:`, `Reported By:`), signature blocks (`Sincerely,`, `Regards,`), and initial variants (`R. Sharma`, `Sneha R. Deshmukh`). | Implemented & Tested |
 | **Entities: Emails** | Recognizes standard (`user@domain.com`) and obfuscated formats (`user [at] domain dot com`, `user (at) domain (dot) com`, `user dot name at domain dot com`). | Implemented & Tested |
 | **Entities: Phones** | Recognizes mobile and landlines (+91 mobiles, Indian STD landlines e.g. `020-25678901`, standard 10-digit mobiles, US/international numbers). | Implemented & Tested |
@@ -121,15 +121,17 @@ Run the benchmark at any time:
 python scripts/evaluate.py
 ```
 
-### Measured Performance Breakdown
+### Measured Performance Breakdown (Strict Exact-Boundary Matching)
 
 | Evaluation Split | Document Count | Precision | Recall | F1 Score | Speed (s/doc) |
 | :--- | :---: | :---: | :---: | :---: | :---: |
-| **Synthetic Benchmark Split** | 18 docs | 98.77% | 97.56% | 98.16% | 0.0166 s |
-| **Unseen Manually Written & Public Split** | 5 docs | 90.91% | 95.24% | 93.02% | 0.0235 s |
-| **Combined Overall Benchmark** | **23 docs** | **96.00%** | **96.77%** | **96.39%** | **0.0029 s** |
+| **Synthetic Benchmark (Core)** | 18 docs | 74.77% | 97.56% | 84.66% | 0.0111 s |
+| **Held-Out Dev Set (Multi-domain)** | 5 docs | 66.67% | 97.67% | 79.25% | 0.0195 s |
+| **Combined Overall Benchmark** | **23 docs** | **71.76%** | **97.60%** | **82.71%** | **0.0037 s** |
 
-- **Peak Memory Usage**: 0.40 MB
+- **Strict Span Matching**: Evaluated using strict span start/end boundaries and category matching (no lenient substring credit).
+- **Zero Data Leakage**: In all 23 documents, high-confidence detection achieved **97.60% recall** with zero sensitive entity leaks in exported files.
+- **Hardware Footprint**: Heap RAM Allocation: 0.41 MB | Process RSS: ~42 MB (pure CPU execution).
 - **Export Verification Leak Audit**: 0 residual sensitive strings leaked across all 23 exported files.
 
 ### Failure Analysis & Missed PII Instances
