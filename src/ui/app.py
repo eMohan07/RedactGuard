@@ -24,10 +24,11 @@ from src.detection.privacy_advisor import PrivacyAdvisor, PrivacyWarning
 from src.redaction.text_redactor import (
     redact_text_with_placeholders, 
     verify_redacted_text, 
-    VerificationFailedError
+    VerificationFailedError,
+    clean_and_align_redacted_text
 )
 from src.redaction.pdf_redactor import redact_pdf
-from src.summarizer.safe_summary import SafeSummarizer
+from src.summarizer.safe_summary import SafeSummarizer, format_executive_summary_file
 from src.ui.highlighter import render_highlighted_document
 
 st.set_page_config(
@@ -185,6 +186,37 @@ elif input_mode == "✍️ Direct Text Paste":
             process_text_content(custom_txt.strip(), doc_name_input)
         st.rerun()
 
+# System Architecture & Methodology (PS-03 Required Brief Explanation)
+with st.expander("🛡️ System Architecture & Methodology (PS-03 Alignment)", expanded=False):
+    col_a, col_b = st.columns(2)
+    with col_a:
+        st.markdown("""
+        **⚙️ Approach & Local Operation**
+        - **Defense-in-Depth**: Combines deterministic regex/checksum validation with local zero-shot NER and SLM contextual verification.
+        - **100% Local & Air-Gapped**: Runs entirely offline (`HF_HUB_OFFLINE=1`). Sensitive documents never leave your machine.
+        - **Human-in-the-Loop**: Color-coded confidence highlights (Green ≥85%, Yellow 60-84%, Red <60%) with full approve/reject review and active learning.
+        """)
+        st.markdown("""
+        **🤖 Models & Data Used**
+        - **GLiNER Small (v2.1)**: ~150MB local zero-shot entity recognition with sliding-window chunking (unlimited document length).
+        - **Local SLM**: Ollama Qwen 2.5 (1.5B) / LLaMA 3.2 for borderline candidate disambiguation and structured safe summaries.
+        - **Deterministic Engines**: Luhn/Verhoeff checksum-validated Indian IDs (Aadhaar, PAN, GSTIN, IFSC, UAN, Voter ID, Passport), international IDs, phone formats, and PIN-anchored addresses.
+        - **Data**: Evaluated on multi-domain medical, corporate, legal, and financial records.
+        """)
+    with col_b:
+        st.markdown("""
+        **🔗 Name Variant Linking & Coreference**
+        - **Graph-Based EntityLinker**: Deconstructs person names into honorifics, first/middle/last tokens, and initials.
+        - **Coreference Resolution**: Unifies variants (e.g. *Dr. R Sharma*, *R. Sharma*, *Richa Sharma*, *Richa*, *Sharma*) into one canonical entity (`[NAME_1]`).
+        - **Ambiguity Guard**: Flags multi-person shared surnames for explicit human review.
+        """)
+        st.markdown("""
+        **🔍 Leak-Free Summary Verification**
+        - **Redact-First Architecture**: The summarizer accepts strictly de-identified text; it never receives raw sensitive PII.
+        - **Quasi-Identifier Generalization**: Pre-synthesis neutralization replaces indirect combinations (e.g. *"CFO of a Pune-based firm"*, *"only female cardiologist in Kolhapur"*) with generalized professional roles.
+        - **Multi-Engine Audit Gate**: Dual-layer re-read verifies the summary against all removed spans, bare constituent tokens, and autonomous rule scans before export.
+        """)
+
 # Helper: Redact All Similar Occurrences
 def redact_all_similar(target_text: str, category: str):
     full_text = st.session_state.doc_data.full_text
@@ -286,16 +318,33 @@ elif st.session_state.doc_data is not None:
             components.html(html_content, height=530, scrolling=True)
 
         with tab_redacted:
-            redacted_preview, _ = redact_text_with_placeholders(
+            raw_preview, _ = redact_text_with_placeholders(
                 st.session_state.doc_data.full_text,
                 st.session_state.spans,
                 mask_style=mask_style,
                 preserve_length=preserve_length
             )
+            clean_preview = clean_and_align_redacted_text(
+                raw_preview,
+                filename=st.session_state.doc_data.filename,
+                mask_style=mask_style,
+                include_banner=False
+            )
+            
+            c_rp1, c_rp2 = st.columns([3, 1])
+            c_rp1.caption("👁️ Formatted, de-identified document preview")
+            c_rp2.download_button(
+                "📥 Download TXT",
+                data=clean_preview,
+                file_name=f"redacted_{Path(st.session_state.doc_data.filename).stem}.txt",
+                mime="text/plain",
+                key="btn_dl_redacted_tab",
+                use_container_width=True
+            )
             st.text_area(
                 "Sanitized Output Text",
-                redacted_preview,
-                height=490,
+                clean_preview,
+                height=460,
                 label_visibility="collapsed"
             )
 
@@ -324,7 +373,28 @@ elif st.session_state.doc_data is not None:
                 with st.spinner("Writing leak-free summary with local SLM..."):
                     summarizer = SafeSummarizer(model=slm_model)
                     summary = summarizer.summarize(st.session_state.doc_data.full_text, st.session_state.spans)
-                    st.success(summary)
+                    st.session_state.cached_ui_summary = summary
+
+            if "cached_ui_summary" in st.session_state and st.session_state.cached_ui_summary:
+                summary_text = st.session_state.cached_ui_summary
+                formatted_file = format_executive_summary_file(
+                    summary_text,
+                    filename=st.session_state.doc_data.filename,
+                    mask_style=mask_style
+                )
+
+                st.markdown(
+                    f"""<div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.12); border-radius: 8px; padding: 16px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.8; white-space: pre-wrap; color: #ececec;">{summary_text}</div>""",
+                    unsafe_allow_html=True
+                )
+                st.download_button(
+                    label="📥 Download Clean Executive Summary (.txt)",
+                    data=formatted_file,
+                    file_name=f"summary_{Path(st.session_state.doc_data.filename).stem}.txt",
+                    mime="text/plain",
+                    use_container_width=True,
+                    key="btn_dl_summary_ui"
+                )
             else:
                 st.info("Click 'Generate Safe Summary' to produce an anonymized overview.")
 

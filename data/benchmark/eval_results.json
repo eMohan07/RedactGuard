@@ -1,14 +1,183 @@
 {
-  "synthetic_split": {
-    "split_name": "Synthetic Benchmark (Core)",
-    "document_count": 18,
-    "precision": 0.7843,
-    "recall": 0.9756,
-    "f1_score": 0.8696,
-    "true_positives": 80,
-    "false_positives": 22,
+  "hybrid_exact": {
+    "split_name": "Combined (Exact Match)",
+    "match_mode": "exact",
+    "document_count": 23,
+    "precision": 0.936,
+    "recall": 0.936,
+    "f1_score": 0.936,
+    "true_positives": 117,
+    "false_positives": 8,
+    "false_negatives": 8,
+    "ms_per_doc": 12.35,
+    "category_metrics": {
+      "NAME": {
+        "precision": 0.898,
+        "recall": 0.898,
+        "f1": 0.898,
+        "support": 49
+      },
+      "EMAIL": {
+        "precision": 0.9524,
+        "recall": 0.9524,
+        "f1": 0.9524,
+        "support": 21
+      },
+      "PHONE": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 19
+      },
+      "ADDRESS": {
+        "precision": 0.9286,
+        "recall": 0.9286,
+        "f1": 0.9286,
+        "support": 14
+      },
+      "ID": {
+        "precision": 0.9545,
+        "recall": 0.9545,
+        "f1": 0.9545,
+        "support": 22
+      }
+    },
+    "missed_pii": [
+      {
+        "document": "doc_08_hr_incident.txt",
+        "text": "Sharma",
+        "type": "NAME"
+      },
+      {
+        "document": "doc_08_hr_incident.txt",
+        "text": "Sharma",
+        "type": "NAME"
+      },
+      {
+        "document": "unseen_01_public_nda.txt",
+        "text": "Kenneth O'Connor",
+        "type": "NAME"
+      },
+      {
+        "document": "unseen_02_clinical_discharge.txt",
+        "text": "Eleanor Vance",
+        "type": "NAME"
+      },
+      {
+        "document": "unseen_02_clinical_discharge.txt",
+        "text": "dr.vance@mountsinaihealth.org",
+        "type": "EMAIL"
+      },
+      {
+        "document": "unseen_04_academic_transcript.txt",
+        "text": "Roll No: 21BCE1042",
+        "type": "ID"
+      },
+      {
+        "document": "unseen_04_academic_transcript.txt",
+        "text": "V. K. Ramanathan",
+        "type": "NAME"
+      },
+      {
+        "document": "unseen_05_corporate_grievance.txt",
+        "text": "Campus 3, Outer Ring Road, Mahadevapura, Bangalore 560048",
+        "type": "ADDRESS"
+      }
+    ],
+    "false_positive_instances": [
+      {
+        "document": "doc_12_executive_bio.txt",
+        "text": "Tanvi",
+        "category": "NAME",
+        "confidence": 0.72
+      },
+      {
+        "document": "unseen_01_public_nda.txt",
+        "text": "Dr. Kenneth O'Connor",
+        "category": "NAME",
+        "confidence": 0.99
+      },
+      {
+        "document": "unseen_02_clinical_discharge.txt",
+        "text": "Dr. Eleanor Vance",
+        "category": "NAME",
+        "confidence": 0.99
+      },
+      {
+        "document": "unseen_02_clinical_discharge.txt",
+        "text": "dr.vance@mountsinaihealth.org.\nVitals",
+        "category": "EMAIL",
+        "confidence": 0.99
+      },
+      {
+        "document": "unseen_04_academic_transcript.txt",
+        "text": "21BCE1042",
+        "category": "ID",
+        "confidence": 0.99
+      },
+      {
+        "document": "unseen_04_academic_transcript.txt",
+        "text": "Prof. V. K. Ramanathan",
+        "category": "NAME",
+        "confidence": 0.94
+      },
+      {
+        "document": "unseen_05_corporate_grievance.txt",
+        "text": "Ananya Roy",
+        "category": "NAME",
+        "confidence": 0.92
+      },
+      {
+        "document": "unseen_05_corporate_grievance.txt",
+        "text": "of Incident: Campus 3, Outer Ring Road, Mahadevapura, Bangalore 560048",
+        "category": "ADDRESS",
+        "confidence": 0.99
+      }
+    ]
+  },
+  "hybrid_iou": {
+    "split_name": "Combined (Boundary IoU Match)",
+    "match_mode": "iou",
+    "document_count": 23,
+    "precision": 0.984,
+    "recall": 0.984,
+    "f1_score": 0.984,
+    "true_positives": 123,
+    "false_positives": 2,
     "false_negatives": 2,
-    "sec_per_doc": 0.0273,
+    "ms_per_doc": 13.04,
+    "category_metrics": {
+      "NAME": {
+        "precision": 0.9592,
+        "recall": 0.9592,
+        "f1": 0.9592,
+        "support": 49
+      },
+      "EMAIL": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 21
+      },
+      "PHONE": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 19
+      },
+      "ADDRESS": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 14
+      },
+      "ID": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 22
+      }
+    },
     "missed_pii": [
       {
         "document": "doc_08_hr_incident.txt",
@@ -23,234 +192,1493 @@
     ],
     "false_positive_instances": [
       {
+        "document": "doc_12_executive_bio.txt",
+        "text": "Tanvi",
+        "category": "NAME",
+        "confidence": 0.72
+      },
+      {
+        "document": "unseen_05_corporate_grievance.txt",
+        "text": "Ananya Roy",
+        "category": "NAME",
+        "confidence": 0.92
+      }
+    ]
+  },
+  "rules_only": {
+    "split_name": "Combined (Rules-Only Ablation)",
+    "match_mode": "exact",
+    "document_count": 23,
+    "precision": 0.3686,
+    "recall": 0.976,
+    "f1_score": 0.5351,
+    "true_positives": 122,
+    "false_positives": 209,
+    "false_negatives": 3,
+    "ms_per_doc": 11.28,
+    "category_metrics": {
+      "NAME": {
+        "precision": 0.2526,
+        "recall": 0.9796,
+        "f1": 0.4017,
+        "support": 49
+      },
+      "EMAIL": {
+        "precision": 0.5676,
+        "recall": 1.0,
+        "f1": 0.7241,
+        "support": 21
+      },
+      "PHONE": {
+        "precision": 0.7917,
+        "recall": 1.0,
+        "f1": 0.8837,
+        "support": 19
+      },
+      "ADDRESS": {
+        "precision": 0.2549,
+        "recall": 0.9286,
+        "f1": 0.4,
+        "support": 14
+      },
+      "ID": {
+        "precision": 0.7241,
+        "recall": 0.9545,
+        "f1": 0.8235,
+        "support": 22
+      }
+    },
+    "missed_pii": [
+      {
+        "document": "doc_08_hr_incident.txt",
+        "text": "Sharma",
+        "type": "NAME"
+      },
+      {
+        "document": "unseen_04_academic_transcript.txt",
+        "text": "Roll No: 21BCE1042",
+        "type": "ID"
+      },
+      {
+        "document": "unseen_05_corporate_grievance.txt",
+        "text": "Campus 3, Outer Ring Road, Mahadevapura, Bangalore 560048",
+        "type": "ADDRESS"
+      }
+    ],
+    "false_positive_instances": [
+      {
         "document": "doc_01_meeting_notes.txt",
-        "text": "Discussion Points",
+        "text": "richa.sharma@enterprise.in",
+        "category": "EMAIL",
+        "confidence": 0.99
+      },
+      {
+        "document": "doc_01_meeting_notes.txt",
+        "text": "91 98230 11223",
+        "category": "ADDRESS",
+        "confidence": 0.95
+      },
+      {
+        "document": "doc_01_meeting_notes.txt",
+        "text": "R. Sharma",
+        "category": "NAME",
+        "confidence": 0.92
+      },
+      {
+        "document": "doc_01_meeting_notes.txt",
+        "text": "Vikram Malhotra",
+        "category": "NAME",
+        "confidence": 0.68
+      },
+      {
+        "document": "doc_01_meeting_notes.txt",
+        "text": "Richa Sharma",
+        "category": "NAME",
+        "confidence": 0.68
+      },
+      {
+        "document": "doc_01_meeting_notes.txt",
+        "text": "Vikram Malhotra",
+        "category": "NAME",
+        "confidence": 0.9
+      },
+      {
+        "document": "doc_01_meeting_notes.txt",
+        "text": "Richa Sharma",
+        "category": "NAME",
+        "confidence": 0.9
+      },
+      {
+        "document": "doc_01_meeting_notes.txt",
+        "text": "Richa Sharma",
+        "category": "NAME",
+        "confidence": 0.9
+      },
+      {
+        "document": "doc_01_meeting_notes.txt",
+        "text": "R. Sharma",
+        "category": "NAME",
+        "confidence": 0.9
+      },
+      {
+        "document": "doc_01_meeting_notes.txt",
+        "text": "R. Sharma",
+        "category": "NAME",
+        "confidence": 0.91
+      },
+      {
+        "document": "doc_01_meeting_notes.txt",
+        "text": "R. Sharma",
+        "category": "NAME",
+        "confidence": 0.91
+      },
+      {
+        "document": "doc_02_medical_intake.txt",
+        "text": "3678 4590",
+        "category": "PHONE",
+        "confidence": 0.97
+      },
+      {
+        "document": "doc_02_medical_intake.txt",
+        "text": "91 94220 54321",
+        "category": "ADDRESS",
+        "confidence": 0.99
+      },
+      {
+        "document": "doc_02_medical_intake.txt",
+        "text": "12 Shivaji Nagar, Pune, MH 411005",
+        "category": "ADDRESS",
+        "confidence": 0.99
+      },
+      {
+        "document": "doc_02_medical_intake.txt",
+        "text": "12 Shivaji Nagar, Pune, MH 411005",
+        "category": "ADDRESS",
+        "confidence": 0.99
+      },
+      {
+        "document": "doc_02_medical_intake.txt",
+        "text": "Anand Kulkarni",
+        "category": "NAME",
+        "confidence": 0.68
+      },
+      {
+        "document": "doc_02_medical_intake.txt",
+        "text": "Shivaji Nagar",
+        "category": "NAME",
+        "confidence": 0.68
+      },
+      {
+        "document": "doc_02_medical_intake.txt",
+        "text": "Shivaji Nagar",
+        "category": "NAME",
+        "confidence": 0.9
+      },
+      {
+        "document": "doc_02_medical_intake.txt",
+        "text": "Anand Kulkarni",
         "category": "NAME",
         "confidence": 0.9
       },
       {
         "document": "doc_03_vendor_invoice.txt",
-        "text": "Acme Solutions Pvt",
-        "category": "NAME",
-        "confidence": 0.9
+        "text": "accounts@acmesolutions.com",
+        "category": "EMAIL",
+        "confidence": 0.99
       },
       {
         "document": "doc_03_vendor_invoice.txt",
-        "text": "Amount Due",
+        "text": "981273645102",
+        "category": "ID",
+        "confidence": 0.99
+      },
+      {
+        "document": "doc_03_vendor_invoice.txt",
+        "text": "Rajesh Gupta",
+        "category": "NAME",
+        "confidence": 0.68
+      },
+      {
+        "document": "doc_03_vendor_invoice.txt",
+        "text": "Rajesh Gupta",
         "category": "NAME",
         "confidence": 0.9
       },
       {
         "document": "doc_04_offer_letter.txt",
-        "text": "Permanent Account",
+        "text": "priya.nair@techfirm.co.in",
+        "category": "EMAIL",
+        "confidence": 0.99
+      },
+      {
+        "document": "doc_04_offer_letter.txt",
+        "text": "EMP-9421",
+        "category": "ID",
+        "confidence": 0.99
+      },
+      {
+        "document": "doc_04_offer_letter.txt",
+        "text": "Dr. Arvind Patel",
+        "category": "NAME",
+        "confidence": 0.99
+      },
+      {
+        "document": "doc_04_offer_letter.txt",
+        "text": "Priya Nair",
+        "category": "NAME",
+        "confidence": 0.68
+      },
+      {
+        "document": "doc_04_offer_letter.txt",
+        "text": "Arvind Patel",
+        "category": "NAME",
+        "confidence": 0.68
+      },
+      {
+        "document": "doc_04_offer_letter.txt",
+        "text": "Dr. Arvind Patel",
         "category": "NAME",
         "confidence": 0.9
       },
       {
         "document": "doc_04_offer_letter.txt",
-        "text": "Official Contact",
+        "text": "Priya Nair",
+        "category": "NAME",
+        "confidence": 0.9
+      },
+      {
+        "document": "doc_04_offer_letter.txt",
+        "text": "Arvind Patel",
         "category": "NAME",
         "confidence": 0.9
       },
       {
         "document": "doc_05_signature_block.txt",
-        "text": "Apex Logistics",
+        "text": "404 Senapati Bapat Marg, Pune, MH 411016",
+        "category": "ADDRESS",
+        "confidence": 0.99
+      },
+      {
+        "document": "doc_05_signature_block.txt",
+        "text": "404 Senapati Bapat Marg, Pune, MH 411016",
+        "category": "ADDRESS",
+        "confidence": 0.99
+      },
+      {
+        "document": "doc_05_signature_block.txt",
+        "text": "Senapati Bapat Marg",
+        "category": "NAME",
+        "confidence": 0.74
+      },
+      {
+        "document": "doc_05_signature_block.txt",
+        "text": "Sunil Deshmukh",
+        "category": "NAME",
+        "confidence": 0.68
+      },
+      {
+        "document": "doc_05_signature_block.txt",
+        "text": "Senapati Bapat",
+        "category": "NAME",
+        "confidence": 0.68
+      },
+      {
+        "document": "doc_05_signature_block.txt",
+        "text": "Bapat Marg",
+        "category": "NAME",
+        "confidence": 0.68
+      },
+      {
+        "document": "doc_05_signature_block.txt",
+        "text": "Senapati Bapat Marg",
+        "category": "NAME",
+        "confidence": 0.9
+      },
+      {
+        "document": "doc_05_signature_block.txt",
+        "text": "Sunil Deshmukh",
+        "category": "NAME",
+        "confidence": 0.9
+      },
+      {
+        "document": "doc_05_signature_block.txt",
+        "text": "Bapat Marg",
+        "category": "NAME",
+        "confidence": 0.9
+      },
+      {
+        "document": "doc_05_signature_block.txt",
+        "text": "Senapati Bapat",
         "category": "NAME",
         "confidence": 0.9
       },
       {
         "document": "doc_07_email_thread.txt",
-        "text": "Case Reference",
+        "text": "amit.joshi@bankcorp.in",
+        "category": "EMAIL",
+        "confidence": 0.99
+      },
+      {
+        "document": "doc_07_email_thread.txt",
+        "text": "9876543210",
+        "category": "PHONE",
+        "confidence": 0.97
+      },
+      {
+        "document": "doc_07_email_thread.txt",
+        "text": "S. K. Rao",
+        "category": "NAME",
+        "confidence": 0.92
+      },
+      {
+        "document": "doc_07_email_thread.txt",
+        "text": "Amit Joshi",
+        "category": "NAME",
+        "confidence": 0.68
+      },
+      {
+        "document": "doc_07_email_thread.txt",
+        "text": "Amit Joshi",
+        "category": "NAME",
+        "confidence": 0.9
+      },
+      {
+        "document": "doc_07_email_thread.txt",
+        "text": "S. K. Rao",
+        "category": "NAME",
+        "confidence": 0.9
+      },
+      {
+        "document": "doc_08_hr_incident.txt",
+        "text": "91 91234 56789",
+        "category": "ADDRESS",
+        "confidence": 0.95
+      },
+      {
+        "document": "doc_08_hr_incident.txt",
+        "text": "Deepa Menon",
+        "category": "NAME",
+        "confidence": 0.68
+      },
+      {
+        "document": "doc_08_hr_incident.txt",
+        "text": "Richa Sharma",
+        "category": "NAME",
+        "confidence": 0.68
+      },
+      {
+        "document": "doc_08_hr_incident.txt",
+        "text": "Rajiv Sharma",
+        "category": "NAME",
+        "confidence": 0.68
+      },
+      {
+        "document": "doc_08_hr_incident.txt",
+        "text": "Deepa Menon",
+        "category": "NAME",
+        "confidence": 0.9
+      },
+      {
+        "document": "doc_08_hr_incident.txt",
+        "text": "Richa Sharma",
+        "category": "NAME",
+        "confidence": 0.9
+      },
+      {
+        "document": "doc_08_hr_incident.txt",
+        "text": "Rajiv Sharma",
         "category": "NAME",
         "confidence": 0.9
       },
       {
         "document": "doc_09_bank_statement.txt",
-        "text": "Account Holder",
+        "text": "Meera Sen",
         "category": "NAME",
-        "confidence": 0.9
+        "confidence": 0.68
       },
       {
         "document": "doc_09_bank_statement.txt",
-        "text": "Savings Account",
-        "category": "NAME",
-        "confidence": 0.9
-      },
-      {
-        "document": "doc_09_bank_statement.txt",
-        "text": "Transaction Reference",
+        "text": "Meera Sen",
         "category": "NAME",
         "confidence": 0.9
       },
       {
         "document": "doc_10_consulting_agreement.txt",
-        "text": "Nova Analytics",
+        "text": "r.sharma@consultant.in",
+        "category": "EMAIL",
+        "confidence": 0.99
+      },
+      {
+        "document": "doc_10_consulting_agreement.txt",
+        "text": "4589 1234",
+        "category": "PHONE",
+        "confidence": 0.89
+      },
+      {
+        "document": "doc_10_consulting_agreement.txt",
+        "text": "88 Bund Garden Road, Pune, MH 411001",
+        "category": "ADDRESS",
+        "confidence": 0.99
+      },
+      {
+        "document": "doc_10_consulting_agreement.txt",
+        "text": "88 Bund Garden Road, Pune, MH 411001",
+        "category": "ADDRESS",
+        "confidence": 0.99
+      },
+      {
+        "document": "doc_10_consulting_agreement.txt",
+        "text": "Bund Garden",
+        "category": "NAME",
+        "confidence": 0.68
+      },
+      {
+        "document": "doc_10_consulting_agreement.txt",
+        "text": "R. Sharma",
         "category": "NAME",
         "confidence": 0.9
       },
       {
-        "document": "doc_11_landline_inquiry.txt",
-        "text": "Registered Landline",
+        "document": "doc_10_consulting_agreement.txt",
+        "text": "Bund Garden",
         "category": "NAME",
         "confidence": 0.9
+      },
+      {
+        "document": "doc_10_consulting_agreement.txt",
+        "text": "R. Sharma",
+        "category": "NAME",
+        "confidence": 0.91
+      },
+      {
+        "document": "doc_11_landline_inquiry.txt",
+        "text": "91 98200 98200",
+        "category": "ADDRESS",
+        "confidence": 0.95
+      },
+      {
+        "document": "doc_11_landline_inquiry.txt",
+        "text": "101, Palm Court, Mumbai, MH 400050",
+        "category": "ADDRESS",
+        "confidence": 0.99
+      },
+      {
+        "document": "doc_11_landline_inquiry.txt",
+        "text": "Flat 101, Palm Court, Mumbai, MH",
+        "category": "ADDRESS",
+        "confidence": 0.98
       },
       {
         "document": "doc_11_landline_inquiry.txt",
         "text": "Flat",
         "category": "NAME",
-        "confidence": 0.93
+        "confidence": 0.94
+      },
+      {
+        "document": "doc_11_landline_inquiry.txt",
+        "text": "Suresh Iyer",
+        "category": "NAME",
+        "confidence": 0.68
+      },
+      {
+        "document": "doc_11_landline_inquiry.txt",
+        "text": "Suresh Iyer",
+        "category": "NAME",
+        "confidence": 0.9
+      },
+      {
+        "document": "doc_12_executive_bio.txt",
+        "text": "91 98111 22334",
+        "category": "ADDRESS",
+        "confidence": 0.95
+      },
+      {
+        "document": "doc_12_executive_bio.txt",
+        "text": "Tanvi Rao",
+        "category": "NAME",
+        "confidence": 0.68
+      },
+      {
+        "document": "doc_12_executive_bio.txt",
+        "text": "Tanvi Rao",
+        "category": "NAME",
+        "confidence": 0.9
+      },
+      {
+        "document": "doc_12_executive_bio.txt",
+        "text": "Tanvi",
+        "category": "NAME",
+        "confidence": 0.72
       },
       {
         "document": "doc_13_patient_discharge.txt",
-        "text": "Emergency Contact",
+        "text": "91 99887 76655",
+        "category": "ADDRESS",
+        "confidence": 0.95
+      },
+      {
+        "document": "doc_13_patient_discharge.txt",
+        "text": "Dr. Arvind Patel",
+        "category": "NAME",
+        "confidence": 0.99
+      },
+      {
+        "document": "doc_13_patient_discharge.txt",
+        "text": "Rohan Roy",
+        "category": "NAME",
+        "confidence": 0.68
+      },
+      {
+        "document": "doc_13_patient_discharge.txt",
+        "text": "Arvind Patel",
+        "category": "NAME",
+        "confidence": 0.68
+      },
+      {
+        "document": "doc_13_patient_discharge.txt",
+        "text": "Dr. Arvind Patel",
         "category": "NAME",
         "confidence": 0.9
       },
       {
         "document": "doc_13_patient_discharge.txt",
-        "text": "Tab Paracetamol",
+        "text": "Arvind Patel",
+        "category": "NAME",
+        "confidence": 0.9
+      },
+      {
+        "document": "doc_13_patient_discharge.txt",
+        "text": "Rohan Roy",
         "category": "NAME",
         "confidence": 0.9
       },
       {
         "document": "doc_14_lease_agreement.txt",
-        "text": "Leased Premises",
+        "text": "richa.sharma@personalmail.org",
+        "category": "EMAIL",
+        "confidence": 0.99
+      },
+      {
+        "document": "doc_14_lease_agreement.txt",
+        "text": "91 98230 11223",
+        "category": "ADDRESS",
+        "confidence": 0.99
+      },
+      {
+        "document": "doc_14_lease_agreement.txt",
+        "text": "204 Kalyani Nagar, Pune, MH 411014",
+        "category": "ADDRESS",
+        "confidence": 0.99
+      },
+      {
+        "document": "doc_14_lease_agreement.txt",
+        "text": "204 Kalyani Nagar, Pune, MH 411014",
+        "category": "ADDRESS",
+        "confidence": 0.99
+      },
+      {
+        "document": "doc_14_lease_agreement.txt",
+        "text": "Mohan Lal",
+        "category": "NAME",
+        "confidence": 0.68
+      },
+      {
+        "document": "doc_14_lease_agreement.txt",
+        "text": "Richa Sharma",
+        "category": "NAME",
+        "confidence": 0.68
+      },
+      {
+        "document": "doc_14_lease_agreement.txt",
+        "text": "Kalyani Nagar",
+        "category": "NAME",
+        "confidence": 0.68
+      },
+      {
+        "document": "doc_14_lease_agreement.txt",
+        "text": "Kalyani Nagar",
         "category": "NAME",
         "confidence": 0.9
       },
       {
         "document": "doc_14_lease_agreement.txt",
-        "text": "Security Deposit",
+        "text": "Mohan Lal",
+        "category": "NAME",
+        "confidence": 0.9
+      },
+      {
+        "document": "doc_14_lease_agreement.txt",
+        "text": "Richa Sharma",
         "category": "NAME",
         "confidence": 0.9
       },
       {
         "document": "doc_15_travel_itinerary.txt",
-        "text": "Booking Reference",
-        "category": "NAME",
-        "confidence": 0.9
+        "text": "alok.kumar@airtravel.com",
+        "category": "EMAIL",
+        "confidence": 0.99
       },
       {
         "document": "doc_15_travel_itinerary.txt",
-        "text": "Frequent Flyer",
+        "text": "9845012345",
+        "category": "PHONE",
+        "confidence": 0.97
+      },
+      {
+        "document": "doc_15_travel_itinerary.txt",
+        "text": "Alok Kumar",
+        "category": "NAME",
+        "confidence": 0.68
+      },
+      {
+        "document": "doc_15_travel_itinerary.txt",
+        "text": "Alok Kumar",
         "category": "NAME",
         "confidence": 0.9
       },
       {
         "document": "doc_16_performance_review.txt",
-        "text": "Cloud Operations",
+        "text": "sneha.bhatt@corpcloud.net",
+        "category": "EMAIL",
+        "confidence": 0.99
+      },
+      {
+        "document": "doc_16_performance_review.txt",
+        "text": "Sneha Bhatt",
+        "category": "NAME",
+        "confidence": 0.68
+      },
+      {
+        "document": "doc_16_performance_review.txt",
+        "text": "Vikram Malhotra",
+        "category": "NAME",
+        "confidence": 0.68
+      },
+      {
+        "document": "doc_16_performance_review.txt",
+        "text": "Sneha Bhatt",
+        "category": "NAME",
+        "confidence": 0.9
+      },
+      {
+        "document": "doc_16_performance_review.txt",
+        "text": "Vikram Malhotra",
         "category": "NAME",
         "confidence": 0.9
       },
       {
         "document": "doc_17_support_ticket.txt",
-        "text": "User Name",
+        "text": "192.168.1.105",
+        "category": "ADDRESS",
+        "confidence": 0.99
+      },
+      {
+        "document": "doc_17_support_ticket.txt",
+        "text": "Kiran Varma",
+        "category": "NAME",
+        "confidence": 0.68
+      },
+      {
+        "document": "doc_17_support_ticket.txt",
+        "text": "Kiran Varma",
+        "category": "NAME",
+        "confidence": 0.9
+      },
+      {
+        "document": "doc_18_board_minutes.txt",
+        "text": "secretarial@conglomerate.com",
+        "category": "EMAIL",
+        "confidence": 0.99
+      },
+      {
+        "document": "doc_18_board_minutes.txt",
+        "text": "500 Nariman Point, Mumbai, MH 400021",
+        "category": "ADDRESS",
+        "confidence": 0.99
+      },
+      {
+        "document": "doc_18_board_minutes.txt",
+        "text": "500 Nariman Point, Mumbai, MH 400021",
+        "category": "ADDRESS",
+        "confidence": 0.99
+      },
+      {
+        "document": "doc_18_board_minutes.txt",
+        "text": "R. Sharma",
+        "category": "NAME",
+        "confidence": 0.92
+      },
+      {
+        "document": "doc_18_board_minutes.txt",
+        "text": "Nariman Point",
+        "category": "NAME",
+        "confidence": 0.68
+      },
+      {
+        "document": "doc_18_board_minutes.txt",
+        "text": "Harsh Vardhan",
+        "category": "NAME",
+        "confidence": 0.68
+      },
+      {
+        "document": "doc_18_board_minutes.txt",
+        "text": "Deepa Menon",
+        "category": "NAME",
+        "confidence": 0.68
+      },
+      {
+        "document": "doc_18_board_minutes.txt",
+        "text": "R. Sharma",
+        "category": "NAME",
+        "confidence": 0.9
+      },
+      {
+        "document": "doc_18_board_minutes.txt",
+        "text": "Deepa Menon",
+        "category": "NAME",
+        "confidence": 0.9
+      },
+      {
+        "document": "doc_18_board_minutes.txt",
+        "text": "Nariman Point",
+        "category": "NAME",
+        "confidence": 0.9
+      },
+      {
+        "document": "doc_18_board_minutes.txt",
+        "text": "Harsh Vardhan",
+        "category": "NAME",
+        "confidence": 0.9
+      },
+      {
+        "document": "doc_18_board_minutes.txt",
+        "text": "R. Sharma",
+        "category": "NAME",
+        "confidence": 0.91
+      },
+      {
+        "document": "doc_06_two_column.pdf",
+        "text": "richa.sharma@healthclinic.org",
+        "category": "EMAIL",
+        "confidence": 0.99
+      },
+      {
+        "document": "doc_06_two_column.pdf",
+        "text": "998811223344",
+        "category": "ID",
+        "confidence": 0.99
+      },
+      {
+        "document": "doc_06_two_column.pdf",
+        "text": "91 98230 44556",
+        "category": "ADDRESS",
+        "confidence": 0.99
+      },
+      {
+        "document": "doc_06_two_column.pdf",
+        "text": "101 Koregaon Park, Pune, MH 411001",
+        "category": "ADDRESS",
+        "confidence": 0.99
+      },
+      {
+        "document": "doc_06_two_column.pdf",
+        "text": "101 Koregaon Park, Pune, MH 411001",
+        "category": "ADDRESS",
+        "confidence": 0.99
+      },
+      {
+        "document": "doc_06_two_column.pdf",
+        "text": "Dr. Arvind Patel",
+        "category": "NAME",
+        "confidence": 0.99
+      },
+      {
+        "document": "doc_06_two_column.pdf",
+        "text": "Arvind Patel",
+        "category": "NAME",
+        "confidence": 0.68
+      },
+      {
+        "document": "doc_06_two_column.pdf",
+        "text": "Richa Sharma",
+        "category": "NAME",
+        "confidence": 0.68
+      },
+      {
+        "document": "doc_06_two_column.pdf",
+        "text": "Rajiv Sharma",
+        "category": "NAME",
+        "confidence": 0.68
+      },
+      {
+        "document": "doc_06_two_column.pdf",
+        "text": "Koregaon Park",
+        "category": "NAME",
+        "confidence": 0.68
+      },
+      {
+        "document": "doc_06_two_column.pdf",
+        "text": "Rajiv Sharma",
         "category": "NAME",
         "confidence": 0.9
       },
       {
         "document": "doc_06_two_column.pdf",
-        "text": "Primary Contact",
+        "text": "Dr. Arvind Patel",
         "category": "NAME",
         "confidence": 0.9
+      },
+      {
+        "document": "doc_06_two_column.pdf",
+        "text": "Richa Sharma",
+        "category": "NAME",
+        "confidence": 0.9
+      },
+      {
+        "document": "doc_06_two_column.pdf",
+        "text": "Arvind Patel",
+        "category": "NAME",
+        "confidence": 0.9
+      },
+      {
+        "document": "doc_06_two_column.pdf",
+        "text": "Koregaon Park",
+        "category": "NAME",
+        "confidence": 0.9
+      },
+      {
+        "document": "unseen_01_public_nda.txt",
+        "text": "m_sullivan@apextech.com",
+        "category": "EMAIL",
+        "confidence": 0.95
+      },
+      {
+        "document": "unseen_01_public_nda.txt",
+        "text": "+1 415 890 4421",
+        "category": "PHONE",
+        "confidence": 0.89
+      },
+      {
+        "document": "unseen_01_public_nda.txt",
+        "text": "1 415 890 4421, residing at 201 Mission St, Suite 1400, San Francisco, CA 94105",
+        "category": "ADDRESS",
+        "confidence": 0.95
+      },
+      {
+        "document": "unseen_01_public_nda.txt",
+        "text": "4421, residing at 201 Mission St, Suite 1400, San Francisco, CA 94105",
+        "category": "ADDRESS",
+        "confidence": 0.94
+      },
+      {
+        "document": "unseen_01_public_nda.txt",
+        "text": "44 Indiranagar 100ft Rd, Bangalore, KA 560038",
+        "category": "ADDRESS",
+        "confidence": 0.99
+      },
+      {
+        "document": "unseen_01_public_nda.txt",
+        "text": "44 Indiranagar 100ft Rd, Bangalore, KA 560038",
+        "category": "ADDRESS",
+        "confidence": 0.99
+      },
+      {
+        "document": "unseen_01_public_nda.txt",
+        "text": "Dr. Kenneth O'Connor",
+        "category": "NAME",
+        "confidence": 0.99
+      },
+      {
+        "document": "unseen_01_public_nda.txt",
+        "text": "Margaret D. Sullivan",
+        "category": "NAME",
+        "confidence": 0.92
+      },
+      {
+        "document": "unseen_01_public_nda.txt",
+        "text": "Dr. Kenneth O'Connor",
+        "category": "NAME",
+        "confidence": 0.99
+      },
+      {
+        "document": "unseen_01_public_nda.txt",
+        "text": "Margaret D",
+        "category": "NAME",
+        "confidence": 0.68
+      },
+      {
+        "document": "unseen_01_public_nda.txt",
+        "text": "San Francisco",
+        "category": "NAME",
+        "confidence": 0.68
+      },
+      {
+        "document": "unseen_01_public_nda.txt",
+        "text": "Margaret D",
+        "category": "NAME",
+        "confidence": 0.9
+      },
+      {
+        "document": "unseen_01_public_nda.txt",
+        "text": "Dr. Kenneth O'Connor",
+        "category": "NAME",
+        "confidence": 0.9
+      },
+      {
+        "document": "unseen_01_public_nda.txt",
+        "text": "San Francisco",
+        "category": "NAME",
+        "confidence": 0.9
+      },
+      {
+        "document": "unseen_01_public_nda.txt",
+        "text": "Margaret D. Sullivan",
+        "category": "NAME",
+        "confidence": 0.9
+      },
+      {
+        "document": "unseen_01_public_nda.txt",
+        "text": "Kenneth O'Connor",
+        "category": "NAME",
+        "confidence": 0.9
+      },
+      {
+        "document": "unseen_02_clinical_discharge.txt",
+        "text": "dr.vance@mountsinaihealth.org.\nVitals",
+        "category": "EMAIL",
+        "confidence": 0.99
+      },
+      {
+        "document": "unseen_02_clinical_discharge.txt",
+        "text": "742 Evergreen Terrace, Springfield, IL 62704",
+        "category": "ADDRESS",
+        "confidence": 0.99
+      },
+      {
+        "document": "unseen_02_clinical_discharge.txt",
+        "text": "742 Evergreen Terrace, Springfield, IL 62704",
+        "category": "ADDRESS",
+        "confidence": 0.99
+      },
+      {
+        "document": "unseen_02_clinical_discharge.txt",
+        "text": "Dr. Eleanor Vance",
+        "category": "NAME",
+        "confidence": 0.99
+      },
+      {
+        "document": "unseen_02_clinical_discharge.txt",
+        "text": "Dr. Eleanor Vance",
+        "category": "NAME",
+        "confidence": 0.99
+      },
+      {
+        "document": "unseen_02_clinical_discharge.txt",
+        "text": "Robert Hernandez",
+        "category": "NAME",
+        "confidence": 0.68
+      },
+      {
+        "document": "unseen_02_clinical_discharge.txt",
+        "text": "Maria Hernandez",
+        "category": "NAME",
+        "confidence": 0.68
+      },
+      {
+        "document": "unseen_02_clinical_discharge.txt",
+        "text": "Maria Hernandez",
+        "category": "NAME",
+        "confidence": 0.9
+      },
+      {
+        "document": "unseen_02_clinical_discharge.txt",
+        "text": "Robert Hernandez",
+        "category": "NAME",
+        "confidence": 0.9
+      },
+      {
+        "document": "unseen_02_clinical_discharge.txt",
+        "text": "Eleanor Vance",
+        "category": "NAME",
+        "confidence": 0.9
+      },
+      {
+        "document": "unseen_02_clinical_discharge.txt",
+        "text": "Dr. Eleanor Vance",
+        "category": "NAME",
+        "confidence": 0.9
+      },
+      {
+        "document": "unseen_03_it_incident_log.txt",
+        "text": "deepak.v@cloudscale.net",
+        "category": "EMAIL",
+        "confidence": 0.99
+      },
+      {
+        "document": "unseen_03_it_incident_log.txt",
+        "text": "s_jenkins@cloudscale.net",
+        "category": "EMAIL",
+        "confidence": 0.99
+      },
+      {
+        "document": "unseen_03_it_incident_log.txt",
+        "text": "EMP-5512",
+        "category": "ID",
+        "confidence": 0.99
+      },
+      {
+        "document": "unseen_03_it_incident_log.txt",
+        "text": "91 97110 99882",
+        "category": "ADDRESS",
+        "confidence": 0.95
+      },
+      {
+        "document": "unseen_03_it_incident_log.txt",
+        "text": "4, Bellandur, Bangalore 560103",
+        "category": "ADDRESS",
+        "confidence": 0.95
+      },
+      {
+        "document": "unseen_03_it_incident_log.txt",
+        "text": "Tech Park 4, Bellandur, Bangalore 560103",
+        "category": "ADDRESS",
+        "confidence": 0.99
+      },
+      {
+        "document": "unseen_03_it_incident_log.txt",
+        "text": "Deepak Verma",
+        "category": "NAME",
+        "confidence": 0.68
+      },
+      {
+        "document": "unseen_03_it_incident_log.txt",
+        "text": "Sarah Jenkins",
+        "category": "NAME",
+        "confidence": 0.68
+      },
+      {
+        "document": "unseen_03_it_incident_log.txt",
+        "text": "Tariq Al-Mansoor",
+        "category": "NAME",
+        "confidence": 0.9
+      },
+      {
+        "document": "unseen_03_it_incident_log.txt",
+        "text": "Deepak Verma",
+        "category": "NAME",
+        "confidence": 0.9
+      },
+      {
+        "document": "unseen_03_it_incident_log.txt",
+        "text": "Sarah Jenkins",
+        "category": "NAME",
+        "confidence": 0.9
+      },
+      {
+        "document": "unseen_04_academic_transcript.txt",
+        "text": "vk.ramanathan@iit.ac.in",
+        "category": "EMAIL",
+        "confidence": 0.95
+      },
+      {
+        "document": "unseen_04_academic_transcript.txt",
+        "text": "STU-88219",
+        "category": "ID",
+        "confidence": 0.99
+      },
+      {
+        "document": "unseen_04_academic_transcript.txt",
+        "text": "21BCE1042",
+        "category": "ID",
+        "confidence": 0.99
+      },
+      {
+        "document": "unseen_04_academic_transcript.txt",
+        "text": "STU-88219",
+        "category": "ID",
+        "confidence": 0.99
+      },
+      {
+        "document": "unseen_04_academic_transcript.txt",
+        "text": "Flat 402, Sai Heritage, Senapati Bapat Road, Pune, MH 411016",
+        "category": "ADDRESS",
+        "confidence": 0.99
+      },
+      {
+        "document": "unseen_04_academic_transcript.txt",
+        "text": "Flat 402, Sai Heritage, Senapati Bapat Road, Pune, MH",
+        "category": "ADDRESS",
+        "confidence": 0.98
+      },
+      {
+        "document": "unseen_04_academic_transcript.txt",
+        "text": "Prof. V. K. Ramanathan",
+        "category": "NAME",
+        "confidence": 0.94
+      },
+      {
+        "document": "unseen_04_academic_transcript.txt",
+        "text": "Sneha R. Deshmukh",
+        "category": "NAME",
+        "confidence": 0.99
+      },
+      {
+        "document": "unseen_04_academic_transcript.txt",
+        "text": "Prof. V. K. Ramanathan",
+        "category": "NAME",
+        "confidence": 0.94
+      },
+      {
+        "document": "unseen_04_academic_transcript.txt",
+        "text": "Sneha R",
+        "category": "NAME",
+        "confidence": 0.68
+      },
+      {
+        "document": "unseen_04_academic_transcript.txt",
+        "text": "Sai Heritage",
+        "category": "NAME",
+        "confidence": 0.68
+      },
+      {
+        "document": "unseen_04_academic_transcript.txt",
+        "text": "Senapati Bapat",
+        "category": "NAME",
+        "confidence": 0.68
+      },
+      {
+        "document": "unseen_04_academic_transcript.txt",
+        "text": "Sneha R",
+        "category": "NAME",
+        "confidence": 0.9
+      },
+      {
+        "document": "unseen_04_academic_transcript.txt",
+        "text": "V. K. Ramanathan",
+        "category": "NAME",
+        "confidence": 0.9
+      },
+      {
+        "document": "unseen_04_academic_transcript.txt",
+        "text": "Sai Heritage",
+        "category": "NAME",
+        "confidence": 0.9
+      },
+      {
+        "document": "unseen_04_academic_transcript.txt",
+        "text": "Prof. V. K. Ramanathan",
+        "category": "NAME",
+        "confidence": 0.9
+      },
+      {
+        "document": "unseen_04_academic_transcript.txt",
+        "text": "Senapati Bapat",
+        "category": "NAME",
+        "confidence": 0.9
+      },
+      {
+        "document": "unseen_04_academic_transcript.txt",
+        "text": "Sneha R. Deshmukh",
+        "category": "NAME",
+        "confidence": 0.9
+      },
+      {
+        "document": "unseen_05_corporate_grievance.txt",
+        "text": "suresh.nambiar@synergycorp.com",
+        "category": "EMAIL",
+        "confidence": 0.99
+      },
+      {
+        "document": "unseen_05_corporate_grievance.txt",
+        "text": "EMP-1049",
+        "category": "ID",
+        "confidence": 0.99
+      },
+      {
+        "document": "unseen_05_corporate_grievance.txt",
+        "text": "91 98450 33441",
+        "category": "ADDRESS",
+        "confidence": 0.95
+      },
+      {
+        "document": "unseen_05_corporate_grievance.txt",
+        "text": "3, Outer Ring Road, Mahadevapura, Bangalore 560048",
+        "category": "ADDRESS",
+        "confidence": 0.99
+      },
+      {
+        "document": "unseen_05_corporate_grievance.txt",
+        "text": "3, Outer Ring Road, Mahadevapura, Bangalore 560048",
+        "category": "ADDRESS",
+        "confidence": 0.99
+      },
+      {
+        "document": "unseen_05_corporate_grievance.txt",
+        "text": "of Incident: Campus 3, Outer Ring Road, Mahadevapura, Bangalore 560048",
+        "category": "ADDRESS",
+        "confidence": 0.99
+      },
+      {
+        "document": "unseen_05_corporate_grievance.txt",
+        "text": "Ananya Roy",
+        "category": "NAME",
+        "confidence": 0.92
+      },
+      {
+        "document": "unseen_05_corporate_grievance.txt",
+        "text": "A. Roy",
+        "category": "NAME",
+        "confidence": 0.92
+      },
+      {
+        "document": "unseen_05_corporate_grievance.txt",
+        "text": "Suresh K. Nambiar",
+        "category": "NAME",
+        "confidence": 0.92
+      },
+      {
+        "document": "unseen_05_corporate_grievance.txt",
+        "text": "Ananya Roy",
+        "category": "NAME",
+        "confidence": 0.68
+      },
+      {
+        "document": "unseen_05_corporate_grievance.txt",
+        "text": "Ananya Roy",
+        "category": "NAME",
+        "confidence": 0.68
+      },
+      {
+        "document": "unseen_05_corporate_grievance.txt",
+        "text": "Suresh K",
+        "category": "NAME",
+        "confidence": 0.68
+      },
+      {
+        "document": "unseen_05_corporate_grievance.txt",
+        "text": "Rachel Adams",
+        "category": "NAME",
+        "confidence": 0.68
+      },
+      {
+        "document": "unseen_05_corporate_grievance.txt",
+        "text": "Outer Ring",
+        "category": "NAME",
+        "confidence": 0.68
+      },
+      {
+        "document": "unseen_05_corporate_grievance.txt",
+        "text": "Suresh K. Nambiar",
+        "category": "NAME",
+        "confidence": 0.9
+      },
+      {
+        "document": "unseen_05_corporate_grievance.txt",
+        "text": "A. Roy",
+        "category": "NAME",
+        "confidence": 0.9
+      },
+      {
+        "document": "unseen_05_corporate_grievance.txt",
+        "text": "Outer Ring",
+        "category": "NAME",
+        "confidence": 0.9
+      },
+      {
+        "document": "unseen_05_corporate_grievance.txt",
+        "text": "Suresh K",
+        "category": "NAME",
+        "confidence": 0.9
+      },
+      {
+        "document": "unseen_05_corporate_grievance.txt",
+        "text": "Rachel Adams",
+        "category": "NAME",
+        "confidence": 0.9
+      },
+      {
+        "document": "unseen_05_corporate_grievance.txt",
+        "text": "Ananya Roy",
+        "category": "NAME",
+        "confidence": 0.9
+      },
+      {
+        "document": "unseen_05_corporate_grievance.txt",
+        "text": "Ananya Roy",
+        "category": "NAME",
+        "confidence": 0.9
+      },
+      {
+        "document": "unseen_05_corporate_grievance.txt",
+        "text": "A. Roy",
+        "category": "NAME",
+        "confidence": 0.91
+      },
+      {
+        "document": "unseen_05_corporate_grievance.txt",
+        "text": "A. Roy",
+        "category": "NAME",
+        "confidence": 0.91
+      }
+    ]
+  },
+  "synthetic_split": {
+    "split_name": "Synthetic (Exact Match)",
+    "match_mode": "exact",
+    "document_count": 18,
+    "precision": 0.9877,
+    "recall": 0.9756,
+    "f1_score": 0.9816,
+    "true_positives": 80,
+    "false_positives": 1,
+    "false_negatives": 2,
+    "ms_per_doc": 83.11,
+    "category_metrics": {
+      "NAME": {
+        "precision": 0.9706,
+        "recall": 0.9429,
+        "f1": 0.9565,
+        "support": 35
+      },
+      "EMAIL": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 13
+      },
+      "PHONE": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 13
+      },
+      "ADDRESS": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 8
+      },
+      "ID": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 13
+      }
+    },
+    "missed_pii": [
+      {
+        "document": "doc_08_hr_incident.txt",
+        "text": "Sharma",
+        "type": "NAME"
+      },
+      {
+        "document": "doc_08_hr_incident.txt",
+        "text": "Sharma",
+        "type": "NAME"
+      }
+    ],
+    "false_positive_instances": [
+      {
+        "document": "doc_12_executive_bio.txt",
+        "text": "Tanvi",
+        "category": "NAME",
+        "confidence": 0.72
       }
     ]
   },
   "unseen_split": {
-    "split_name": "Held-Out Dev Set (Multi-domain)",
+    "split_name": "Held-Out (Exact Match)",
+    "match_mode": "exact",
     "document_count": 5,
-    "precision": 0.7119,
-    "recall": 0.9767,
-    "f1_score": 0.8235,
-    "true_positives": 42,
-    "false_positives": 17,
-    "false_negatives": 1,
-    "sec_per_doc": 0.048,
+    "precision": 0.8409,
+    "recall": 0.8605,
+    "f1_score": 0.8506,
+    "true_positives": 37,
+    "false_positives": 7,
+    "false_negatives": 6,
+    "ms_per_doc": 61.43,
+    "category_metrics": {
+      "NAME": {
+        "precision": 0.7333,
+        "recall": 0.7857,
+        "f1": 0.7586,
+        "support": 14
+      },
+      "EMAIL": {
+        "precision": 0.875,
+        "recall": 0.875,
+        "f1": 0.875,
+        "support": 8
+      },
+      "PHONE": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 6
+      },
+      "ADDRESS": {
+        "precision": 0.8333,
+        "recall": 0.8333,
+        "f1": 0.8333,
+        "support": 6
+      },
+      "ID": {
+        "precision": 0.8889,
+        "recall": 0.8889,
+        "f1": 0.8889,
+        "support": 9
+      }
+    },
     "missed_pii": [
+      {
+        "document": "unseen_01_public_nda.txt",
+        "text": "Kenneth O'Connor",
+        "type": "NAME"
+      },
+      {
+        "document": "unseen_02_clinical_discharge.txt",
+        "text": "Eleanor Vance",
+        "type": "NAME"
+      },
+      {
+        "document": "unseen_02_clinical_discharge.txt",
+        "text": "dr.vance@mountsinaihealth.org",
+        "type": "EMAIL"
+      },
       {
         "document": "unseen_04_academic_transcript.txt",
         "text": "Roll No: 21BCE1042",
         "type": "ID"
+      },
+      {
+        "document": "unseen_04_academic_transcript.txt",
+        "text": "V. K. Ramanathan",
+        "type": "NAME"
+      },
+      {
+        "document": "unseen_05_corporate_grievance.txt",
+        "text": "Campus 3, Outer Ring Road, Mahadevapura, Bangalore 560048",
+        "type": "ADDRESS"
       }
     ],
     "false_positive_instances": [
       {
         "document": "unseen_01_public_nda.txt",
-        "text": "Apex Technologies Inc",
+        "text": "Dr. Kenneth O'Connor",
         "category": "NAME",
-        "confidence": 0.9
+        "confidence": 0.99
       },
       {
         "document": "unseen_02_clinical_discharge.txt",
-        "text": "Sinai Community Health",
+        "text": "Dr. Eleanor Vance",
         "category": "NAME",
-        "confidence": 0.9
+        "confidence": 0.99
       },
       {
         "document": "unseen_02_clinical_discharge.txt",
-        "text": "Social Security",
-        "category": "NAME",
-        "confidence": 0.9
-      },
-      {
-        "document": "unseen_02_clinical_discharge.txt",
-        "text": "Emergency Contact",
-        "category": "NAME",
-        "confidence": 0.9
-      },
-      {
-        "document": "unseen_02_clinical_discharge.txt",
-        "text": "Prescribed Atorvastatin",
-        "category": "NAME",
-        "confidence": 0.9
-      },
-      {
-        "document": "unseen_03_it_incident_log.txt",
-        "text": "Reported By",
-        "category": "NAME",
-        "confidence": 0.9
-      },
-      {
-        "document": "unseen_03_it_incident_log.txt",
-        "text": "Senior Site Reliability",
-        "category": "NAME",
-        "confidence": 0.9
-      },
-      {
-        "document": "unseen_03_it_incident_log.txt",
-        "text": "Affected Host",
-        "category": "NAME",
-        "confidence": 0.9
-      },
-      {
-        "document": "unseen_03_it_incident_log.txt",
-        "text": "Compromised Account",
-        "category": "NAME",
-        "confidence": 0.9
-      },
-      {
-        "document": "unseen_03_it_incident_log.txt",
-        "text": "Immediate Mitigation",
-        "category": "NAME",
-        "confidence": 0.9
-      },
-      {
-        "document": "unseen_03_it_incident_log.txt",
-        "text": "Access Key",
-        "category": "NAME",
-        "confidence": 0.9
-      },
-      {
-        "document": "unseen_04_academic_transcript.txt",
-        "text": "Indian Institute",
-        "category": "NAME",
-        "confidence": 0.9
-      },
-      {
-        "document": "unseen_04_academic_transcript.txt",
-        "text": "Student Name",
-        "category": "NAME",
-        "confidence": 0.9
+        "text": "dr.vance@mountsinaihealth.org.\nVitals",
+        "category": "EMAIL",
+        "confidence": 0.99
       },
       {
         "document": "unseen_04_academic_transcript.txt",
@@ -260,288 +1688,25 @@
       },
       {
         "document": "unseen_04_academic_transcript.txt",
-        "text": "Advanced Machine Learning",
+        "text": "Prof. V. K. Ramanathan",
         "category": "NAME",
-        "confidence": 0.9
-      },
-      {
-        "document": "unseen_05_corporate_grievance.txt",
-        "text": "Internal Grievance",
-        "category": "NAME",
-        "confidence": 0.9
+        "confidence": 0.94
       },
       {
         "document": "unseen_05_corporate_grievance.txt",
         "text": "Ananya Roy",
         "category": "NAME",
         "confidence": 0.92
-      }
-    ]
-  },
-  "combined_overall": {
-    "split_name": "Combined Overall Benchmark",
-    "document_count": 23,
-    "precision": 0.7578,
-    "recall": 0.976,
-    "f1_score": 0.8531,
-    "true_positives": 122,
-    "false_positives": 39,
-    "false_negatives": 3,
-    "sec_per_doc": 0.0074,
-    "missed_pii": [
-      {
-        "document": "doc_08_hr_incident.txt",
-        "text": "Sharma",
-        "type": "NAME"
       },
       {
-        "document": "doc_08_hr_incident.txt",
-        "text": "Sharma",
-        "type": "NAME"
-      },
-      {
-        "document": "unseen_04_academic_transcript.txt",
-        "text": "Roll No: 21BCE1042",
-        "type": "ID"
-      }
-    ],
-    "false_positive_instances": [
-      {
-        "document": "doc_01_meeting_notes.txt",
-        "text": "Discussion Points",
-        "category": "NAME",
-        "confidence": 0.9
-      },
-      {
-        "document": "doc_03_vendor_invoice.txt",
-        "text": "Acme Solutions Pvt",
-        "category": "NAME",
-        "confidence": 0.9
-      },
-      {
-        "document": "doc_03_vendor_invoice.txt",
-        "text": "Amount Due",
-        "category": "NAME",
-        "confidence": 0.9
-      },
-      {
-        "document": "doc_04_offer_letter.txt",
-        "text": "Permanent Account",
-        "category": "NAME",
-        "confidence": 0.9
-      },
-      {
-        "document": "doc_04_offer_letter.txt",
-        "text": "Official Contact",
-        "category": "NAME",
-        "confidence": 0.9
-      },
-      {
-        "document": "doc_05_signature_block.txt",
-        "text": "Apex Logistics",
-        "category": "NAME",
-        "confidence": 0.9
-      },
-      {
-        "document": "doc_07_email_thread.txt",
-        "text": "Case Reference",
-        "category": "NAME",
-        "confidence": 0.9
-      },
-      {
-        "document": "doc_09_bank_statement.txt",
-        "text": "Account Holder",
-        "category": "NAME",
-        "confidence": 0.9
-      },
-      {
-        "document": "doc_09_bank_statement.txt",
-        "text": "Savings Account",
-        "category": "NAME",
-        "confidence": 0.9
-      },
-      {
-        "document": "doc_09_bank_statement.txt",
-        "text": "Transaction Reference",
-        "category": "NAME",
-        "confidence": 0.9
-      },
-      {
-        "document": "doc_10_consulting_agreement.txt",
-        "text": "Nova Analytics",
-        "category": "NAME",
-        "confidence": 0.9
-      },
-      {
-        "document": "doc_11_landline_inquiry.txt",
-        "text": "Registered Landline",
-        "category": "NAME",
-        "confidence": 0.9
-      },
-      {
-        "document": "doc_11_landline_inquiry.txt",
-        "text": "Flat",
-        "category": "NAME",
-        "confidence": 0.93
-      },
-      {
-        "document": "doc_13_patient_discharge.txt",
-        "text": "Emergency Contact",
-        "category": "NAME",
-        "confidence": 0.9
-      },
-      {
-        "document": "doc_13_patient_discharge.txt",
-        "text": "Tab Paracetamol",
-        "category": "NAME",
-        "confidence": 0.9
-      },
-      {
-        "document": "doc_14_lease_agreement.txt",
-        "text": "Leased Premises",
-        "category": "NAME",
-        "confidence": 0.9
-      },
-      {
-        "document": "doc_14_lease_agreement.txt",
-        "text": "Security Deposit",
-        "category": "NAME",
-        "confidence": 0.9
-      },
-      {
-        "document": "doc_15_travel_itinerary.txt",
-        "text": "Booking Reference",
-        "category": "NAME",
-        "confidence": 0.9
-      },
-      {
-        "document": "doc_15_travel_itinerary.txt",
-        "text": "Frequent Flyer",
-        "category": "NAME",
-        "confidence": 0.9
-      },
-      {
-        "document": "doc_16_performance_review.txt",
-        "text": "Cloud Operations",
-        "category": "NAME",
-        "confidence": 0.9
-      },
-      {
-        "document": "doc_17_support_ticket.txt",
-        "text": "User Name",
-        "category": "NAME",
-        "confidence": 0.9
-      },
-      {
-        "document": "doc_06_two_column.pdf",
-        "text": "Primary Contact",
-        "category": "NAME",
-        "confidence": 0.9
-      },
-      {
-        "document": "unseen_01_public_nda.txt",
-        "text": "Apex Technologies Inc",
-        "category": "NAME",
-        "confidence": 0.9
-      },
-      {
-        "document": "unseen_02_clinical_discharge.txt",
-        "text": "Sinai Community Health",
-        "category": "NAME",
-        "confidence": 0.9
-      },
-      {
-        "document": "unseen_02_clinical_discharge.txt",
-        "text": "Social Security",
-        "category": "NAME",
-        "confidence": 0.9
-      },
-      {
-        "document": "unseen_02_clinical_discharge.txt",
-        "text": "Emergency Contact",
-        "category": "NAME",
-        "confidence": 0.9
-      },
-      {
-        "document": "unseen_02_clinical_discharge.txt",
-        "text": "Prescribed Atorvastatin",
-        "category": "NAME",
-        "confidence": 0.9
-      },
-      {
-        "document": "unseen_03_it_incident_log.txt",
-        "text": "Reported By",
-        "category": "NAME",
-        "confidence": 0.9
-      },
-      {
-        "document": "unseen_03_it_incident_log.txt",
-        "text": "Senior Site Reliability",
-        "category": "NAME",
-        "confidence": 0.9
-      },
-      {
-        "document": "unseen_03_it_incident_log.txt",
-        "text": "Affected Host",
-        "category": "NAME",
-        "confidence": 0.9
-      },
-      {
-        "document": "unseen_03_it_incident_log.txt",
-        "text": "Compromised Account",
-        "category": "NAME",
-        "confidence": 0.9
-      },
-      {
-        "document": "unseen_03_it_incident_log.txt",
-        "text": "Immediate Mitigation",
-        "category": "NAME",
-        "confidence": 0.9
-      },
-      {
-        "document": "unseen_03_it_incident_log.txt",
-        "text": "Access Key",
-        "category": "NAME",
-        "confidence": 0.9
-      },
-      {
-        "document": "unseen_04_academic_transcript.txt",
-        "text": "Indian Institute",
-        "category": "NAME",
-        "confidence": 0.9
-      },
-      {
-        "document": "unseen_04_academic_transcript.txt",
-        "text": "Student Name",
-        "category": "NAME",
-        "confidence": 0.9
-      },
-      {
-        "document": "unseen_04_academic_transcript.txt",
-        "text": "21BCE1042",
-        "category": "ID",
+        "document": "unseen_05_corporate_grievance.txt",
+        "text": "of Incident: Campus 3, Outer Ring Road, Mahadevapura, Bangalore 560048",
+        "category": "ADDRESS",
         "confidence": 0.99
-      },
-      {
-        "document": "unseen_04_academic_transcript.txt",
-        "text": "Advanced Machine Learning",
-        "category": "NAME",
-        "confidence": 0.9
-      },
-      {
-        "document": "unseen_05_corporate_grievance.txt",
-        "text": "Internal Grievance",
-        "category": "NAME",
-        "confidence": 0.9
-      },
-      {
-        "document": "unseen_05_corporate_grievance.txt",
-        "text": "Ananya Roy",
-        "category": "NAME",
-        "confidence": 0.92
       }
     ]
   },
-  "peak_ram_mb": 0.42,
+  "peak_heap_mb": 0.62,
+  "process_rss_mb": 42.98,
   "leak_failures": 0
 }

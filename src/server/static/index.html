@@ -714,6 +714,55 @@
     display: none !important;
   }
 
+  /* Sidebar Resize Splitter (Between Sample Docs and Home/Workspace Screen) */
+  .sidebar-splitter {
+    width: 6px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: col-resize;
+    user-select: none;
+    position: relative;
+    z-index: 55;
+    background: transparent;
+    transition: background 0.15s ease;
+  }
+  .sidebar-splitter::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background: var(--sidebar-border);
+    transition: all 0.15s ease;
+  }
+  .sidebar-splitter:hover::before,
+  .sidebar-splitter.dragging::before {
+    background: var(--gpt-green);
+    width: 3px;
+  }
+  .sidebar-splitter .splitter-drag-handle {
+    width: 4px;
+    height: 36px;
+    background: var(--splitter-handle);
+    border-radius: 99px;
+    position: relative;
+    z-index: 2;
+    opacity: 0;
+    transition: all 0.15s ease;
+  }
+  .sidebar-splitter:hover .splitter-drag-handle,
+  .sidebar-splitter.dragging .splitter-drag-handle {
+    opacity: 1;
+    background: var(--gpt-green);
+    transform: scale(1.25);
+    box-shadow: 0 0 8px rgba(16, 163, 127, 0.45);
+  }
+  #sidebar.collapsed + .sidebar-splitter {
+    display: none;
+  }
+
   /* Workspace Splitter - Sleek Minimal Draggable Divider */
   .workspace-splitter {
     width: 10px;
@@ -867,6 +916,13 @@
   }
   .highlight-span:hover { filter: brightness(1.1); transform: translateY(-0.5px); }
   .highlight-span.active { outline: 2px solid var(--gpt-green); outline-offset: 1px; }
+  .highlight-span.pending-highlight {
+    animation: pendingPulse 2.5s infinite ease-in-out;
+  }
+  @keyframes pendingPulse {
+    0%, 100% { border-color: #eab308; box-shadow: 0 0 0 rgba(234, 179, 8, 0); }
+    50% { border-color: #facc15; box-shadow: 0 0 8px rgba(234, 179, 8, 0.35); }
+  }
 
   .badge-tag {
     color: #fff;
@@ -1029,10 +1085,31 @@
     background: var(--summary-box-bg);
     border: 1px solid var(--summary-box-border);
     color: var(--summary-box-text);
-    padding: 14px 16px;
+    padding: 18px 20px;
     border-radius: 8px;
     white-space: pre-wrap;
-    line-height: 1.8;
+    line-height: 1.85;
+    font-size: 0.92rem;
+  }
+
+  .redacted-tag-pill {
+    display: inline-block;
+    padding: 1px 7px;
+    border-radius: 4px;
+    background: rgba(16, 163, 127, 0.16);
+    border: 1px solid rgba(16, 163, 127, 0.40);
+    color: var(--gpt-green-text);
+    font-family: var(--font-mono);
+    font-size: 0.88em;
+    font-weight: 600;
+    vertical-align: baseline;
+    letter-spacing: 0.02em;
+    margin: 0 1px;
+  }
+  body.light-theme .redacted-tag-pill {
+    background: #ecfdf5;
+    border-color: #10a37f;
+    color: #065f46;
   }
 
   .badge-privacy-verified {
@@ -1146,6 +1223,11 @@
     </div>
   </div>
 </aside>
+
+<!-- Sidebar Resize Splitter (Drag left/right to widen or shrink sample docs panel) -->
+<div class="sidebar-splitter" id="sidebarSplitter" title="Drag left/right to resize sidebar width | Double-click to reset">
+  <div class="splitter-drag-handle" title="Drag left/right to resize sidebar"></div>
+</div>
 
 <!-- Main Workspace -->
 <div id="mainArea">
@@ -1279,7 +1361,49 @@
             <button class="btn-outline btn-sm" type="button" style="margin-left: auto;">Browse File</button>
           </div>
 
-          <div id="redactedViewer" style="display: none; font-family: var(--font-mono); background: var(--preview-box-bg); padding: 14px; border-radius: 8px; border: 1px solid var(--preview-box-border); white-space: pre-wrap; line-height: 1.8; word-break: break-word;"></div>
+          <div id="redactedToolbar" style="display: none; align-items: center; justify-content: space-between; margin-bottom: 10px; padding: 10px 14px; background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 8px;">
+            <div style="display: flex; align-items: center; gap: 8px; font-size: 0.82rem; color: var(--text-secondary);">
+              <span>👁️ <strong>Clean Redacted Document Preview</strong></span>
+              <span style="font-size: 0.72rem; background: var(--gpt-green-soft); color: var(--gpt-green-text); border: 1px solid var(--gpt-green-border); padding: 2px 8px; border-radius: 99px; font-weight: 600;">Aligned & Verified</span>
+            </div>
+            <div style="display: flex; gap: 8px; align-items: center;">
+              <button class="btn-outline btn-sm" id="btnToggleMethodologyInfo" onclick="toggleMethodologyInfo()" style="font-size: 0.76rem;" title="View how name variants are linked and summary verification details">ℹ️ Name Linking & Verification Info</button>
+              <button class="btn-outline btn-sm" onclick="copyRedactedText()">📋 Copy Text</button>
+              <button class="btn-primary btn-sm" onclick="downloadRedactedFromPreview()">📥 Download Clean File</button>
+            </div>
+          </div>
+
+          <!-- Methodology & Verification Drawer for Redacted & Summary Views (Matches 2nd Image) -->
+          <div id="methodologyInfoDrawer" style="display: none; margin-bottom: 12px; padding: 14px 16px; background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 8px; font-size: 0.82rem; line-height: 1.6;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; border-bottom: 1px solid var(--border); padding-bottom: 6px;">
+              <strong style="color: var(--text-primary); font-size: 0.86rem; display: flex; align-items: center; gap: 6px;">
+                🛡️ De-Identification & Verification Specification
+              </strong>
+              <span style="font-size: 0.72rem; color: var(--text-muted); cursor: pointer;" onclick="toggleMethodologyInfo()">✕ Close</span>
+            </div>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 14px;">
+              <div style="background: var(--panel-bg); padding: 12px 14px; border-radius: 6px; border: 1px solid var(--border-subtle);">
+                <div style="font-weight: 700; color: #f59e0b; margin-bottom: 4px; display: flex; align-items: center; gap: 6px;">
+                  <span>🔗</span> How Name Variants are Linked (Coreference)
+                </div>
+                <p style="margin: 0; color: var(--text-secondary); font-size: 0.80rem;">
+                  <code>EntityLinker</code> parses names into constituent honorifics (<em>Dr.</em>, <em>Mr.</em>), first/middle/last tokens, and initials. It links initials (e.g. <em>"Dr. R Sharma"</em>, <em>"R. Sharma"</em>) and constituent bare tokens (<em>"Richa"</em>, <em>"Sharma"</em>) to the full entity (<em>"Richa Sharma"</em>) into a single unified canonical tag (e.g. <code>[NAME_1]</code>), while flagging shared surnames between multiple people for human safety.
+                </p>
+              </div>
+              <div style="background: var(--panel-bg); padding: 12px 14px; border-radius: 6px; border: 1px solid var(--border-subtle);">
+                <div style="font-weight: 700; color: #a855f7; margin-bottom: 4px; display: flex; align-items: center; gap: 6px;">
+                  <span>🔍</span> How Summary is Checked Against Leaking Information
+                </div>
+                <p style="margin: 0; color: var(--text-secondary); font-size: 0.80rem;">
+                  <strong>1. Redact-First Pipeline:</strong> The summarizer accepts strictly already-redacted text with canonical placeholders (e.g. <code>[NAME_1]</code>); it never receives raw PII.<br>
+                  <strong>2. Quasi-Identifier Neutralization:</strong> Pre-synthesis rules generalize indirect combinations (e.g. <em>"CFO of a Pune-based firm"</em>) into generalized roles.<br>
+                  <strong>3. Multi-Engine Leak Audit:</strong> Re-scans generated summary against all removed approved spans, constituent name tokens, digit sequences, and autonomous PII rules before export.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div id="redactedViewer" style="display: none; font-family: var(--font-mono); background: var(--preview-box-bg); padding: 18px 20px; border-radius: 8px; border: 1px solid var(--preview-box-border); white-space: pre-wrap; line-height: 1.85; word-break: break-word; font-size: 0.92rem; color: var(--text-primary);"></div>
           
           <div id="analysisViewer" style="display: none;">
             <h4 style="margin-bottom: 12px; color: var(--text-primary);">📊 Analysis & Decision Breakdown</h4>
@@ -1298,9 +1422,19 @@
             </table>
           </div>
 
-          <div id="summaryViewer" style="display: none; padding: 16px; background: var(--gpt-green-soft); border-radius: 8px; border: 1px solid var(--gpt-green-border); line-height: 1.8; white-space: pre-wrap;">
-            <h4 style="color: var(--gpt-green); margin-bottom: 8px;">📝 Zero-Leak Executive Summary</h4>
-            <div id="summaryViewerText" style="white-space: pre-wrap; word-break: break-word;">Click "Safe Summary" at the top to generate a privacy-preserving summary.</div>
+          <div id="summaryViewer" style="display: none; padding: 20px; background: var(--card-bg); border-radius: 8px; border: 1px solid var(--card-border); line-height: 1.85;">
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 12px; margin-bottom: 16px;">
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <h4 style="color: var(--text-primary); margin: 0; font-size: 0.96rem;">📝 Executive Document Summary</h4>
+                <span id="summaryEngineBadgeViewer" style="font-size: 0.72rem; background: var(--badge-neutral-bg); color: var(--text-secondary); border: 1px solid var(--border); padding: 2px 8px; border-radius: 99px; font-weight: 600;">Zero-Leak Verified</span>
+              </div>
+              <div style="display: flex; gap: 8px; align-items: center;">
+                <button class="btn-outline btn-sm" onclick="toggleMethodologyInfo()" style="font-size: 0.76rem;" title="View how name variants are linked and summary verification details">ℹ️ Name Linking & Verification Info</button>
+                <button class="btn-outline btn-sm" onclick="copySummaryText()">📋 Copy</button>
+                <button class="btn-primary btn-sm" onclick="downloadSummaryFile()">📥 Download Clean Summary (.txt)</button>
+              </div>
+            </div>
+            <div id="summaryViewerText" style="white-space: pre-wrap; word-break: break-word; color: var(--text-primary); font-family: var(--font-sans); font-size: 0.92rem;">Click "Safe Summary" at the top to generate a privacy-preserving summary.</div>
           </div>
 
           <!-- Selection Popup -->
@@ -1538,6 +1672,49 @@ function applyPanelSizing() {
   panelCandidates.style.flex = `0 0 calc(100% - ${panelSplitPercent}% - 14px)`;
 }
 
+// Sidebar Draggable Splitter (Resize sample docs panel left/right)
+let isDraggingSidebarSplitter = false;
+const sidebarSplitter = document.getElementById('sidebarSplitter');
+let sidebarWidth = parseInt(localStorage.getItem('redactguard_sidebar_width') || '260');
+
+function applySidebarWidth(w) {
+  sidebarWidth = Math.max(220, Math.min(620, Math.round(w)));
+  if (sidebar && !sidebar.classList.contains('collapsed')) {
+    sidebar.style.width = sidebarWidth + 'px';
+  }
+}
+
+// Restore saved sidebar width on page load
+if (localStorage.getItem('redactguard_sidebar_width')) {
+  applySidebarWidth(parseInt(localStorage.getItem('redactguard_sidebar_width')));
+}
+
+if (sidebarSplitter) {
+  sidebarSplitter.addEventListener('mousedown', (e) => {
+    isDraggingSidebarSplitter = true;
+    sidebarSplitter.classList.add('dragging');
+    if (sidebar) sidebar.style.transition = 'none';
+    document.body.style.cursor = 'col-resize';
+    document.body.style.userSelect = 'none';
+  });
+
+  // Double-click resets sidebar width to default 260px
+  sidebarSplitter.addEventListener('dblclick', () => {
+    applySidebarWidth(260);
+    localStorage.setItem('redactguard_sidebar_width', '260');
+    if (sidebar) sidebar.style.transition = 'all 0.25s cubic-bezier(0.16, 1, 0.3, 1)';
+  });
+}
+
+function toggleMethodologyInfo() {
+  const drawer = document.getElementById('methodologyInfoDrawer');
+  if (!drawer) return;
+  drawer.style.display = (drawer.style.display === 'none' || drawer.style.display === '') ? 'block' : 'none';
+  if (drawer.style.display === 'block') {
+    drawer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+}
+
 // Draggable Splitter (Hover shows col-resize cursor; drag smoothly adjusts width)
 let isDraggingSplitter = false;
 if (workspaceSplitter) {
@@ -1556,6 +1733,10 @@ if (workspaceSplitter) {
 }
 
 window.addEventListener('mousemove', (e) => {
+  if (isDraggingSidebarSplitter) {
+    applySidebarWidth(e.clientX);
+    return;
+  }
   if (!isDraggingSplitter) return;
   const workspaceRect = documentWorkspace.getBoundingClientRect();
   const mouseX = e.clientX - workspaceRect.left;
@@ -1570,6 +1751,14 @@ window.addEventListener('mousemove', (e) => {
 });
 
 window.addEventListener('mouseup', () => {
+  if (isDraggingSidebarSplitter) {
+    isDraggingSidebarSplitter = false;
+    if (sidebarSplitter) sidebarSplitter.classList.remove('dragging');
+    if (sidebar) sidebar.style.transition = 'all 0.25s cubic-bezier(0.16, 1, 0.3, 1)';
+    document.body.style.cursor = '';
+    document.body.style.userSelect = '';
+    localStorage.setItem('redactguard_sidebar_width', sidebarWidth.toString());
+  }
   if (isDraggingSplitter) {
     isDraggingSplitter = false;
     document.body.style.cursor = '';
@@ -1830,6 +2019,8 @@ function switchView(view) {
   
   docViewer.style.display = "none";
   redactedViewer.style.display = "none";
+  const redactedToolbar = document.getElementById('redactedToolbar');
+  if (redactedToolbar) redactedToolbar.style.display = (view === 'redacted') ? 'flex' : 'none';
   analysisViewer.style.display = "none";
   summaryViewer.style.display = "none";
 
@@ -1905,6 +2096,62 @@ function renderAll() {
   renderHistoryList();
 }
 
+function cleanAndAlignText(text) {
+  if (!text) return "";
+  let clean = text.replace(/\r\n/g, "\n").replace(/\r/g, "\n");
+  clean = clean.replace(/[ \t]+([,.;:!?])/g, "$1");
+  clean = clean.replace(/([(\[{])[ \t]+/g, "$1");
+  clean = clean.replace(/[ \t]+([)\]}])/g, "$1");
+
+  const lines = clean.split("\n");
+  const processed = [];
+  let i = 0;
+  while (i < lines.length) {
+    const stripped = lines[i].trim();
+    const kvMatch = stripped.match(/^([A-Za-z0-9\s/_-]{2,30}):\s*(.*)$/);
+    if (kvMatch && !stripped.startsWith("http")) {
+      const block = [];
+      while (i < lines.length) {
+        const cur = lines[i].trim();
+        const m = cur.match(/^([A-Za-z0-9\s/_-]{2,30}):\s*(.*)$/);
+        if (m && !cur.startsWith("http")) {
+          block.push([m[1].trim(), m[2].trim()]);
+          i++;
+        } else {
+          break;
+        }
+      }
+      if (block.length >= 2) {
+        const maxKey = Math.min(Math.max(...block.map(b => b[0].length)), 25);
+        for (const [k, v] of block) {
+          processed.push(k.padEnd(maxKey, " ") + " : " + v);
+        }
+      } else {
+        for (const [k, v] of block) {
+          processed.push(k + ": " + v);
+        }
+      }
+      continue;
+    }
+    processed.push(lines[i].trimEnd());
+    i++;
+  }
+  return processed.join("\n").replace(/\n{3,}/g, "\n\n").trim();
+}
+
+function copyRedactedText() {
+  if (!window.lastCleanRedactedText) return;
+  navigator.clipboard.writeText(window.lastCleanRedactedText);
+  alert("Clean redacted text copied to clipboard!");
+}
+
+function downloadRedactedFromPreview() {
+  if (!currentSession) return;
+  const maskStyle = maskStyleSelect ? maskStyleSelect.value : "INDEXED";
+  const ts = new Date().getTime();
+  window.location.href = `/api/export/${currentSession.session_id}?format=txt&mask_style=${maskStyle}&_t=${ts}`;
+}
+
 function renderRedactedPreview() {
   if (!currentSession) return;
   const maskStyle = maskStyleSelect ? maskStyleSelect.value : "INDEXED";
@@ -1925,7 +2172,17 @@ function renderRedactedPreview() {
     }
     text = text.substring(0, s.start_char) + tag + text.substring(s.end_char);
   }
-  redactedViewer.textContent = text;
+
+  // Clean alignment
+  text = cleanAndAlignText(text);
+  window.lastCleanRedactedText = text;
+
+  // Render with styled badges for tags
+  let html = escapeHtml(text);
+  html = html.replace(/(\[(?:NAME|EMAIL|PHONE|ADDRESS|ID|ORGANIZATION|FINANCIAL|CONFIDENTIAL|DATE|REDACTED[^\]]*)_\d+\]|\[REDACTED[^\]]*\]|&lt;[A-Z_]+_[a-f0-9]+&gt;|█{4,}|\*{4,})/g,
+    '<span class="redacted-tag-pill">$1</span>'
+  );
+  redactedViewer.innerHTML = html;
 }
 
 function renderAnalysisTable() {
@@ -1955,7 +2212,16 @@ function renderAnalysisTable() {
     const tr = document.createElement('tr');
     const confPct = Math.round(s.confidence * 100);
     const confBadge = s.confidence >= 0.85 ? "🟢" : (s.confidence >= 0.60 ? "🟡" : "🔴");
-    const statusText = s.accepted ? "<span style='color:#22c55e; font-weight:600;'>Included</span>" : "<span style='color:#ef4444; text-decoration:line-through;'>Excluded</span>";
+    const isPending = (!s.accepted && !s.rejected_by_user);
+    
+    let statusText;
+    if (s.rejected_by_user) {
+      statusText = `<span style="color:#ef4444; text-decoration:line-through; font-size:0.75rem;">Excluded</span> <button class="btn-outline btn-sm" style="padding:1px 5px; font-size:0.68rem; margin-left:4px;" onclick="toggleSpan('${s.id}', true)">Undo</button>`;
+    } else if (isPending) {
+      statusText = `<button class="btn-primary btn-sm" style="background:#ca8a04; border-color:#eab308; color:#ffffff; font-size:0.72rem; padding:2px 8px; font-weight:700;" onclick="toggleSpan('${s.id}', true)">🟡 Approve</button> <button class="btn-outline btn-sm" style="border-color:#ef4444; color:#ef4444; font-size:0.72rem; padding:2px 6px; margin-left:4px;" onclick="rejectSpan('${s.id}')">✗</button>`;
+    } else {
+      statusText = `<span style="color:#22c55e; font-weight:600; font-size:0.75rem;">🟢 Approved</span> <button class="btn-outline btn-sm" style="padding:1px 5px; font-size:0.68rem; margin-left:4px;" onclick="rejectSpan('${s.id}')">Undo</button>`;
+    }
 
     tr.innerHTML = `
       <td style="font-family:var(--font-mono); font-weight:600;">${escapeHtml(s.text)}</td>
@@ -2034,10 +2300,13 @@ function renderDocument() {
     const styles = getStyleForSpan(s);
     const tag = getMaskTag(s);
     const isActive = (s.id === selectedSpanId) ? "active" : "";
+    const badgeText = styles.isPending 
+      ? `${tag} · 🟡 ${Math.round(s.confidence * 100)}% Pending`
+      : `${tag} · ${Math.round(s.confidence * 100)}%`;
 
-    html += `<span class="highlight-span ${isActive}" id="hl_${s.id}" style="${styles.style}" onclick="focusSpan('${s.id}')">`
+    html += `<span class="highlight-span ${isActive} ${styles.isPending ? 'pending-highlight' : ''}" id="hl_${s.id}" style="${styles.style}" onclick="handleSpanClick('${s.id}')" title="${styles.isPending ? '🟡 Pending Human Review: Click to inspect & approve' : 'Click to inspect/edit'}">`
           + `<span>${escapeHtml(text.substring(s.start_char, s.end_char))}</span>`
-          + `<span class="badge-tag" style="background:${styles.badgeBg};">${tag} · ${Math.round(s.confidence * 100)}%</span>`
+          + `<span class="badge-tag" style="background:${styles.badgeBg}; font-size:0.68rem; padding:2px 6px;">${badgeText}</span>`
           + `</span>`;
 
     curr = s.end_char;
@@ -2050,19 +2319,60 @@ function renderDocument() {
 }
 
 function getStyleForSpan(s) {
-  if (!s.accepted) {
+  if (s.rejected_by_user) {
     return {
       style: "background:var(--excluded-bg); border:1px solid var(--excluded-border); color:var(--excluded-text); text-decoration:line-through; opacity:0.65;",
-      badgeBg: "var(--excluded-border)"
+      badgeBg: "var(--excluded-border)",
+      statusLabel: "Excluded",
+      isPending: false
     };
   }
-  if (s.confidence >= 0.85) {
-    return { style: "background:var(--high-bg); border:1.5px solid var(--high-border); color:var(--high-text); font-weight:600;", badgeBg: "var(--high-badge)" };
-  } else if (s.confidence >= 0.60) {
-    return { style: "background:var(--med-bg); border:1.5px solid var(--med-border); color:var(--med-text); font-weight:600;", badgeBg: "var(--med-badge)" };
-  } else {
-    return { style: "background:var(--low-bg); border:1.5px solid var(--low-border); color:var(--low-text); font-weight:600;", badgeBg: "var(--low-badge)" };
+  // Pending Human Review (medium-confidence or unconfirmed heuristic match)
+  if (!s.accepted) {
+    return {
+      style: "background:rgba(234, 179, 8, 0.22); border:1.8px dashed #eab308; color:#fde047; font-weight:600; cursor:pointer;",
+      badgeBg: "#ca8a04",
+      statusLabel: "🟡 Pending Review",
+      isPending: true
+    };
   }
+  // High confidence auto-accepted
+  if (s.confidence >= 0.85) {
+    return {
+      style: "background:var(--high-bg); border:1.5px solid var(--high-border); color:var(--high-text); font-weight:600;",
+      badgeBg: "var(--high-badge)",
+      statusLabel: "🟢 Approved",
+      isPending: false
+    };
+  } else if (s.confidence >= 0.60) {
+    return {
+      style: "background:rgba(234, 179, 8, 0.18); border:1.5px solid #eab308; color:#fde047; font-weight:600;",
+      badgeBg: "#ca8a04",
+      statusLabel: "🟢 Approved (User)",
+      isPending: false
+    };
+  } else {
+    return {
+      style: "background:var(--low-bg); border:1.5px solid var(--low-border); color:var(--low-text); font-weight:600;",
+      badgeBg: "var(--low-badge)",
+      statusLabel: "🟢 Approved (Low Conf)",
+      isPending: false
+    };
+  }
+}
+
+function handleSpanClick(spanId) {
+  focusSpan(spanId);
+  const span = currentSession.spans.find(s => s.id === spanId);
+  if (span && !span.accepted && !span.rejected_by_user) {
+    showToast(`🟡 Selected '${span.text}' for review. Click [Approve] or [Reject] in sidebar.`);
+  }
+}
+
+async function rejectSpan(spanId) {
+  const span = currentSession.spans.find(s => s.id === spanId);
+  if (span) span.rejected_by_user = true;
+  await toggleSpan(spanId, false);
 }
 
 function renderCandidates() {
@@ -2105,10 +2415,14 @@ function renderCandidates() {
 
   list.forEach((s) => {
     const isTargetEntity = (selectedEntity !== "ALL" && s.category.toUpperCase() === selectedEntity.toUpperCase());
+    const isPending = (!s.accepted && !s.rejected_by_user);
     const card = document.createElement('div');
-    card.className = `candidate-card ${s.id === selectedSpanId ? 'active' : ''}`;
+    card.className = `candidate-card ${s.id === selectedSpanId ? 'active' : ''} ${isPending ? 'pending-card' : ''}`;
     card.id = `card_${s.id}`;
-    if (isTargetEntity) {
+    if (isPending) {
+      card.style.borderLeft = "4px solid #eab308";
+      card.style.background = "rgba(234, 179, 8, 0.08)";
+    } else if (isTargetEntity) {
       card.style.borderLeft = "3.5px solid var(--gpt-green)";
     }
     card.onclick = (e) => {
@@ -2123,16 +2437,22 @@ function renderCandidates() {
 
     card.innerHTML = `
       <div class="candidate-header">
-        <span class="candidate-text">${escapeHtml(s.text)}</span>
-        <span class="candidate-tag">${tag} ${confBadge} ${Math.round(s.confidence * 100)}%${matchBadge}</span>
+        <span class="candidate-text" style="${isPending ? 'color:#fde047; font-weight:700;' : ''}">${escapeHtml(s.text)}</span>
+        <span class="candidate-tag" style="${isPending ? 'border-color:#ca8a04; color:#fde047; background:rgba(234,179,8,0.25);' : ''}">${tag} ${confBadge} ${Math.round(s.confidence * 100)}%${isPending ? ' · 🟡 PENDING' : ''}${matchBadge}</span>
       </div>
+      ${isPending ? `<div style="background:rgba(234,179,8,0.15); border:1px solid rgba(234,179,8,0.35); color:#fde047; font-size:0.73rem; padding:4px 8px; border-radius:6px; margin-bottom:6px;">🟡 <strong>Pending Human Review</strong>: Heuristic or borderline match. Confirm before removal.</div>` : ''}
       ${isAmbig ? `<div class="warning-box" style="padding:4px 8px; font-size:0.74rem; margin-bottom:6px;">⚠️ Shared surname matches multiple persons. Manual review advised.</div>` : ''}
       <div style="font-size: 0.72rem; color: var(--text-muted); font-family: var(--font-mono); margin-bottom: 6px;">Source: ${escapeHtml(s.source || 'rule')}</div>
-      <div class="candidate-actions">
-        <label style="display:flex; align-items:center; gap:6px; font-size:0.8rem; cursor:pointer;" onclick="event.stopPropagation();">
-          <input type="checkbox" ${s.accepted ? "checked" : ""} onchange="toggleSpan('${s.id}', this.checked)">
-          <span style="font-weight:600; color:var(--text-primary);">Redact</span>
-        </label>
+      <div class="candidate-actions" style="display:flex; align-items:center; gap:8px;">
+        ${isPending ? `
+          <button class="btn-primary btn-sm" style="background:#ca8a04; border-color:#eab308; color:#ffffff; font-weight:700; padding:3px 10px;" onclick="event.stopPropagation(); toggleSpan('${s.id}', true)">✓ Approve</button>
+          <button class="btn-outline btn-sm" style="border-color:#ef4444; color:#ef4444; padding:3px 9px;" onclick="event.stopPropagation(); rejectSpan('${s.id}')">✗ Reject</button>
+        ` : `
+          <label style="display:flex; align-items:center; gap:6px; font-size:0.8rem; cursor:pointer;" onclick="event.stopPropagation();">
+            <input type="checkbox" ${s.accepted ? "checked" : ""} onchange="toggleSpan('${s.id}', this.checked)">
+            <span style="font-weight:600; color:var(--text-primary);">${s.accepted ? "🟢 Approved" : "Excluded"}</span>
+          </label>
+        `}
         <button class="btn-outline btn-sm" style="margin-left:auto; border-radius:6px; padding:3px 9px;" onclick="event.stopPropagation(); redactSimilarById('${s.id}')">All Similar</button>
       </div>
     `;
@@ -2442,6 +2762,10 @@ async function fetchSummary() {
     summaryViewerText.textContent = data.summary;
     modalSummaryContent.textContent = data.summary;
     summaryEngineBadge.textContent = `${data.engine || "Zero-Leak Engine"} · [${data.mask_style || maskStyle}]`;
+    const summaryBadgeViewer = document.getElementById('summaryEngineBadgeViewer');
+    if (summaryBadgeViewer) {
+      summaryBadgeViewer.textContent = `${data.engine || "Zero-Leak Engine"} · [${data.mask_style || maskStyle}]`;
+    }
 
     if (data.caught_leaks && data.caught_leaks.length > 0) {
       modalSummaryWarning.innerHTML = `

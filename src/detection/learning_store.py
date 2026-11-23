@@ -1,6 +1,7 @@
 import json
 import time
 import os
+import re
 import shutil
 from pathlib import Path
 from typing import Dict, Set, List, Any, Optional
@@ -21,8 +22,11 @@ KEY_FILE = DATA_DIR / ".security_key"
 class LearningStore:
     """
     Active Learning Engine with Security Protection:
-    1. Immediately adds rejected strings to an ignore list and approved/manual adds to a dictionary.
-    2. Encrypts sensitive dictionary and audit data at rest using authenticated symmetric encryption (Fernet / AES-128-CBC + HMAC-SHA256).
+    1. Contextual Active Learning: Learns approved patterns and dictionary phrases.
+       Document-scoped suppression prevents a single rejection (e.g. "Sharma" in an enterprise context)
+       from globally blinding detection of common names in subsequent documents.
+    2. Encrypts sensitive dictionary and audit data at rest using authenticated symmetric encryption
+       (Fernet / AES-128-CBC + HMAC-SHA256). Supports external key provisioning via PII_SECURITY_KEY.
     3. Provides purge_all() to cleanly delete all learned PII data on demand.
     4. Provides automated TTL cleanup for temporary uploads and exports.
     """
@@ -31,8 +35,10 @@ class LearningStore:
         self.jsonl_path = jsonl_path or CORRECTIONS_FILE
         self.key_path = key_path or KEY_FILE
         self.cipher: Optional[Any] = self._init_cipher()
-        self.remembered: Dict[str, str] = {}  # phrase -> category
-        self.suppressed: Set[str] = set()       # phrases rejected (ignore list)
+        self.remembered: Dict[str, str] = {}         # phrase -> category
+        self.suppressed: Set[str] = set()              # multi-token phrases globally rejected
+        self.doc_suppressed: Dict[str, Set[str]] = {}  # document -> set of single-token rejected phrases
+        self.learned_prefixes: Set[str] = set()        # learned ID prefix patterns (e.g. "CUST-")
         self.total_corrections_logged = 0
         self.load()
 
@@ -40,6 +46,12 @@ class LearningStore:
         if not HAS_CRYPTO:
             return None
         try:
+            # 1. Prefer external environment variable for key provisioning
+            env_key = os.environ.get("PII_SECURITY_KEY")
+            if env_key:
+                return Fernet(env_key.encode("utf-8").strip())
+
+            # 2. Key file fallback
             if self.key_path.exists():
                 with open(self.key_path, "rb") as kf:
                     key = kf.read().strip()
@@ -104,8 +116,9 @@ class LearningStore:
 
     def record_correction(self, text: str, category: str, action: str = None, accepted: bool = None, filename: str = "document"):
         """
-        Logs user feedback and updates immediate memory.
-        Sensitive text is encrypted before writing to disk.
+        Logs user feedback and updates contextual active learning memory.
+        Single-token rejections are kept scoped to the active document to prevent
+        suppressing valid names in other records. Multi-token phrases are learned globally.
         """
         cleaned = text.strip()
         if not cleaned or len(cleaned) < 2:
@@ -119,8 +132,26 @@ class LearningStore:
             self.remembered[cleaned] = category
             if cleaned.lower() in self.suppressed:
                 self.suppressed.remove(cleaned.lower())
+            if filename in self.doc_suppressed and cleaned.lower() in self.doc_suppressed[filename]:
+                self.doc_suppressed[filename].remove(cleaned.lower())
+            
+            # Pattern generalization: extract ID prefix pattern (e.g. CUST-1029 -> CUST-)
+            if category == "ID":
+                m_pref = re.match(r"^([A-Z]{2,6}[-_])\d+$", cleaned)
+                if m_pref:
+                    self.learned_prefixes.add(m_pref.group(1))
+
         elif action == "reject":
-            self.suppressed.add(cleaned.lower())
+            # Document-scoped vs global suppression
+            is_single_word = len(cleaned.split()) == 1
+            if filename not in self.doc_suppressed:
+                self.doc_suppressed[filename] = set()
+            self.doc_suppressed[filename].add(cleaned.lower())
+
+            # Only add to global suppression if it is a multi-word phrase (e.g. "Acme Solutions Pvt")
+            if not is_single_word:
+                self.suppressed.add(cleaned.lower())
+
             if cleaned in self.remembered:
                 del self.remembered[cleaned]
         self.save()
@@ -198,12 +229,13 @@ class LearningStore:
         return deleted
 
     def get_learned_spans(self, full_text: str, page_num: int = 1):
-        """Generates candidate spans from remembered approved terms."""
+        """Generates candidate spans from remembered approved terms and generalized learned patterns."""
         import uuid
         import re
         from src.detection.schemas import DetectedSpan
 
         spans = []
+        # 1. Exact learned terms
         for term, category in self.remembered.items():
             pattern = re.compile(r"\b" + re.escape(term) + r"\b", re.IGNORECASE)
             for m in pattern.finditer(full_text):
@@ -218,18 +250,43 @@ class LearningStore:
                     accepted=True,
                     page_num=page_num
                 ))
+
+        # 2. Generalization: apply learned ID prefixes
+        for pref in self.learned_prefixes:
+            pat = re.compile(rf"\b{re.escape(pref)}\d+\b", re.IGNORECASE)
+            for m in pat.finditer(full_text):
+                if not any(s.start_char <= m.start() and m.end() <= s.end_char for s in spans):
+                    spans.append(DetectedSpan(
+                        id=str(uuid.uuid4())[:8],
+                        category="ID",
+                        text=m.group(),
+                        start_char=m.start(),
+                        end_char=m.end(),
+                        confidence=0.94,
+                        source="ActiveLearningStore:GeneralizedPattern",
+                        accepted=True,
+                        page_num=page_num
+                    ))
         return spans
 
-    def is_suppressed(self, text: str) -> bool:
+    def is_suppressed(self, text: str, filename: Optional[str] = None) -> bool:
         if not text:
             return False
-        return text.strip().lower() in self.suppressed
+        clean_lower = text.strip().lower()
+        # 1. Document-scoped check
+        if filename and filename in self.doc_suppressed:
+            if clean_lower in self.doc_suppressed[filename]:
+                return True
+        # 2. Global suppression (only applies to multi-token phrases)
+        if len(clean_lower.split()) >= 2 and clean_lower in self.suppressed:
+            return True
+        return False
 
-    def filter_suppressed(self, spans: List[Any]) -> List[Any]:
+    def filter_suppressed(self, spans: List[Any], filename: Optional[str] = None) -> List[Any]:
         """Filters out candidate spans that match rejected/ignored phrases."""
         survivors = []
         for s in spans:
-            if s.text.strip().lower() in self.suppressed:
+            if self.is_suppressed(s.text, filename=filename):
                 continue
             survivors.append(s)
         return survivors

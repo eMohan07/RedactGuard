@@ -12,8 +12,8 @@ except ImportError:
 class ParsedName:
     def __init__(self, raw: str):
         self.raw = raw
-        # Remove honorifics
-        cleaned = re.sub(r"^(?:Mr\.|Mrs\.|Ms\.|Dr\.|Prof\.)\s+", "", raw.strip(), flags=re.IGNORECASE)
+        # Remove honorifics (with or without trailing dot)
+        cleaned = re.sub(r"^(?:Mr\.?|Mrs\.?|Ms\.?|Dr\.?|Prof\.?)\s+", "", raw.strip(), flags=re.IGNORECASE)
         tokens = [t.strip(".,") for t in re.split(r"\s+", cleaned) if t.strip(".,")]
 
         self.tokens = tokens
@@ -58,15 +58,20 @@ class EntityLinker:
         if p1.last and p2.last:
             if cls.fuzzy_ratio(p1.last, p2.last) < 90.0:
                 return False
-            # If both have initials
+            # If both have initials or one has initial
             if p1.first_initial == p2.first_initial:
                 if p1.is_initial or p2.is_initial:
                     return True
                 return cls.fuzzy_ratio(p1.first, p2.first) >= 80.0
             return False
 
-        # One has no surname (e.g. bare "Richa" or bare "Sharma")
-        # Handled in cluster_entities via document-wide ambiguity check
+        # One has no surname (e.g. bare "Richa", bare "Sharma", bare "Priya", bare "Nair")
+        # Matches if the single token matches first, middle, or last name of the full name
+        if p1.is_single_token and not p2.is_single_token:
+            return p1.first == p2.first or p1.first == p2.last or (p2.middle and p1.first in p2.middle.split())
+        if p2.is_single_token and not p1.is_single_token:
+            return p2.first == p1.first or p2.first == p1.last or (p1.middle and p2.first in p1.middle.split())
+
         return False
 
     @classmethod

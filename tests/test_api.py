@@ -53,9 +53,12 @@ def test_api_upload_and_review():
 
 def test_api_scanned_pdf_error(tmp_path):
     try:
-        import fitz
+        import pymupdf as fitz
     except ImportError:
-        return
+        try:
+            import fitz
+        except ImportError:
+            return
 
     pdf_path = tmp_path / "blank.pdf"
     doc = fitz.open()

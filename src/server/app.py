@@ -22,9 +22,9 @@ from src.detection.schemas import DetectedSpan
 from src.detection.entity_linker import EntityLinker
 from src.detection.learning_store import LearningStore
 from src.detection.privacy_advisor import PrivacyAdvisor, PrivacyWarning
-from src.redaction.text_redactor import redact_text_with_placeholders, verify_redacted_text
+from src.redaction.text_redactor import redact_text_with_placeholders, verify_redacted_text, clean_and_align_redacted_text
 from src.redaction.pdf_redactor import redact_pdf
-from src.summarizer.safe_summary import SafeSummarizer
+from src.summarizer.safe_summary import SafeSummarizer, format_executive_summary_file
 
 app = FastAPI(title="Offline Document Sanitizer & Redactor")
 config = ensure_directories()
@@ -604,9 +604,16 @@ async def export_summary_file(session_id: str, mask_style: str = "INDEXED", pres
     sess["summary"] = purged_summary
     sess["summary_mask_style"] = mask_style
 
-    filename = f"summary_{mask_style.lower()}_{sess['doc_data'].filename}.txt"
+    formatted_summary = format_executive_summary_file(
+        purged_summary, 
+        filename=sess["doc_data"].filename, 
+        mask_style=mask_style
+    )
+
+    clean_stem = Path(sess["doc_data"].filename).stem
+    filename = f"summary_{mask_style.lower()}_{clean_stem}.txt"
     return PlainTextResponse(
-        content=sess["summary"],
+        content=formatted_summary,
         headers={"Content-Disposition": f'attachment; filename="{filename}"'}
     )
 
@@ -676,9 +683,19 @@ async def export_redacted(
                 detail=f"Export Refused by Security Gate: Residual sensitive text detected: {leaks}"
             )
 
+        # Apply clean alignment and formatting for downloaded file
+        cleaned_text = clean_and_align_redacted_text(
+            redacted_text,
+            filename=doc_data.filename,
+            mask_style=mask_style,
+            include_banner=False
+        )
+        is_clean_safe, _ = verify_redacted_text(cleaned_text, spans)
+        export_payload = cleaned_text if is_clean_safe else redacted_text
+
         out_name = f"redacted_{mask_style.lower()}_{clean_stem}.txt"
         out_file = config.OUTPUT_DIR / out_name
-        out_file.write_text(redacted_text, encoding="utf-8")
+        out_file.write_text(export_payload, encoding="utf-8")
 
         response = FileResponse(out_file, media_type="text/plain; charset=utf-8", filename=out_name)
         response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"

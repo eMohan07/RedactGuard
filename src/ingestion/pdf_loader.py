@@ -44,9 +44,12 @@ def load_pdf_file(file_path: Path | str, min_chars_per_page: float = 10.0) -> Do
         raise FileNotFoundError(f"File not found: {path}")
 
     try:
-        import fitz  # PyMuPDF
+        import pymupdf as fitz
     except ImportError:
-        raise ImportError("PyMuPDF is required to process PDF files. Run: pip install pymupdf")
+        try:
+            import fitz
+        except ImportError:
+            raise ImportError("PyMuPDF is required to process PDF files. Run: pip install pymupdf")
 
     doc = fitz.open(path)
     total_pages = len(doc)

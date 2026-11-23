@@ -4,9 +4,12 @@ from src.ingestion.pdf_loader import load_pdf_file, ScannedPDFError, EmptyDocume
 
 def test_text_based_pdf(tmp_path):
     try:
-        import fitz
+        import pymupdf as fitz
     except ImportError:
-        pytest.skip("PyMuPDF not installed in environment yet")
+        try:
+            import fitz
+        except ImportError:
+            pytest.skip("PyMuPDF not installed in environment yet")
 
     pdf_path = tmp_path / "text_doc.pdf"
     doc = fitz.open()
@@ -21,9 +24,12 @@ def test_text_based_pdf(tmp_path):
 
 def test_scanned_pdf_raises_error(tmp_path):
     try:
-        import fitz
+        import pymupdf as fitz
     except ImportError:
-        pytest.skip("PyMuPDF not installed in environment yet")
+        try:
+            import fitz
+        except ImportError:
+            pytest.skip("PyMuPDF not installed in environment yet")
 
     # Create a PDF with zero text (simulating an image-only / scanned PDF)
     pdf_path = tmp_path / "scanned_doc.pdf"

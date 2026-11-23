@@ -5,6 +5,7 @@ from pathlib import Path
 from typing import List, Tuple, Set
 from src.detection.schemas import DetectedSpan
 from src.detection.entity_linker import EntityLinker
+from src.detection.rules.regex_rules import COMMON_STOPWORDS, DISALLOWED_NAME_TOKENS, STREET_SUFFIXES, detect_by_rules
 from src.redaction.text_redactor import VerificationFailedError
 
 def normalize_text_for_audit(s: str) -> str:
@@ -86,9 +87,12 @@ def redact_pdf(
     5. Refuses export and purges output file if any sensitive string is recoverable.
     """
     try:
-        import fitz  # PyMuPDF
+        import pymupdf as fitz
     except ImportError:
-        raise ImportError("PyMuPDF is required for PDF redaction. Run: pip install pymupdf")
+        try:
+            import fitz  # PyMuPDF
+        except ImportError:
+            raise ImportError("PyMuPDF is required for PDF redaction. Run: pip install pymupdf")
 
     import secrets
     import hmac
@@ -124,23 +128,40 @@ def redact_pdf(
             else:
                 replacement_tag = f"[REDACTED: {span.category}]"
 
+            def _get_optimal_fontsize(r, text_to_fit: str) -> float:
+                if not text_to_fit:
+                    return 8.0
+                w = max(float(r.width) - 2.0, 6.0)
+                h = max(float(r.height) - 1.0, 6.0)
+                # Average character width is ~0.52em in Helvetica
+                max_w_fs = w / (max(len(text_to_fit), 1) * 0.52)
+                max_h_fs = h * 0.75
+                return max(min(min(max_w_fs, max_h_fs), 9.5), 4.5)
+
             if span.bboxes:
                 for idx, b in enumerate(span.bboxes):
                     rect = fitz.Rect(b[0], b[1], b[2], b[3])
+                    tag_text = replacement_tag if idx == 0 else ""
+                    fs = _get_optimal_fontsize(rect, tag_text)
                     page.add_redact_annot(
                         rect,
-                        text=replacement_tag if idx == 0 else "",
+                        text=tag_text,
                         fill=(0, 0, 0),
-                        text_color=(1, 1, 1)
+                        text_color=(1, 1, 1),
+                        fontsize=fs,
+                        align=fitz.TEXT_ALIGN_CENTER
                     )
             else:
                 quads = page.search_for(span.text)
                 for rect in quads:
+                    fs = _get_optimal_fontsize(rect, replacement_tag)
                     page.add_redact_annot(
                         rect,
                         text=replacement_tag,
                         fill=(0, 0, 0),
-                        text_color=(1, 1, 1)
+                        text_color=(1, 1, 1),
+                        fontsize=fs,
+                        align=fitz.TEXT_ALIGN_CENTER
                     )
 
         # Permanently excise glyphs and pixel streams
@@ -195,7 +216,7 @@ def redact_pdf(
     secondary_lower = secondary_text.lower()
     secondary_normalized = normalize_text_for_audit(secondary_text)
 
-    # Audit each sensitive span
+    # Audit each sensitive span (full text and constituent tokens)
     for s in active_spans:
         raw_needle = s.text.strip()
         if len(raw_needle) < 2:
@@ -222,6 +243,29 @@ def redact_pdf(
         if len(needle_norm) >= 4 and needle_norm in secondary_normalized:
             leaks.append(f"{s.text} (found in normalized content streams)")
             continue
+
+        # 5. Constituent name token check (e.g. bare "Priya" or "Nair" from "Priya Nair")
+        if s.category == "NAME":
+            clean_name = re.sub(r"^(?:Dr\.?|Mr\.?|Mrs\.?|Ms\.?|Prof\.?)\s+", "", raw_needle, flags=re.IGNORECASE)
+            tokens = [t.strip(".,") for t in re.split(r"\s+", clean_name) if len(t.strip(".,")) >= 3]
+            for tok in tokens:
+                tok_l = tok.lower()
+                if tok_l not in COMMON_STOPWORDS and tok_l not in DISALLOWED_NAME_TOKENS and tok_l not in STREET_SUFFIXES:
+                    if re.search(r"\b" + re.escape(tok) + r"\b", primary_exported_text, flags=re.IGNORECASE):
+                        leaks.append(f"Constituent token '{tok}' from approved entity '{s.text}' found in exported PDF")
+
+    # 6. Autonomous rules scanner over exported PDF text
+    rejected_terms = {s.text.strip().lower() for s in spans if not s.accepted and s.text.strip()}
+    residual_detections = detect_by_rules(primary_exported_text)
+    placeholder_pattern = re.compile(r"^(\[(?:NAME|EMAIL|PHONE|ADDRESS|ID)_\d+\]|<[A-Z_]+_HMAC_[a-f0-9]+>|\[(?:NAME|EMAIL|PHONE|ADDRESS|ID|REDACTED[^\]]*)\]|█+|\*+)$")
+    for r_span in residual_detections:
+        val = r_span.text.strip()
+        if placeholder_pattern.match(val):
+            continue
+        val_lower = val.lower()
+        if val_lower in rejected_terms or any(rt in val_lower or val_lower in rt for rt in rejected_terms):
+            continue
+        leaks.append(f"Residual {r_span.category} '{val}' detected in PDF by post-export scanner")
 
     unique_leaks = list(dict.fromkeys(leaks))
     if unique_leaks:
