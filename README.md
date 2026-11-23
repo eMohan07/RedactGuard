@@ -156,12 +156,7 @@ streamlit run app.py
 ```
 - Accessible at **`http://localhost:8501`**.
 
-### 3. Presentation Deck
-A 16:9 widescreen presentation deck detailing the architecture, benchmarks, and threat models is included in the root directory:
-- Presentation File: `RedactGuard_Presentation.pptx`
-- Generator Script: `python scripts/generate_deck.py`
-
-### 4. Running the Benchmark Suite
+### 3. Running the Benchmark Suite
 Evaluate precision, recall, F1, latency, and leak audit metrics across 23 test documents:
 ```bash
 python scripts/evaluate.py
@@ -232,7 +227,6 @@ RedactGuard/
 ├── LICENSE                          # MIT License
 ├── README.md                        # Project documentation & architectural summary
 ├── DEMO_AND_DOCS.md                 # Detailed demo walkthrough & verification guide
-├── RedactGuard_Presentation.pptx     # 16:9 widescreen presentation deck
 ├── .streamlit/
 │   └── config.toml                  # Streamlit telemetry suppression config
 ├── data/
@@ -250,8 +244,7 @@ RedactGuard/
 ├── scripts/
 │   ├── evaluate.py                  # Strict benchmark evaluator runner
 │   ├── download_models.py           # Offline model cache fetcher
-│   ├── generate_benchmark.py        # Benchmark synthetic generator
-│   └── generate_deck.py             # Script generating RedactGuard_Presentation.pptx
+│   └── generate_benchmark.py        # Benchmark synthetic generator
 ├── src/
 │   ├── detection/
 │   │   ├── hybrid_detector.py       # Orchestrator (Regex + GLiNER + Learning Store)
