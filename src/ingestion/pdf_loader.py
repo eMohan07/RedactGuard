@@ -1,3 +1,5 @@
+import warnings
+warnings.filterwarnings("ignore", category=FutureWarning, module="fitz")
 from pathlib import Path
 from typing import List
 from src.detection.schemas import DocumentContent, WordBox, DetectedSpan

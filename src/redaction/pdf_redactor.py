@@ -1,6 +1,8 @@
 import re
 import zlib
 import unicodedata
+import warnings
+warnings.filterwarnings("ignore", category=FutureWarning, module="fitz")
 from pathlib import Path
 from typing import List, Tuple, Set
 from src.detection.schemas import DetectedSpan

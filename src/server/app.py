@@ -1,4 +1,6 @@
 import sys
+import warnings
+warnings.filterwarnings("ignore", category=FutureWarning, module="fitz")
 from pathlib import Path
 
 # Ensure project root is in sys.path
