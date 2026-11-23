@@ -3,7 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>🛡️ RedactGuard — Local PII Redactor & Document Shield</title>
+<link rel="icon" type="image/png" href="/static/favicon.png">
+<link rel="apple-touch-icon" href="/static/favicon.png">
+<title>RedactGuard — Private · Offline · Verified</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -89,6 +91,10 @@
     --verified-box-border: #10a37f;
     --verified-box-text: #6ee7b7;
 
+    --brand-redact: #f8fafc;
+    --brand-guard: #38bdf8;
+    --brand-sub: #94a3b8;
+
     --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     --font-mono: 'JetBrains Mono', 'SF Mono', Consolas, Menlo, monospace;
   }
@@ -173,6 +179,10 @@
     --verified-box-bg: #ecfdf5;
     --verified-box-border: #10a37f;
     --verified-box-text: #065f46;
+
+    --brand-redact: #0f172a;
+    --brand-guard: #0284c7;
+    --brand-sub: #64748b;
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -216,30 +226,110 @@
     align-items: center;
     gap: 10px;
     cursor: pointer;
+    user-select: none;
   }
-  .brand-logo {
-    font-size: 1.25rem;
-    line-height: 1;
+  .brand-logo-img {
+    height: 34px;
+    width: auto;
+    object-fit: contain;
+  }
+  .brand-text-block {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.15;
   }
   .brand-name {
-    font-weight: 700;
-    font-size: 1.02rem;
+    font-weight: 800;
+    font-size: 1.05rem;
     letter-spacing: -0.02em;
-    color: var(--text-primary);
+  }
+  .brand-redact {
+    color: var(--brand-redact);
+  }
+  .brand-guard {
+    color: var(--brand-guard);
+  }
+  .brand-subtext {
+    font-size: 0.55rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    color: var(--brand-sub);
+    text-transform: uppercase;
+  }
+  .header-collapsed-bar {
+    display: none;
+    align-items: center;
+    gap: 8px;
+  }
+  #sidebar.collapsed ~ #mainArea .header-collapsed-bar {
+    display: inline-flex;
+  }
+  .header-brand-wrap {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    user-select: none;
+    padding: 3px 6px;
+    border-radius: 6px;
+    transition: background 0.15s ease;
+  }
+  .header-brand-wrap:hover {
+    background: var(--card-hover);
+  }
+  .header-brand-img {
+    height: 24px;
+    width: auto;
+    object-fit: contain;
+  }
+  .header-brand-name {
+    font-weight: 800;
+    font-size: 0.95rem;
+    letter-spacing: -0.02em;
+    display: flex;
+    align-items: center;
+  }
+  .header-divider {
+    width: 1px;
+    height: 20px;
+    background: var(--border);
+    margin: 0 4px;
+    flex-shrink: 0;
+  }
+  .hero-shield-img {
+    height: 80px;
+    width: auto;
+    object-fit: contain;
+    margin-bottom: 12px;
+    filter: drop-shadow(0 10px 24px rgba(8, 145, 178, 0.25));
+  }
+  .hero-tagline-sub {
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.22em;
+    color: var(--brand-sub);
+    margin-bottom: 12px;
+    text-transform: uppercase;
   }
   .sidebar-btn-icon {
     background: transparent;
     border: none;
     color: var(--text-muted);
-    font-size: 1.1rem;
     cursor: pointer;
-    padding: 4px 6px;
+    padding: 5px;
     border-radius: 6px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     transition: all 0.15s ease;
+    line-height: 1;
   }
   .sidebar-btn-icon:hover {
     color: var(--text-primary);
     background: var(--sidebar-hover);
+  }
+  .sidebar-btn-icon svg {
+    display: block;
   }
 
   .sidebar-action-wrap {
@@ -982,11 +1072,21 @@
 <!-- Left Sidebar (ChatGPT-style with History) -->
 <aside id="sidebar">
   <div class="sidebar-header">
-    <div class="brand-group" onclick="showEmptyHero()">
-      <div class="brand-logo">🛡️</div>
-      <span class="brand-name">RedactGuard</span>
+    <div class="brand-group" onclick="showEmptyHero()" title="RedactGuard Home">
+      <img src="/static/shield_mark.png" alt="RedactGuard Shield" class="brand-logo-img">
+      <div class="brand-text-block">
+        <div class="brand-name">
+          <span class="brand-redact">Redact</span><span class="brand-guard">Guard</span>
+        </div>
+        <span class="brand-subtext">PRIVATE · OFFLINE · VERIFIED</span>
+      </div>
     </div>
-    <button class="sidebar-btn-icon" id="btnToggleSidebar" title="Toggle Sidebar">◧</button>
+    <button class="sidebar-btn-icon" id="btnToggleSidebar" title="Collapse Sidebar" aria-label="Collapse Sidebar">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+        <line x1="9" y1="3" x2="9" y2="21"/>
+      </svg>
+    </button>
   </div>
 
   <div class="sidebar-action-wrap">
@@ -1043,7 +1143,23 @@
   <!-- Top Navigation Header -->
   <header>
     <div class="header-left">
-      <button class="sidebar-btn-icon" id="btnHeaderSidebarToggle" title="Open Sidebar">☰</button>
+      <!-- Claude-style Brand & Sidebar Toggle: ONLY visible when sidebar is collapsed -->
+      <div class="header-collapsed-bar" id="headerCollapsedBar">
+        <button class="sidebar-btn-icon" id="btnHeaderSidebarToggle" title="Open Sidebar" aria-label="Open Sidebar">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+            <line x1="9" y1="3" x2="9" y2="21"/>
+          </svg>
+        </button>
+        <div class="header-brand-wrap" onclick="showEmptyHero()" title="RedactGuard Home">
+          <img src="/static/shield_mark.png" alt="RedactGuard" class="header-brand-img">
+          <div class="header-brand-name">
+            <span class="brand-redact">Redact</span><span class="brand-guard">Guard</span>
+          </div>
+        </div>
+        <div class="header-divider"></div>
+      </div>
+
       <div class="header-title-wrap">
         <span class="header-title" id="docTitle">New Redaction Session</span>
         <span class="header-count-badge" id="candidateCountBadge"><span id="candidateCount">0</span> PII</span>
@@ -1071,9 +1187,13 @@
   <div id="workspaceCanvas">
     <!-- 1. ChatGPT-Style Hero / Empty State Screen -->
     <div id="emptyHeroScreen">
-      <div class="hero-logo-box">🛡️</div>
-      <h1 class="hero-title">RedactGuard</h1>
-      <div class="hero-tagline">Detect. Review. Redact. Protect.</div>
+      <div style="display: flex; flex-direction: column; align-items: center; margin-bottom: 14px;">
+        <img src="/static/shield_mark.png" alt="RedactGuard Shield" class="hero-shield-img">
+        <h1 class="hero-title" style="margin-bottom: 2px;">
+          <span class="brand-redact">Redact</span><span class="brand-guard">Guard</span>
+        </h1>
+        <div class="hero-tagline-sub">PRIVATE · OFFLINE · VERIFIED</div>
+      </div>
       <p class="hero-desc">Local AI-powered PII detection, secure document redaction, and privacy-preserving summarization. 100% offline — zero data leaves your device.</p>
 
       <!-- Feature Highlight Badges -->
