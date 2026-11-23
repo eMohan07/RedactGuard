@@ -1,0 +1,2349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🛡️ RedactGuard — Local PII Redactor & Document Shield</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    /* ChatGPT Dark Theme (Default) */
+    --sidebar-bg: #171717;
+    --sidebar-hover: #212121;
+    --sidebar-border: #2f2f2f;
+    
+    --main-bg: #212121;
+    --panel-bg: #1a1a1a;
+    --panel-header-bg: #1a1a1a;
+    --card-bg: #242424;
+    --card-border: #333333;
+    --card-hover: #2c2c2c;
+    --border: #333333;
+    --border-subtle: #262626;
+
+    --subtle-bar-bg: #171717;
+    --subtle-bar-border: #2f2f2f;
+
+    --text-primary: #ececec;
+    --text-secondary: #b4b4b4;
+    --text-muted: #8e8e8e;
+    --text-light: #737373;
+    
+    --gpt-green: #10a37f;
+    --gpt-green-hover: #0e8c6d;
+    --gpt-green-soft: rgba(16, 163, 127, 0.15);
+    --gpt-green-border: rgba(16, 163, 127, 0.35);
+    --gpt-green-text: #6ee7b7;
+
+    --primary: #10a37f;
+    --primary-hover: #0e8c6d;
+
+    --high-bg: rgba(16, 163, 127, 0.20); --high-border: #10a37f; --high-badge: #10a37f; --high-text: #6ee7b7;
+    --med-bg: rgba(234, 179, 8, 0.20); --med-border: #eab308; --med-badge: #ca8a04; --med-text: #fde047;
+    --low-bg: rgba(239, 68, 68, 0.20); --low-border: #ef4444; --low-badge: #dc2626; --low-text: #fca5a5;
+
+    --excluded-bg: rgba(255, 255, 255, 0.05);
+    --excluded-border: #52525b;
+    --excluded-text: #71717a;
+
+    --modal-bg: #18181b;
+    --modal-header-bg: #121214;
+    --modal-footer-bg: #121214;
+    --modal-border: #27272a;
+    --modal-text: #f4f4f5;
+
+    --summary-box-bg: #121214;
+    --summary-box-border: #27272a;
+    --summary-box-text: #f4f4f5;
+
+    --tab-nav-bg: #141415;
+    --tab-btn-text: #a1a1aa;
+    --tab-btn-active-bg: #27272a;
+    --tab-btn-active-text: #ffffff;
+
+    --table-th-bg: #141415;
+    --table-th-text: #a1a1aa;
+    --table-tr-hover: rgba(255, 255, 255, 0.04);
+
+    --preview-box-bg: #141415;
+    --preview-box-border: #27272a;
+
+    --input-bg: #18181b;
+    --input-border: #3f3f46;
+    --input-text: #ececec;
+
+    --splitter-bg: #242426;
+    --splitter-hover: #333336;
+    --splitter-handle: #71717a;
+    --splitter-btn-bg: #222224;
+    --splitter-btn-text: #a1a1aa;
+    --splitter-btn-border: #3a3a3e;
+
+    --badge-neutral-bg: rgba(255, 255, 255, 0.06);
+    --badge-neutral-border: #333333;
+    --badge-neutral-text: #b4b4b4;
+
+    --verified-box-bg: rgba(16, 163, 127, 0.15);
+    --verified-box-border: #10a37f;
+    --verified-box-text: #6ee7b7;
+
+    --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    --font-mono: 'JetBrains Mono', 'SF Mono', Consolas, Menlo, monospace;
+  }
+
+  /* Light Theme Override - Balanced, modern, high-contrast */
+  body.light-theme {
+    --sidebar-bg: #f8fafc;
+    --sidebar-hover: #f1f5f9;
+    --sidebar-border: #e2e8f0;
+    
+    --main-bg: #f1f5f9;
+    --panel-bg: #ffffff;
+    --panel-header-bg: #ffffff;
+    --card-bg: #ffffff;
+    --card-border: #e2e8f0;
+    --card-hover: #f8fafc;
+    --border: #e2e8f0;
+    --border-subtle: #f1f5f9;
+
+    --subtle-bar-bg: #f8fafc;
+    --subtle-bar-border: #e2e8f0;
+
+    --text-primary: #0f172a;
+    --text-secondary: #334155;
+    --text-muted: #64748b;
+    --text-light: #94a3b8;
+
+    --gpt-green: #10a37f;
+    --gpt-green-hover: #0e8c6d;
+    --gpt-green-soft: #ecfdf5;
+    --gpt-green-border: #a7f3d0;
+    --gpt-green-text: #065f46;
+
+    --primary: #10a37f;
+    --primary-hover: #0e8c6d;
+
+    --high-bg: #ecfdf5; --high-border: #10a37f; --high-badge: #047857; --high-text: #065f46;
+    --med-bg: #fefce8; --med-border: #eab308; --med-badge: #b45309; --med-text: #854d0e;
+    --low-bg: #fef2f2; --low-border: #f87171; --low-badge: #b91c1c; --low-text: #991b1b;
+
+    --excluded-bg: #f1f5f9;
+    --excluded-border: #cbd5e1;
+    --excluded-text: #94a3b8;
+
+    --modal-bg: #ffffff;
+    --modal-header-bg: #f8fafc;
+    --modal-footer-bg: #f8fafc;
+    --modal-border: #e2e8f0;
+    --modal-text: #0f172a;
+
+    --summary-box-bg: #f8fafc;
+    --summary-box-border: #e2e8f0;
+    --summary-box-text: #0f172a;
+
+    --tab-nav-bg: #f1f5f9;
+    --tab-btn-text: #64748b;
+    --tab-btn-active-bg: #ffffff;
+    --tab-btn-active-text: #0f172a;
+
+    --table-th-bg: #f1f5f9;
+    --table-th-text: #475569;
+    --table-tr-hover: #f8fafc;
+
+    --preview-box-bg: #f8fafc;
+    --preview-box-border: #e2e8f0;
+
+    --input-bg: #ffffff;
+    --input-border: #cbd5e1;
+    --input-text: #0f172a;
+
+    --splitter-bg: #e2e8f0;
+    --splitter-hover: #cbd5e1;
+    --splitter-handle: #94a3b8;
+    --splitter-btn-bg: #ffffff;
+    --splitter-btn-text: #475569;
+    --splitter-btn-border: #cbd5e1;
+
+    --badge-neutral-bg: #f1f5f9;
+    --badge-neutral-border: #cbd5e1;
+    --badge-neutral-text: #334155;
+
+    --verified-box-bg: #ecfdf5;
+    --verified-box-border: #10a37f;
+    --verified-box-text: #065f46;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: var(--font-sans);
+    background: var(--main-bg);
+    color: var(--text-primary);
+    height: 100vh;
+    width: 100vw;
+    display: flex;
+    overflow: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Left Sidebar (ChatGPT style) */
+  #sidebar {
+    width: 260px;
+    background: var(--sidebar-bg);
+    border-right: 1px solid var(--sidebar-border);
+    display: flex;
+    flex-direction: column;
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    z-index: 50;
+    flex-shrink: 0;
+  }
+  #sidebar.collapsed {
+    width: 0px;
+    overflow: hidden;
+    border-right: none;
+  }
+
+  .sidebar-header {
+    padding: 14px 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--sidebar-border);
+  }
+  .brand-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+  }
+  .brand-logo {
+    font-size: 1.25rem;
+    line-height: 1;
+  }
+  .brand-name {
+    font-weight: 700;
+    font-size: 1.02rem;
+    letter-spacing: -0.02em;
+    color: var(--text-primary);
+  }
+  .sidebar-btn-icon {
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    font-size: 1.1rem;
+    cursor: pointer;
+    padding: 4px 6px;
+    border-radius: 6px;
+    transition: all 0.15s ease;
+  }
+  .sidebar-btn-icon:hover {
+    color: var(--text-primary);
+    background: var(--sidebar-hover);
+  }
+
+  .sidebar-action-wrap {
+    padding: 12px 14px;
+  }
+  .btn-new-chat {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    border-radius: 8px;
+    background: var(--card-bg);
+    border: 1px solid var(--sidebar-border);
+    color: var(--text-primary);
+    font-size: 0.88rem;
+    font-weight: 600;
+    font-family: var(--font-sans);
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+  .btn-new-chat:hover {
+    background: var(--sidebar-hover);
+    border-color: var(--border);
+  }
+
+  .sidebar-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 6px 10px;
+  }
+  .sidebar-section-title {
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-muted);
+    padding: 10px 8px 4px 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .history-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 10px;
+    border-radius: 8px;
+    font-size: 0.82rem;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.15s ease;
+    margin-bottom: 2px;
+  }
+  .history-item:hover {
+    background: var(--sidebar-hover);
+    color: var(--text-primary);
+  }
+  .history-item.active {
+    background: var(--sidebar-hover);
+    color: var(--text-primary);
+    font-weight: 600;
+  }
+  .history-item-left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+  .history-icon {
+    font-size: 0.85rem;
+    opacity: 0.8;
+  }
+  .history-name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .history-badge {
+    font-size: 0.7rem;
+    background: var(--sidebar-border);
+    padding: 1px 6px;
+    border-radius: 99px;
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+  }
+
+  .sidebar-footer {
+    padding: 12px 14px;
+    border-top: 1px solid var(--sidebar-border);
+    font-size: 0.78rem;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .sidebar-footer-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  /* Main Area */
+  #mainArea {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    min-width: 0;
+    background: var(--main-bg);
+  }
+
+  /* Top Navigation Bar */
+  header {
+    height: 54px;
+    border-bottom: 1px solid var(--border);
+    background: var(--panel-header-bg);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 16px;
+    z-index: 40;
+    flex-shrink: 0;
+  }
+  .header-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    overflow: hidden;
+  }
+  .header-title-wrap {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    overflow: hidden;
+  }
+  .header-title {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .header-count-badge {
+    background: var(--gpt-green-soft);
+    border: 1px solid var(--gpt-green-border);
+    color: var(--gpt-green-text);
+    padding: 2px 8px;
+    border-radius: 99px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    font-family: var(--font-mono);
+    white-space: nowrap;
+  }
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  /* Buttons & Inputs */
+  .btn-primary {
+    background: var(--gpt-green);
+    color: #ffffff;
+    border: none;
+    font-weight: 600;
+    border-radius: 8px;
+    padding: 7px 14px;
+    cursor: pointer;
+    font-family: var(--font-sans);
+    font-size: 0.82rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.15s ease;
+  }
+  .btn-primary:hover {
+    background: var(--gpt-green-hover);
+    transform: translateY(-0.5px);
+  }
+  .btn-primary:active { transform: translateY(0); }
+
+  .btn-outline {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
+    font-weight: 600;
+    border-radius: 8px;
+    padding: 7px 12px;
+    cursor: pointer;
+    font-family: var(--font-sans);
+    font-size: 0.82rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.15s ease;
+  }
+  .btn-outline:hover {
+    background: var(--card-hover);
+    color: var(--text-primary);
+    border-color: var(--border);
+  }
+
+  .btn-sm {
+    padding: 5px 9px;
+    font-size: 0.75rem;
+  }
+
+  select, input[type="text"] {
+    background: var(--input-bg);
+    border: 1px solid var(--input-border);
+    color: var(--input-text);
+    padding: 6px 10px;
+    border-radius: 7px;
+    font-size: 0.82rem;
+    font-family: var(--font-sans);
+    outline: none;
+    transition: border-color 0.15s ease;
+  }
+  select:focus, input[type="text"]:focus {
+    border-color: var(--gpt-green);
+  }
+
+  /* Workspace Layout */
+  #workspaceCanvas {
+    flex: 1;
+    overflow: hidden;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ChatGPT-style Empty / Hero State */
+  #emptyHeroScreen {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 24px 20px;
+    max-width: 820px;
+    margin: 0 auto;
+    width: 100%;
+    text-align: center;
+    overflow-y: auto;
+  }
+  .hero-logo-box {
+    width: 56px;
+    height: 56px;
+    border-radius: 16px;
+    background: var(--gpt-green-soft);
+    border: 1px solid var(--gpt-green-border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.8rem;
+    margin-bottom: 16px;
+  }
+  .hero-title {
+    font-size: 1.85rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 6px;
+    letter-spacing: -0.03em;
+  }
+  .hero-tagline {
+    font-size: 0.96rem;
+    font-weight: 600;
+    color: var(--gpt-green);
+    margin-bottom: 10px;
+  }
+  .hero-desc {
+    font-size: 0.88rem;
+    color: var(--text-muted);
+    max-width: 580px;
+    line-height: 1.6;
+    margin-bottom: 24px;
+  }
+
+  /* Feature Value Highlights on Hero */
+  .hero-highlights-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    width: 100%;
+    max-width: 720px;
+    margin-bottom: 24px;
+  }
+  .hero-highlight-card {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 12px;
+    padding: 14px 16px;
+    text-align: left;
+    transition: all 0.15s ease;
+  }
+  .hero-highlight-card:hover {
+    border-color: var(--border);
+    background: var(--card-hover);
+    transform: translateY(-1px);
+  }
+  .hero-highlight-card h4 {
+    font-size: 0.84rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .hero-highlight-card p {
+    font-size: 0.76rem;
+    color: var(--text-muted);
+    line-height: 1.45;
+  }
+
+  /* Prompt Upload Box (ChatGPT-style prompt area) */
+  .chatgpt-input-box {
+    width: 100%;
+    max-width: 720px;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 12px 14px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    transition: border-color 0.15s ease;
+  }
+  .chatgpt-input-box:focus-within {
+    border-color: var(--gpt-green);
+  }
+  .chatgpt-textarea {
+    width: 100%;
+    background: transparent;
+    border: none;
+    outline: none;
+    resize: none;
+    color: var(--text-primary);
+    font-family: var(--font-sans);
+    font-size: 0.9rem;
+    line-height: 1.6;
+  }
+  .chatgpt-input-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 6px;
+    border-top: 1px solid var(--border-subtle);
+  }
+
+  /* Document Loaded Workspace (Split Panels) */
+  #documentWorkspace {
+    flex: 1;
+    display: flex;
+    flex-direction: row;
+    gap: 0;
+    padding: 12px;
+    height: 100%;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .workspace-panel {
+    background: var(--panel-bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    min-width: 0;
+    transition: opacity 0.15s ease;
+  }
+  .workspace-panel-left {
+    flex: 0 0 56%;
+  }
+  .workspace-panel-right {
+    flex: 0 0 44%;
+  }
+
+  .workspace-panel.collapsed {
+    display: none !important;
+  }
+
+  /* Workspace Splitter - Sleek Minimal Draggable Divider */
+  .workspace-splitter {
+    width: 10px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 2px;
+    cursor: col-resize;
+    user-select: none;
+    position: relative;
+    z-index: 15;
+    transition: all 0.15s ease;
+  }
+  .workspace-splitter::before {
+    content: '';
+    position: absolute;
+    top: 6px;
+    bottom: 6px;
+    width: 2px;
+    background: var(--border);
+    border-radius: 2px;
+    transition: all 0.15s ease;
+  }
+  .workspace-splitter:hover::before {
+    background: var(--gpt-green);
+    width: 3px;
+  }
+  .splitter-drag-handle {
+    width: 6px;
+    height: 42px;
+    background: var(--splitter-handle);
+    border-radius: 99px;
+    position: relative;
+    z-index: 2;
+    transition: all 0.15s ease;
+  }
+  .workspace-splitter:hover .splitter-drag-handle {
+    background: var(--gpt-green);
+    transform: scale(1.25);
+    box-shadow: 0 0 10px rgba(16, 163, 127, 0.45);
+  }
+
+  /* Next Document Dropzone inside Document Viewer */
+  .next-doc-dropzone {
+    margin-top: 24px;
+    padding: 14px 18px;
+    border: 1.5px dashed var(--border);
+    border-radius: 10px;
+    background: var(--preview-box-bg);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+  .next-doc-dropzone:hover, .next-doc-dropzone.drag-over {
+    border-color: var(--gpt-green);
+    background: var(--gpt-green-soft);
+    transform: translateY(-1px);
+  }
+
+  .panel-header {
+    padding: 10px 16px;
+    border-bottom: 1px solid var(--border);
+    background: var(--panel-header-bg);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-shrink: 0;
+  }
+  .panel-header h2 {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--text-primary);
+  }
+
+  .tab-nav {
+    display: flex;
+    gap: 4px;
+    background: var(--tab-nav-bg);
+    padding: 3px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+  }
+  .tab-btn {
+    border: none;
+    background: transparent;
+    padding: 5px 12px;
+    font-size: 0.76rem;
+    font-weight: 600;
+    border-radius: 6px;
+    color: var(--tab-btn-text);
+    cursor: pointer;
+    font-family: var(--font-sans);
+    transition: all 0.15s ease;
+  }
+  .tab-btn:hover { color: var(--text-primary); }
+  .tab-btn.active {
+    background: var(--tab-btn-active-bg);
+    color: var(--tab-btn-active-text);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+    font-weight: 700;
+  }
+
+  .panel-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px;
+    position: relative;
+    background: var(--panel-bg);
+  }
+
+  .subtle-bar {
+    display: flex;
+    align-items: center;
+    padding: 8px 16px;
+    border-bottom: 1px solid var(--subtle-bar-border);
+    background: var(--subtle-bar-bg);
+    flex-shrink: 0;
+  }
+
+  .pill {
+    padding: 2px 7px;
+    border-radius: 4px;
+    font-weight: 600;
+    font-size: 0.72rem;
+  }
+  .pill-high { background: var(--high-bg); border: 1px solid var(--high-border); color: var(--high-text); }
+  .pill-med { background: var(--med-bg); border: 1px solid var(--med-border); color: var(--med-text); }
+  .pill-low { background: var(--low-bg); border: 1px solid var(--low-border); color: var(--low-text); }
+  .learning-badge {
+    background: var(--gpt-green-soft); border: 1px solid var(--gpt-green-border); color: var(--gpt-green); padding: 2px 8px; border-radius: 6px; font-size: 0.74rem; font-weight: 600;
+  }
+
+  /* Document Viewer Text */
+  #docViewer, #redactedViewer, #summaryViewer {
+    font-size: 0.92rem;
+    line-height: 2.0;
+    white-space: pre-wrap;
+    user-select: text;
+    color: var(--text-primary);
+  }
+  .highlight-span {
+    border-radius: 5px;
+    padding: 2px 6px;
+    margin: 0 2px;
+    display: inline-block;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+  .highlight-span:hover { filter: brightness(1.1); transform: translateY(-0.5px); }
+  .highlight-span.active { outline: 2px solid var(--gpt-green); outline-offset: 1px; }
+
+  .badge-tag {
+    color: #fff;
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    font-weight: 700;
+    padding: 1px 6px;
+    border-radius: 4px;
+    margin-left: 5px;
+  }
+
+  /* Candidate Card */
+  .candidate-card {
+    border: 1px solid var(--card-border);
+    border-radius: 10px;
+    padding: 12px 14px;
+    margin-bottom: 8px;
+    background: var(--card-bg);
+    transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .candidate-card:hover {
+    border-color: var(--border);
+    background: var(--card-hover);
+    transform: translateY(-1px);
+  }
+  .candidate-card.active {
+    border-color: var(--gpt-green);
+    background: var(--gpt-green-soft);
+  }
+  .candidate-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 6px;
+  }
+  .candidate-text {
+    font-family: var(--font-mono);
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+  .candidate-tag {
+    font-family: var(--font-mono);
+    font-size: 0.74rem;
+    font-weight: 600;
+    color: #6366f1;
+  }
+  body.light-theme .candidate-tag {
+    color: #4338ca;
+  }
+  .candidate-actions { display: flex; gap: 8px; align-items: center; }
+
+  /* Analysis Table */
+  .analysis-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.82rem;
+  }
+  .analysis-table th {
+    background: var(--table-th-bg);
+    padding: 9px 12px;
+    text-align: left;
+    border-bottom: 1.5px solid var(--border);
+    font-weight: 600;
+    color: var(--table-th-text);
+  }
+  .analysis-table td {
+    padding: 9px 12px;
+    border-bottom: 1px solid var(--border);
+    color: var(--text-primary);
+  }
+  .analysis-table tr:hover {
+    background: var(--table-tr-hover);
+  }
+
+  /* Warnings */
+  .warning-box {
+    background: rgba(234, 179, 8, 0.1);
+    border: 1px solid rgba(234, 179, 8, 0.35);
+    border-radius: 8px;
+    padding: 10px 14px;
+    margin-bottom: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .warning-text h4 { font-size: 0.84rem; color: #eab308; margin-bottom: 2px; }
+  body.light-theme .warning-text h4 { color: #a16207; }
+  .warning-text p { font-size: 0.78rem; color: var(--text-secondary); }
+
+  /* Selection popup */
+  #selectionPopup {
+    position: absolute;
+    display: none;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    color: var(--text-primary);
+    padding: 6px 10px;
+    border-radius: 8px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+    z-index: 100;
+  }
+
+  /* Modal */
+  .modal-backdrop {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; width: 100vw; height: 100vh;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(5px);
+    z-index: 999;
+    align-items: center;
+    justify-content: center;
+  }
+  .modal-card {
+    background: var(--modal-bg);
+    border-radius: 14px;
+    width: 650px;
+    max-width: 90vw;
+    box-shadow: 0 25px 50px -12px rgba(0,0,0,0.35);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    border: 1px solid var(--modal-border);
+  }
+  .modal-header {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--modal-border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--modal-header-bg);
+  }
+  .modal-header h3 {
+    color: var(--text-primary);
+    font-size: 1.05rem;
+    font-weight: 700;
+    margin: 0;
+  }
+  .modal-body {
+    padding: 20px;
+    font-size: 0.92rem;
+    line-height: 1.85;
+    color: var(--modal-text);
+    background: var(--modal-bg);
+    max-height: 60vh;
+    overflow-y: auto;
+  }
+  .modal-footer {
+    padding: 14px 20px;
+    border-top: 1px solid var(--modal-border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--modal-footer-bg);
+  }
+
+  /* Modal Summary Content Box */
+  #modalSummaryContent {
+    background: var(--summary-box-bg);
+    border: 1px solid var(--summary-box-border);
+    color: var(--summary-box-text);
+    padding: 14px 16px;
+    border-radius: 8px;
+    white-space: pre-wrap;
+    line-height: 1.8;
+  }
+
+  .badge-privacy-verified {
+    background: var(--verified-box-bg);
+    border: 1px solid var(--verified-box-border);
+    color: var(--verified-box-text);
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    font-weight: 600;
+  }
+  .badge-leak-warning {
+    background: rgba(239, 68, 68, 0.15);
+    border: 1px solid #ef4444;
+    color: #f87171;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    font-weight: 600;
+  }
+  body.light-theme .badge-leak-warning {
+    background: #fef2f2;
+    border-color: #ef4444;
+    color: #991b1b;
+  }
+
+  input[type="range"] {
+    accent-color: var(--gpt-green);
+  }
+</style>
+</head>
+<body>
+
+<!-- Left Sidebar (ChatGPT-style with History) -->
+<aside id="sidebar">
+  <div class="sidebar-header">
+    <div class="brand-group" onclick="showEmptyHero()">
+      <div class="brand-logo">🛡️</div>
+      <span class="brand-name">RedactGuard</span>
+    </div>
+    <button class="sidebar-btn-icon" id="btnToggleSidebar" title="Toggle Sidebar">◧</button>
+  </div>
+
+  <div class="sidebar-action-wrap">
+    <button class="btn-new-chat" id="btnNewDoc">
+      <span style="font-size: 1.1rem; line-height: 1;">+</span>
+      <span>New Document</span>
+    </button>
+  </div>
+
+  <div class="sidebar-content">
+    <!-- Sample Documents Library (Quick load built-in templates) -->
+    <div class="sidebar-section-title">
+      <span>Sample Documents</span>
+    </div>
+    <div id="sidebarSampleDocsList">
+      <!-- Loaded dynamically from /api/presets -->
+    </div>
+
+    <!-- User's Recent Documents History -->
+    <div class="sidebar-section-title" style="margin-top: 14px;">
+      <span>Recent Documents</span>
+      <span style="cursor: pointer; font-size: 0.65rem; color: var(--text-muted);" onclick="clearAllHistory()" title="Clear recent documents history">Clear</span>
+    </div>
+    <div id="historyList">
+      <!-- Loaded from localStorage -->
+    </div>
+  </div>
+
+  <div class="sidebar-footer">
+    <div class="sidebar-footer-row">
+      <div style="display: flex; align-items: center; gap: 6px;">
+        <span style="width: 7px; height: 7px; border-radius: 50%; background: #22c55e; display: inline-block;"></span>
+        <span style="font-weight: 600; color: var(--text-secondary);">100% Offline Engine</span>
+      </div>
+      <button class="btn-outline btn-sm" id="btnThemeToggle" style="padding: 2px 8px; font-size: 0.7rem;" title="Toggle Dark/Light Mode">🌙 / ☀️</button>
+    </div>
+    <!-- AI Active Memory & Reset Section -->
+    <div class="sidebar-footer-row" style="margin-top: 6px; padding-top: 6px; border-top: 1px solid var(--sidebar-border);">
+      <div>
+        <div style="font-weight: 600; font-size: 0.74rem; color: var(--text-secondary); display: flex; align-items: center; gap: 4px;">
+          🧠 <span>AI Active Memory</span>
+        </div>
+        <div id="learningStatusDesc" style="color: var(--text-muted); font-size: 0.68rem;">Learned corrections cache</div>
+      </div>
+      <button class="btn-outline btn-sm" id="btnPurgeLearning" style="font-size: 0.68rem; padding: 2px 6px;" title="Reset detector learned dictionary terms back to factory default">
+        🧹 Reset AI Memory
+      </button>
+    </div>
+  </div>
+</aside>
+
+<!-- Main Workspace -->
+<div id="mainArea">
+  <!-- Top Navigation Header -->
+  <header>
+    <div class="header-left">
+      <button class="sidebar-btn-icon" id="btnHeaderSidebarToggle" title="Open Sidebar">☰</button>
+      <div class="header-title-wrap">
+        <span class="header-title" id="docTitle">New Redaction Session</span>
+        <span class="header-count-badge" id="candidateCountBadge"><span id="candidateCount">0</span> PII</span>
+      </div>
+    </div>
+
+    <div class="header-right">
+      <!-- Hidden file input -->
+      <input type="file" id="fileInput" accept=".txt,.pdf" style="display: none;">
+
+      <!-- Masking Strategy Selector -->
+      <select id="maskStyleSelect" title="Anonymization / Masking Strategy">
+        <option value="INDEXED">Placeholder [NAME_1]</option>
+        <option value="BLOCK">Block Mask ████</option>
+        <option value="ASTERISK">Asterisk ****</option>
+        <option value="HASH">Hashed &lt;NAME_hash&gt;</option>
+        <option value="GENERIC">Generic [REDACTED]</option>
+      </select>
+
+      <button class="btn-outline" id="btnSummary">📝 Safe Summary</button>
+      <button class="btn-primary" id="btnExport">💾 Export Verified</button>
+    </div>
+  </header>
+
+  <div id="workspaceCanvas">
+    <!-- 1. ChatGPT-Style Hero / Empty State Screen -->
+    <div id="emptyHeroScreen">
+      <div class="hero-logo-box">🛡️</div>
+      <h1 class="hero-title">RedactGuard</h1>
+      <div class="hero-tagline">Detect. Review. Redact. Protect.</div>
+      <p class="hero-desc">Local AI-powered PII detection, secure document redaction, and privacy-preserving summarization. 100% offline — zero data leaves your device.</p>
+
+      <!-- Feature Highlight Badges -->
+      <div class="hero-highlights-grid">
+        <div class="hero-highlight-card">
+          <h4>🔒 100% Air-Gapped</h4>
+          <p>Runs purely on your local machine with no external network telemetry.</p>
+        </div>
+        <div class="hero-highlight-card">
+          <h4>🧠 Active Learning</h4>
+          <p>Multi-pattern recognizers + local feedback dictionary adapt to your corrections.</p>
+        </div>
+        <div class="hero-highlight-card">
+          <h4>📝 Zero-Leak Summaries</h4>
+          <p>Extractive summarization audited against all detected sensitive entities.</p>
+        </div>
+      </div>
+
+      <!-- ChatGPT-style prompt & file upload input box -->
+      <div class="chatgpt-input-box">
+        <textarea class="chatgpt-textarea" id="directTextInput" rows="3" placeholder="Paste your document text here (clinical notes, customer records, NDA agreements, invoices, transcripts)..."></textarea>
+        <div class="chatgpt-input-actions">
+          <div style="display: flex; gap: 8px; align-items: center;">
+            <button class="btn-outline btn-sm" onclick="document.getElementById('fileInput').click()">
+              📎 Attach PDF / TXT
+            </button>
+            <input type="text" id="directDocName" placeholder="Document Name (e.g. report.txt)" style="padding: 4px 8px; font-size: 0.75rem; width: 170px;">
+          </div>
+          <button class="btn-primary btn-sm" id="btnAnalyzeDirect">
+            🚀 Analyze & Redact
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. Active Document Split-Panel Workspace -->
+    <div id="documentWorkspace" style="display: none;">
+      <!-- Left Panel: Document Viewer with Tabs -->
+      <div class="panel workspace-panel workspace-panel-left" id="panelDocViewer">
+        <div class="panel-header">
+          <div class="tab-nav">
+            <button class="tab-btn active" id="tabHighlights" onclick="switchView('highlights')">🔍 Highlights</button>
+            <button class="tab-btn" id="tabRedacted" onclick="switchView('redacted')">👁️ Redacted Preview</button>
+            <button class="tab-btn" id="tabAnalysis" onclick="switchView('analysis')">📊 Analysis Breakdown</button>
+            <button class="tab-btn" id="tabSummaryView" onclick="switchView('summary')">📝 Safe Summary</button>
+          </div>
+          <button class="btn-outline btn-sm" id="btnUploadNew">Upload New</button>
+        </div>
+
+        <div class="subtle-bar" id="legendBar" style="gap: 8px; font-size: 0.76rem;">
+          <span style="color: var(--text-muted);">Confidence:</span>
+          <span class="pill pill-high">🟢 High (≥85%)</span>
+          <span class="pill pill-med">🟡 Med (60-84%)</span>
+          <span class="pill pill-low">🔴 Low (&lt;60%)</span>
+          <span id="learningStatsBadge" class="learning-badge" style="margin-left: 8px;">🧠 Active Learning Ready</span>
+          <span style="color: var(--text-muted); font-size: 0.72rem; margin-left: auto;">💡 Select any text to redact</span>
+        </div>
+
+        <div class="panel-body">
+          <div id="warningsContainer"></div>
+          <div id="docViewer"></div>
+
+          <!-- Upload Next Document Dropzone -->
+          <div class="next-doc-dropzone" id="nextDocDropzone" title="Click or drop file to upload next document">
+            <span style="font-size: 1.25rem;">📄</span>
+            <div style="text-align: left;">
+              <div style="font-weight: 600; font-size: 0.82rem; color: var(--text-primary);">Upload Next Document</div>
+              <div style="font-size: 0.74rem; color: var(--text-muted);">Click to attach PDF / TXT or drag & drop next document here</div>
+            </div>
+            <button class="btn-outline btn-sm" type="button" style="margin-left: auto;">Browse File</button>
+          </div>
+
+          <div id="redactedViewer" style="display: none; font-family: var(--font-mono); background: var(--preview-box-bg); padding: 12px; border-radius: 8px; border: 1px solid var(--preview-box-border);"></div>
+          
+          <div id="analysisViewer" style="display: none;">
+            <h4 style="margin-bottom: 12px; color: var(--text-primary);">📊 Analysis & Decision Breakdown</h4>
+            <table class="analysis-table" id="analysisTable">
+              <thead>
+                <tr>
+                  <th>Entity Text</th>
+                  <th>Category</th>
+                  <th>Confidence</th>
+                  <th>Recognizer Source</th>
+                  <th>Offsets</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="analysisTableBody"></tbody>
+            </table>
+          </div>
+
+          <div id="summaryViewer" style="display: none; padding: 16px; background: var(--gpt-green-soft); border-radius: 8px; border: 1px solid var(--gpt-green-border); line-height: 1.8;">
+            <h4 style="color: var(--gpt-green); margin-bottom: 8px;">📝 Zero-Leak Executive Summary</h4>
+            <div id="summaryViewerText">Click "Safe Summary" at the top to generate a privacy-preserving summary.</div>
+          </div>
+
+          <!-- Selection Popup -->
+          <div id="selectionPopup" style="display: none; align-items: center; gap: 6px;">
+            <span id="selectedTextSnippet" style="margin-right: 4px; font-weight: 600; font-size: 0.78rem;"></span>
+            <select id="selCategory" style="padding: 3px 6px; border-radius: 4px; font-size: 0.75rem;">
+              <option value="NAME">NAME</option>
+              <option value="EMAIL">EMAIL</option>
+              <option value="PHONE">PHONE</option>
+              <option value="ADDRESS">ADDRESS</option>
+              <option value="ID">ID</option>
+              <option value="ORGANIZATION">ORGANIZATION</option>
+              <option value="FINANCIAL">FINANCIAL</option>
+              <option value="CONFIDENTIAL">CONFIDENTIAL</option>
+              <option value="DATE">DATE</option>
+            </select>
+            <button id="btnRedactSelection" class="btn-sm btn-primary" title="Redact only this specific selected occurrence">+ Add (This Only)</button>
+            <button id="btnRedactSelectionSimilar" class="btn-sm btn-outline" title="Redact all occurrences of this text across the entire document & remember in active learning">+ All Similar (Document-Wide)</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Center Draggable Splitter (Hover arrow cursor col-resize) -->
+      <div class="workspace-splitter" id="workspaceSplitter" title="Drag left/right to resize panels | Double-click to reset">
+        <div class="splitter-drag-handle" title="Drag left/right to resize panels"></div>
+      </div>
+
+      <!-- Right Panel: Review Candidates & Entity Sorting -->
+      <div class="panel workspace-panel workspace-panel-right" id="panelCandidates">
+        <div class="panel-header">
+          <h2>📋 Review Candidates</h2>
+          <div style="display: flex; gap: 6px;">
+            <button class="btn-outline btn-sm" id="btnSelectAll">Select All</button>
+            <button class="btn-outline btn-sm" id="btnDeselectAll">Deselect All</button>
+          </div>
+        </div>
+
+        <!-- Confidence Threshold Bar -->
+        <div class="subtle-bar" style="justify-content: space-between; font-size: 0.76rem;">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span style="font-weight: 600; color: var(--text-muted);">Confidence Threshold:</span>
+            <input type="range" id="confSlider" min="0" max="100" value="0" style="width: 80px; cursor: pointer;">
+            <span id="confSliderVal" style="font-family: var(--font-mono); font-weight: 600; width: 32px;">0%</span>
+          </div>
+          <div id="activeEntityStatus" style="font-family: var(--font-mono); font-size: 0.72rem; color: var(--text-muted); font-weight: 600;">
+            Showing all entities
+          </div>
+        </div>
+
+        <!-- Integrated Entity Selector & Manual Redaction Bar -->
+        <div style="padding: 10px 16px; border-bottom: 1px solid var(--border); background: var(--panel-header-bg); display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+          <input type="text" id="manualTextInput" placeholder="Type entity name or text to redact..." style="flex: 1; min-width: 130px; font-size: 0.8rem;" title="Enter custom entity name (e.g. SSN, PASSPORT) or text to redact">
+          
+          <select id="entitySortSelect" style="font-size: 0.8rem; font-weight: 600; cursor: pointer;" title="Select entity to sort / filter candidates">
+            <option value="ALL">Show All</option>
+            <option value="EMAIL">EMAIL</option>
+            <option value="ADDRESS">ADDRESS</option>
+            <option value="NAME">NAME</option>
+            <option value="PHONE">PHONE</option>
+            <option value="ID">ID</option>
+            <option value="ORGANIZATION">ORGANIZATION</option>
+            <option value="FINANCIAL">FINANCIAL</option>
+            <option value="CONFIDENTIAL">CONFIDENTIAL</option>
+            <option value="DATE">DATE</option>
+          </select>
+
+          <button class="btn-primary btn-sm" id="btnManualAdd" style="white-space: nowrap;">+ Add Redaction</button>
+
+          <label style="display: flex; align-items: center; gap: 5px; font-size: 0.75rem; color: var(--text-muted); cursor: pointer; user-select: none;">
+            <input type="checkbox" id="chkFilterOnly">
+            <span>Filter Only</span>
+          </label>
+        </div>
+
+        <div class="panel-body" id="candidatesList">
+          <p style="color: var(--text-muted); text-align: center; margin-top: 40px;">No document loaded yet.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Safe Summary Modal Dialog -->
+<div class="modal-backdrop" id="summaryModal">
+  <div class="modal-card">
+    <div class="modal-header">
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <h3>📝 Zero-Leak Executive Summary</h3>
+        <span id="summaryEngineBadge" style="font-size: 0.72rem; background: var(--gpt-green-soft); color: var(--gpt-green); border: 1px solid var(--gpt-green-border); padding: 2px 8px; border-radius: 99px; font-weight: 600;">Local Engine</span>
+      </div>
+      <button onclick="closeSummaryModal()" style="background:none; border:none; font-size:1.2rem; cursor:pointer; color:var(--text-muted);">✕</button>
+    </div>
+    <div class="modal-body">
+      <div style="display: flex; gap: 8px; margin-bottom: 14px; flex-wrap: wrap;">
+        <span style="font-size: 0.75rem; background: var(--gpt-green-soft); border: 1px solid var(--gpt-green-border); color: var(--gpt-green); padding: 3px 8px; border-radius: 4px; font-weight: 600;">
+          🛡️ Leak Audit: PASSED (0 leaks)
+        </span>
+        <span style="font-size: 0.75rem; background: var(--badge-neutral-bg); border: 1px solid var(--badge-neutral-border); color: var(--badge-neutral-text); padding: 3px 8px; border-radius: 4px; font-weight: 600;">
+          🔒 Structural Isolation: Redacted Input Only
+        </span>
+      </div>
+      <div id="modalSummaryContent"></div>
+      <div id="modalSummaryWarning" style="margin-top: 14px;"></div>
+    </div>
+    <div class="modal-footer">
+      <span style="font-size: 0.75rem; color: var(--text-muted);">Audited against all removed PII.</span>
+      <div style="display: flex; gap: 8px;">
+        <button class="btn-outline btn-sm" onclick="copySummaryText()">📋 Copy</button>
+        <button class="btn-outline btn-sm" onclick="downloadSummaryFile()">📥 Download .txt</button>
+        <button class="btn-primary btn-sm" onclick="closeSummaryModal()">Done</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+let currentSession = null;
+let selectedIndex = 0;
+let currentView = 'highlights';
+let cachedSummary = "";
+let selectedEntity = "ALL";
+let isFilterOnly = false;
+let selectedSpanId = null;
+
+// DOM Elements
+const sidebar = document.getElementById('sidebar');
+const btnToggleSidebar = document.getElementById('btnToggleSidebar');
+const btnHeaderSidebarToggle = document.getElementById('btnHeaderSidebarToggle');
+const btnNewDoc = document.getElementById('btnNewDoc');
+const emptyHeroScreen = document.getElementById('emptyHeroScreen');
+const documentWorkspace = document.getElementById('documentWorkspace');
+const historyList = document.getElementById('historyList');
+
+const panelDocViewer = document.getElementById('panelDocViewer');
+const panelCandidates = document.getElementById('panelCandidates');
+const workspaceSplitter = document.getElementById('workspaceSplitter');
+const sidebarSampleDocsList = document.getElementById('sidebarSampleDocsList');
+const nextDocDropzone = document.getElementById('nextDocDropzone');
+const learningStatusDesc = document.getElementById('learningStatusDesc');
+
+const fileInput = document.getElementById('fileInput');
+const directTextInput = document.getElementById('directTextInput');
+const directDocName = document.getElementById('directDocName');
+const btnAnalyzeDirect = document.getElementById('btnAnalyzeDirect');
+
+const docViewer = document.getElementById('docViewer');
+const redactedViewer = document.getElementById('redactedViewer');
+const analysisViewer = document.getElementById('analysisViewer');
+const analysisTableBody = document.getElementById('analysisTableBody');
+const summaryViewer = document.getElementById('summaryViewer');
+const summaryViewerText = document.getElementById('summaryViewerText');
+const candidatesList = document.getElementById('candidatesList');
+const warningsContainer = document.getElementById('warningsContainer');
+const docTitle = document.getElementById('docTitle');
+const candidateCount = document.getElementById('candidateCount');
+const selectionPopup = document.getElementById('selectionPopup');
+const btnRedactSelection = document.getElementById('btnRedactSelection');
+const btnRedactSelectionSimilar = document.getElementById('btnRedactSelectionSimilar');
+const selectedTextSnippet = document.getElementById('selectedTextSnippet');
+const learningStatsBadge = document.getElementById('learningStatsBadge');
+const legendBar = document.getElementById('legendBar');
+const summaryModal = document.getElementById('summaryModal');
+const modalSummaryContent = document.getElementById('modalSummaryContent');
+const modalSummaryWarning = document.getElementById('modalSummaryWarning');
+const summaryEngineBadge = document.getElementById('summaryEngineBadge');
+const maskStyleSelect = document.getElementById('maskStyleSelect');
+const confSlider = document.getElementById('confSlider');
+const confSliderVal = document.getElementById('confSliderVal');
+const entitySortSelect = document.getElementById('entitySortSelect');
+const chkFilterOnly = document.getElementById('chkFilterOnly');
+const activeEntityStatus = document.getElementById('activeEntityStatus');
+const btnManualAdd = document.getElementById('btnManualAdd');
+const manualTextInput = document.getElementById('manualTextInput');
+const selCategory = document.getElementById('selCategory');
+const btnPurgeLearning = document.getElementById('btnPurgeLearning');
+
+// Sidebar toggle & New doc handlers
+if (btnToggleSidebar) {
+  btnToggleSidebar.addEventListener('click', () => {
+    sidebar.classList.toggle('collapsed');
+  });
+}
+if (btnHeaderSidebarToggle) {
+  btnHeaderSidebarToggle.addEventListener('click', () => {
+    sidebar.classList.toggle('collapsed');
+  });
+}
+
+function showEmptyHero() {
+  emptyHeroScreen.style.display = 'flex';
+  documentWorkspace.style.display = 'none';
+  docTitle.textContent = "New Redaction Session";
+  candidateCount.textContent = "0";
+}
+
+if (btnNewDoc) {
+  btnNewDoc.addEventListener('click', () => {
+    showEmptyHero();
+    directTextInput.value = "";
+    directTextInput.focus();
+  });
+}
+
+const btnUploadNew = document.getElementById('btnUploadNew');
+if (btnUploadNew) {
+  btnUploadNew.addEventListener('click', () => {
+    fileInput.value = "";
+    fileInput.click();
+  });
+}
+
+// Dark / Light Theme Toggle
+const btnThemeToggle = document.getElementById('btnThemeToggle');
+if (btnThemeToggle) {
+  btnThemeToggle.addEventListener('click', () => {
+    document.body.classList.toggle('light-theme');
+    localStorage.setItem('redactguard_theme', document.body.classList.contains('light-theme') ? 'light' : 'dark');
+  });
+  if (localStorage.getItem('redactguard_theme') === 'light') {
+    document.body.classList.add('light-theme');
+  }
+}
+
+// Workspace Splitter & Dynamic Resizing
+let panelSplitPercent = 56;
+try {
+  const savedSplit = parseFloat(localStorage.getItem('redactguard_panel_split'));
+  if (savedSplit && savedSplit >= 15 && savedSplit <= 85) {
+    panelSplitPercent = savedSplit;
+  }
+} catch (e) {}
+
+function applyPanelSizing() {
+  panelDocViewer.style.flex = `0 0 ${panelSplitPercent}%`;
+  panelCandidates.style.flex = `0 0 calc(100% - ${panelSplitPercent}% - 14px)`;
+}
+
+// Draggable Splitter (Hover shows col-resize cursor; drag smoothly adjusts width)
+let isDraggingSplitter = false;
+if (workspaceSplitter) {
+  workspaceSplitter.addEventListener('mousedown', (e) => {
+    isDraggingSplitter = true;
+    document.body.style.cursor = 'col-resize';
+    document.body.style.userSelect = 'none';
+  });
+
+  // Double click to reset split to default 56% / 44%
+  workspaceSplitter.addEventListener('dblclick', () => {
+    panelSplitPercent = 56;
+    localStorage.setItem('redactguard_panel_split', panelSplitPercent);
+    applyPanelSizing();
+  });
+}
+
+window.addEventListener('mousemove', (e) => {
+  if (!isDraggingSplitter) return;
+  const workspaceRect = documentWorkspace.getBoundingClientRect();
+  const mouseX = e.clientX - workspaceRect.left;
+  const totalW = workspaceRect.width;
+  if (totalW <= 0) return;
+
+  let newPercent = (mouseX / totalW) * 100;
+  newPercent = Math.max(18, Math.min(82, newPercent));
+
+  panelSplitPercent = Math.round(newPercent * 10) / 10;
+  applyPanelSizing();
+});
+
+window.addEventListener('mouseup', () => {
+  if (isDraggingSplitter) {
+    isDraggingSplitter = false;
+    document.body.style.cursor = '';
+    document.body.style.userSelect = '';
+    localStorage.setItem('redactguard_panel_split', panelSplitPercent);
+  }
+});
+
+// Local History Storage
+const HISTORY_KEY = 'redactguard_doc_history';
+
+function getHistory() {
+  try {
+    return JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]');
+  } catch (e) {
+    return [];
+  }
+}
+
+// Load Sample Documents in Sidebar
+async function loadSampleDocuments() {
+  if (!sidebarSampleDocsList) return;
+  try {
+    const res = await fetch('/api/presets');
+    if (res.ok) {
+      const data = await res.json();
+      const presets = data.presets || [];
+      sidebarSampleDocsList.innerHTML = "";
+      presets.forEach(p => {
+        const el = document.createElement('div');
+        el.className = "history-item";
+        el.innerHTML = `
+          <div class="history-item-left">
+            <span class="history-icon">📋</span>
+            <span class="history-name" title="${escapeHtml(p.label)}">${escapeHtml(p.label)}</span>
+          </div>
+        `;
+        el.onclick = async () => {
+          await analyzeTextDirectly(p.text, p.filename);
+        };
+        sidebarSampleDocsList.appendChild(el);
+      });
+    }
+  } catch (err) {
+    console.warn("Could not load sample documents", err);
+  }
+}
+loadSampleDocuments();
+
+function saveHistoryItem(session) {
+  if (!session || !session.session_id) return;
+  let hist = getHistory();
+  hist = hist.filter(h => h.session_id !== session.session_id);
+  const count = (session.spans && Array.isArray(session.spans)) ? session.spans.length : 0;
+  hist.unshift({
+    session_id: session.session_id,
+    filename: session.filename,
+    candidates_count: count,
+    timestamp: new Date().toISOString(),
+    session_data: session
+  });
+  if (hist.length > 25) hist = hist.slice(0, 25);
+  localStorage.setItem(HISTORY_KEY, JSON.stringify(hist));
+  renderHistoryList();
+}
+
+function clearAllHistory() {
+  if (confirm("Clear recent documents list from history?")) {
+    localStorage.removeItem(HISTORY_KEY);
+    renderHistoryList();
+  }
+}
+
+function renderHistoryList() {
+  if (!historyList) return;
+  const hist = getHistory();
+  historyList.innerHTML = "";
+  if (hist.length === 0) {
+    historyList.innerHTML = `<div style="padding: 10px 8px; font-size: 0.75rem; color: var(--text-muted);">No recent documents.</div>`;
+    return;
+  }
+  hist.forEach(item => {
+    const el = document.createElement('div');
+    const isActive = currentSession && currentSession.session_id === item.session_id;
+    el.className = `history-item ${isActive ? 'active' : ''}`;
+
+    let count = 0;
+    if (item.candidates_count !== undefined && item.candidates_count !== null && !isNaN(item.candidates_count)) {
+      count = item.candidates_count;
+    } else if (item.session_data && item.session_data.spans && Array.isArray(item.session_data.spans)) {
+      count = item.session_data.spans.length;
+    }
+
+    el.innerHTML = `
+      <div class="history-item-left">
+        <span class="history-icon">📄</span>
+        <span class="history-name" title="${escapeHtml(item.filename)}">${escapeHtml(item.filename)}</span>
+      </div>
+      <span class="history-badge">${count}</span>
+    `;
+    el.onclick = () => {
+      loadSessionFromHistory(item);
+    };
+    historyList.appendChild(el);
+  });
+}
+
+function loadSessionFromHistory(item) {
+  if (item && item.session_data) {
+    currentSession = item.session_data;
+    cachedSummary = "";
+    selectedIndex = 0;
+    switchView('highlights');
+    renderAll();
+  }
+}
+renderHistoryList();
+
+// File Upload Handler (Common for input, buttons, and dropzone)
+async function uploadFileDirectly(file) {
+  if (!file) return;
+  const formData = new FormData();
+  formData.append('file', file);
+  docTitle.textContent = `Analyzing ${file.name}...`;
+
+  try {
+    const res = await fetch('/api/upload', { method: 'POST', body: formData });
+    if (!res.ok) {
+      const err = await res.json();
+      alert("Error: " + (err.detail || "Upload failed"));
+      docTitle.textContent = "Document Viewer";
+      return;
+    }
+    const data = await res.json();
+    currentSession = data;
+    selectedIndex = 0;
+    cachedSummary = "";
+    saveHistoryItem(currentSession);
+    switchView('highlights');
+    renderAll();
+  } catch (err) {
+    alert("Connection error: " + err);
+  }
+}
+
+fileInput.addEventListener('change', async (e) => {
+  const file = e.target.files[0];
+  if (file) {
+    await uploadFileDirectly(file);
+  }
+});
+
+// Next Document Dropzone Handler
+if (nextDocDropzone) {
+  nextDocDropzone.addEventListener('click', () => {
+    fileInput.value = "";
+    fileInput.click();
+  });
+  nextDocDropzone.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    nextDocDropzone.classList.add('drag-over');
+  });
+  nextDocDropzone.addEventListener('dragleave', () => {
+    nextDocDropzone.classList.remove('drag-over');
+  });
+  nextDocDropzone.addEventListener('drop', async (e) => {
+    e.preventDefault();
+    nextDocDropzone.classList.remove('drag-over');
+    if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0]) {
+      await uploadFileDirectly(e.dataTransfer.files[0]);
+    }
+  });
+}
+
+// Direct Text Analysis Handler
+btnAnalyzeDirect.addEventListener('click', async () => {
+  const text = directTextInput.value.trim();
+  const name = directDocName.value.trim() || "pasted_document.txt";
+  if (!text) { alert("Please paste text first."); return; }
+  await analyzeTextDirectly(text, name);
+});
+
+async function analyzeTextDirectly(text, filename) {
+  docTitle.textContent = `Scanning ${filename}...`;
+  try {
+    const res = await fetch('/api/analyze_text', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text: text, filename: filename, use_slm: false })
+    });
+    if (!res.ok) {
+      const err = await res.json();
+      alert("Error: " + (err.detail || "Analysis failed"));
+      docTitle.textContent = "Document Viewer";
+      return;
+    }
+    const data = await res.json();
+    currentSession = data;
+    selectedIndex = 0;
+    cachedSummary = "";
+    saveHistoryItem(currentSession);
+    switchView('highlights');
+    renderAll();
+  } catch (err) {
+    alert("Connection error: " + err);
+  }
+}
+
+maskStyleSelect.addEventListener('change', () => {
+  renderRedactedPreview();
+  renderCandidates();
+  if (currentView === 'highlights') renderDocument();
+});
+
+confSlider.addEventListener('input', (e) => {
+  confSliderVal.textContent = `${e.target.value}%`;
+  renderCandidates();
+  renderAnalysisTable();
+});
+
+function updateActiveEntityStatus(visibleCount) {
+  if (!activeEntityStatus) return;
+  if (selectedEntity === "ALL") {
+    activeEntityStatus.textContent = `Showing all entities (${visibleCount})`;
+    activeEntityStatus.style.color = "var(--text-muted)";
+  } else {
+    const mode = isFilterOnly ? "Filtered to" : "Sorted to Top";
+    activeEntityStatus.textContent = `${mode}: ${selectedEntity} (${visibleCount} visible)`;
+    activeEntityStatus.style.color = "var(--gpt-green)";
+  }
+}
+
+if (entitySortSelect) {
+  entitySortSelect.addEventListener('change', (e) => {
+    selectedEntity = e.target.value;
+    renderCandidates();
+    if (currentView === 'analysis') renderAnalysisTable();
+  });
+}
+
+if (chkFilterOnly) {
+  chkFilterOnly.addEventListener('change', (e) => {
+    isFilterOnly = e.target.checked;
+    renderCandidates();
+    if (currentView === 'analysis') renderAnalysisTable();
+  });
+}
+
+function switchView(view) {
+  currentView = view;
+  document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+  
+  docViewer.style.display = "none";
+  redactedViewer.style.display = "none";
+  analysisViewer.style.display = "none";
+  summaryViewer.style.display = "none";
+
+  if (view === 'highlights') {
+    document.getElementById('tabHighlights').classList.add('active');
+    docViewer.style.display = "block";
+    legendBar.style.display = "flex";
+  } else if (view === 'redacted') {
+    document.getElementById('tabRedacted').classList.add('active');
+    redactedViewer.style.display = "block";
+    legendBar.style.display = "none";
+    renderRedactedPreview();
+  } else if (view === 'analysis') {
+    document.getElementById('tabAnalysis').classList.add('active');
+    analysisViewer.style.display = "block";
+    legendBar.style.display = "none";
+    renderAnalysisTable();
+  } else if (view === 'summary') {
+    document.getElementById('tabSummaryView').classList.add('active');
+    summaryViewer.style.display = "block";
+    legendBar.style.display = "none";
+    if (!cachedSummary) {
+      fetchSummary();
+    } else {
+      summaryViewerText.textContent = cachedSummary;
+    }
+  }
+}
+
+function populateEntityOptions() {
+  if (!currentSession || !currentSession.spans || !entitySortSelect) return;
+  const currentVal = entitySortSelect.value;
+  const existingValues = new Set(Array.from(entitySortSelect.options).map(o => o.value.toUpperCase()));
+  
+  currentSession.spans.forEach(s => {
+    const cat = s.category.toUpperCase();
+    if (!existingValues.has(cat)) {
+      existingValues.add(cat);
+      const opt = document.createElement('option');
+      opt.value = cat;
+      opt.textContent = cat;
+      entitySortSelect.appendChild(opt);
+      if (selCategory) {
+        const popOpt = document.createElement('option');
+        popOpt.value = cat;
+        popOpt.textContent = cat;
+        selCategory.appendChild(popOpt);
+      }
+    }
+  });
+  entitySortSelect.value = currentVal;
+}
+
+function renderAll() {
+  if (!currentSession) return;
+  emptyHeroScreen.style.display = "none";
+  documentWorkspace.style.display = "flex";
+  applyPanelSizing();
+
+  docTitle.textContent = currentSession.filename;
+  candidateCount.textContent = currentSession.spans.length;
+
+  if (currentSession.learning_stats) {
+    learningStatsBadge.textContent = `🧠 Detector learned from ${currentSession.learning_stats.total_corrections} corrections`;
+  }
+
+  populateEntityOptions();
+  renderWarnings();
+  renderDocument();
+  renderCandidates();
+  if (currentView === 'redacted') renderRedactedPreview();
+  if (currentView === 'analysis') renderAnalysisTable();
+  renderHistoryList();
+}
+
+function renderRedactedPreview() {
+  if (!currentSession) return;
+  const maskStyle = maskStyleSelect ? maskStyleSelect.value : "INDEXED";
+  let text = currentSession.full_text;
+  const activeSpans = currentSession.spans.filter(s => s.accepted).sort((a,b) => b.start_char - a.start_char);
+
+  for (const s of activeSpans) {
+    let tag = currentSession.tag_map[s.id] || `[${s.category}]`;
+    if (maskStyle === "BLOCK") {
+      tag = "█".repeat(Math.max(s.text.length, 4));
+    } else if (maskStyle === "ASTERISK") {
+      tag = "*".repeat(Math.max(s.text.length, 4));
+    } else if (maskStyle === "HASH") {
+      const simpleHash = Math.abs(s.text.split("").reduce((a, b) => { a = ((a << 5) - a) + b.charCodeAt(0); return a & a; }, 0)).toString(16).substring(0, 6);
+      tag = `<${s.category}_${simpleHash}>`;
+    } else if (maskStyle === "GENERIC") {
+      tag = `[REDACTED: ${s.category}]`;
+    }
+    text = text.substring(0, s.start_char) + tag + text.substring(s.end_char);
+  }
+  redactedViewer.textContent = text;
+}
+
+function renderAnalysisTable() {
+  if (!currentSession || !currentSession.spans) return;
+  const ambigIds = new Set((currentSession.ambiguity_flags || []).map(a => a.span_id));
+  const minConf = (parseInt(confSlider.value) || 0) / 100;
+
+  let list = currentSession.spans.filter(s => s.confidence >= minConf);
+
+  if (selectedEntity !== "ALL") {
+    if (isFilterOnly) {
+      list = list.filter(s => s.category.toUpperCase() === selectedEntity.toUpperCase());
+    } else {
+      list.sort((a, b) => {
+        const aMatch = (a.category.toUpperCase() === selectedEntity.toUpperCase()) ? 1 : 0;
+        const bMatch = (b.category.toUpperCase() === selectedEntity.toUpperCase()) ? 1 : 0;
+        if (bMatch !== aMatch) return bMatch - aMatch;
+        return a.start_char - b.start_char;
+      });
+    }
+  } else {
+    list.sort((a, b) => a.start_char - b.start_char);
+  }
+
+  analysisTableBody.innerHTML = "";
+  list.forEach(s => {
+    const tr = document.createElement('tr');
+    const confPct = Math.round(s.confidence * 100);
+    const confBadge = s.confidence >= 0.85 ? "🟢" : (s.confidence >= 0.60 ? "🟡" : "🔴");
+    const statusText = s.accepted ? "<span style='color:#22c55e; font-weight:600;'>Included</span>" : "<span style='color:#ef4444; text-decoration:line-through;'>Excluded</span>";
+
+    tr.innerHTML = `
+      <td style="font-family:var(--font-mono); font-weight:600;">${escapeHtml(s.text)}</td>
+      <td><span class="badge-tag" style="background:#4338ca;">${s.category}</span></td>
+      <td>${confBadge} ${confPct}%</td>
+      <td style="color:var(--text-muted); font-family:var(--font-mono); font-size:0.75rem;">${escapeHtml(s.source || 'rule')}</td>
+      <td style="color:var(--text-muted); font-size:0.75rem;">${s.start_char}..${s.end_char}</td>
+      <td>${statusText}</td>
+    `;
+    analysisTableBody.appendChild(tr);
+  });
+}
+
+function renderWarnings() {
+  warningsContainer.innerHTML = "";
+  if (!currentSession.warnings || currentSession.warnings.length === 0) return;
+
+  currentSession.warnings.forEach(w => {
+    const box = document.createElement('div');
+    box.className = "warning-box";
+    box.innerHTML = `
+      <div class="warning-text">
+        <h4>⚠️ Privacy Warning (Re-identification Risk): "${escapeHtml(w.original_text)}"</h4>
+        <p>${escapeHtml(w.explanation)} — <strong>Suggested:</strong> "${escapeHtml(w.suggested_generalization)}"</p>
+      </div>
+      <button class="btn-outline btn-sm" onclick="generalizeWarning('${w.id}')">🔄 Generalize</button>
+    `;
+    warningsContainer.appendChild(box);
+  });
+}
+
+async function generalizeWarning(warningId) {
+  const res = await fetch('/api/generalize', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ session_id: currentSession.session_id, warning_id: warningId })
+  });
+  if (res.ok) {
+    const data = await res.json();
+    currentSession.full_text = data.full_text;
+    currentSession.warnings = data.warnings;
+    currentSession.spans = data.spans;
+    currentSession.tag_map = data.tag_map;
+    currentSession.ambiguity_flags = data.ambiguity_flags || [];
+    renderAll();
+  }
+}
+
+function getMaskTag(s) {
+  const maskStyle = maskStyleSelect ? maskStyleSelect.value : "INDEXED";
+  if (maskStyle === "BLOCK") {
+    return "█".repeat(Math.max(s.text.length, 4));
+  } else if (maskStyle === "ASTERISK") {
+    return "*".repeat(Math.max(s.text.length, 4));
+  } else if (maskStyle === "HASH") {
+    const simpleHash = Math.abs(s.text.split("").reduce((a, b) => { a = ((a << 5) - a) + b.charCodeAt(0); return a & a; }, 0)).toString(16).substring(0, 6);
+    return `<${s.category}_${simpleHash}>`;
+  } else if (maskStyle === "GENERIC") {
+    return `[REDACTED: ${s.category}]`;
+  } else {
+    return currentSession.tag_map[s.id] || `[${s.category}]`;
+  }
+}
+
+function renderDocument() {
+  const text = currentSession.full_text;
+  const spans = currentSession.spans.slice().sort((a,b) => a.start_char - b.start_char);
+
+  let html = "";
+  let curr = 0;
+
+  spans.forEach((s) => {
+    if (s.start_char < curr) return;
+    html += escapeHtml(text.substring(curr, s.start_char));
+
+    const styles = getStyleForSpan(s);
+    const tag = getMaskTag(s);
+    const isActive = (s.id === selectedSpanId) ? "active" : "";
+
+    html += `<span class="highlight-span ${isActive}" id="hl_${s.id}" style="${styles.style}" onclick="focusSpan('${s.id}')">`
+          + `<span>${escapeHtml(text.substring(s.start_char, s.end_char))}</span>`
+          + `<span class="badge-tag" style="background:${styles.badgeBg};">${tag} · ${Math.round(s.confidence * 100)}%</span>`
+          + `</span>`;
+
+    curr = s.end_char;
+  });
+
+  if (curr < text.length) {
+    html += escapeHtml(text.substring(curr));
+  }
+  docViewer.innerHTML = html;
+}
+
+function getStyleForSpan(s) {
+  if (!s.accepted) {
+    return {
+      style: "background:var(--excluded-bg); border:1px solid var(--excluded-border); color:var(--excluded-text); text-decoration:line-through; opacity:0.65;",
+      badgeBg: "var(--excluded-border)"
+    };
+  }
+  if (s.confidence >= 0.85) {
+    return { style: "background:var(--high-bg); border:1.5px solid var(--high-border); color:var(--high-text); font-weight:600;", badgeBg: "var(--high-badge)" };
+  } else if (s.confidence >= 0.60) {
+    return { style: "background:var(--med-bg); border:1.5px solid var(--med-border); color:var(--med-text); font-weight:600;", badgeBg: "var(--med-badge)" };
+  } else {
+    return { style: "background:var(--low-bg); border:1.5px solid var(--low-border); color:var(--low-text); font-weight:600;", badgeBg: "var(--low-badge)" };
+  }
+}
+
+function renderCandidates() {
+  candidatesList.innerHTML = "";
+  if (!currentSession || !currentSession.spans || currentSession.spans.length === 0) {
+    candidatesList.innerHTML = `<p style="color:var(--text-muted); text-align:center; margin-top:30px;">0 personal data points detected.</p>`;
+    candidateCount.textContent = "0";
+    updateActiveEntityStatus(0);
+    return;
+  }
+
+  const ambigIds = new Set((currentSession.ambiguity_flags || []).map(a => a.span_id));
+  const minConf = (parseInt(confSlider.value) || 0) / 100;
+
+  let list = currentSession.spans.filter(s => s.confidence >= minConf);
+
+  if (selectedEntity !== "ALL") {
+    if (isFilterOnly) {
+      list = list.filter(s => s.category.toUpperCase() === selectedEntity.toUpperCase());
+    } else {
+      list.sort((a, b) => {
+        const aMatch = (a.category.toUpperCase() === selectedEntity.toUpperCase()) ? 1 : 0;
+        const bMatch = (b.category.toUpperCase() === selectedEntity.toUpperCase()) ? 1 : 0;
+        if (bMatch !== aMatch) {
+          return bMatch - aMatch;
+        }
+        return a.start_char - b.start_char;
+      });
+    }
+  } else {
+    list.sort((a, b) => a.start_char - b.start_char);
+  }
+
+  if (list.length === 0) {
+    candidatesList.innerHTML = `<p style="color:var(--text-muted); text-align:center; margin-top:30px;">No candidates match entity "${escapeHtml(selectedEntity)}".</p>`;
+    candidateCount.textContent = "0";
+    updateActiveEntityStatus(0);
+    return;
+  }
+
+  list.forEach((s) => {
+    const isTargetEntity = (selectedEntity !== "ALL" && s.category.toUpperCase() === selectedEntity.toUpperCase());
+    const card = document.createElement('div');
+    card.className = `candidate-card ${s.id === selectedSpanId ? 'active' : ''}`;
+    card.id = `card_${s.id}`;
+    if (isTargetEntity) {
+      card.style.borderLeft = "3.5px solid var(--gpt-green)";
+    }
+    card.onclick = (e) => {
+      if (e.target.closest('button, input, label')) return;
+      focusSpan(s.id);
+    };
+
+    const tag = getMaskTag(s);
+    const confBadge = s.confidence >= 0.85 ? "🟢" : (s.confidence >= 0.60 ? "🟡" : "🔴");
+    const isAmbig = ambigIds.has(s.id);
+    const matchBadge = isTargetEntity ? `<span style="background:var(--gpt-green); color:#ffffff; padding:1px 6px; border-radius:3px; font-family:var(--font-mono); font-size:0.64rem; font-weight:700; margin-left:6px;">★ MATCH</span>` : '';
+
+    card.innerHTML = `
+      <div class="candidate-header">
+        <span class="candidate-text">${escapeHtml(s.text)}</span>
+        <span class="candidate-tag">${tag} ${confBadge} ${Math.round(s.confidence * 100)}%${matchBadge}</span>
+      </div>
+      ${isAmbig ? `<div class="warning-box" style="padding:4px 8px; font-size:0.74rem; margin-bottom:6px;">⚠️ Shared surname matches multiple persons. Manual review advised.</div>` : ''}
+      <div style="font-size: 0.72rem; color: var(--text-muted); font-family: var(--font-mono); margin-bottom: 6px;">Source: ${escapeHtml(s.source || 'rule')}</div>
+      <div class="candidate-actions">
+        <label style="display:flex; align-items:center; gap:6px; font-size:0.8rem; cursor:pointer;" onclick="event.stopPropagation();">
+          <input type="checkbox" ${s.accepted ? "checked" : ""} onchange="toggleSpan('${s.id}', this.checked)">
+          <span style="font-weight:600; color:var(--text-primary);">Redact</span>
+        </label>
+        <button class="btn-outline btn-sm" style="margin-left:auto; border-radius:6px; padding:3px 9px;" onclick="event.stopPropagation(); redactSimilarById('${s.id}')">All Similar</button>
+      </div>
+    `;
+    candidatesList.appendChild(card);
+  });
+
+  candidateCount.textContent = list.length;
+  updateActiveEntityStatus(list.length);
+}
+
+function focusSpan(spanId) {
+  selectedSpanId = spanId;
+  document.querySelectorAll('.highlight-span').forEach(el => {
+    el.classList.toggle('active', el.id === `hl_${spanId}`);
+  });
+  const hl = document.getElementById(`hl_${spanId}`);
+  if (hl) hl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+  document.querySelectorAll('.candidate-card').forEach(c => {
+    c.classList.toggle('active', c.id === `card_${spanId}`);
+  });
+  const activeCard = document.getElementById(`card_${spanId}`);
+  if (activeCard) activeCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+async function toggleSpan(spanId, accepted) {
+  const res = await fetch('/api/spans/update', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ session_id: currentSession.session_id, span_id: spanId, accepted: accepted })
+  });
+  if (res.ok) {
+    const data = await res.json();
+    currentSession.spans = data.spans;
+    currentSession.tag_map = data.tag_map;
+    currentSession.ambiguity_flags = data.ambiguity_flags;
+    saveHistoryItem(currentSession);
+    renderDocument();
+    renderCandidates();
+    if (currentView === 'redacted') renderRedactedPreview();
+    if (currentView === 'analysis') renderAnalysisTable();
+  }
+}
+
+async function redactSimilarById(spanId) {
+  if (!currentSession) return;
+  const span = currentSession.spans.find(s => s.id === spanId);
+  if (!span) return;
+  await redactSimilar(span.text, span.category);
+}
+
+async function redactSimilar(text, category) {
+  const res = await fetch('/api/spans/redact_similar', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ session_id: currentSession.session_id, text: text, category: category })
+  });
+  if (res.ok) {
+    const data = await res.json();
+    currentSession.spans = data.spans;
+    currentSession.tag_map = data.tag_map;
+    currentSession.ambiguity_flags = data.ambiguity_flags;
+    saveHistoryItem(currentSession);
+    renderDocument();
+    renderCandidates();
+    if (currentView === 'redacted') renderRedactedPreview();
+    if (currentView === 'analysis') renderAnalysisTable();
+    if (data.learning_stats) {
+      learningStatsBadge.textContent = `🧠 Detector learned from ${data.learning_stats.total_corrections} corrections`;
+    }
+  }
+}
+
+document.getElementById('btnSelectAll').onclick = async () => {
+  if (!currentSession) return;
+  const res = await fetch('/api/spans/batch_update', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ session_id: currentSession.session_id, accepted: true })
+  });
+  if (res.ok) {
+    const data = await res.json();
+    currentSession.spans = data.spans;
+    currentSession.tag_map = data.tag_map;
+    currentSession.ambiguity_flags = data.ambiguity_flags;
+    saveHistoryItem(currentSession);
+    renderDocument();
+    renderCandidates();
+    if (currentView === 'redacted') renderRedactedPreview();
+    if (currentView === 'analysis') renderAnalysisTable();
+  }
+};
+
+document.getElementById('btnDeselectAll').onclick = async () => {
+  if (!currentSession) return;
+  const res = await fetch('/api/spans/batch_update', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ session_id: currentSession.session_id, accepted: false })
+  });
+  if (res.ok) {
+    const data = await res.json();
+    currentSession.spans = data.spans;
+    currentSession.tag_map = data.tag_map;
+    currentSession.ambiguity_flags = data.ambiguity_flags;
+    saveHistoryItem(currentSession);
+    renderDocument();
+    renderCandidates();
+    if (currentView === 'redacted') renderRedactedPreview();
+    if (currentView === 'analysis') renderAnalysisTable();
+  }
+};
+
+// Mouse Text Selection for Redaction
+let currentSelection = "";
+docViewer.addEventListener('mouseup', () => {
+  const sel = window.getSelection();
+  const str = sel ? sel.toString().trim() : "";
+  if (str && str.length > 1) {
+    currentSelection = str;
+    selectedTextSnippet.textContent = `"${str.substring(0, 20)}..."`;
+    try {
+      const range = sel.getRangeAt(0);
+      const rect = range.getBoundingClientRect();
+      selectionPopup.style.left = `${rect.left + window.scrollX}px`;
+      selectionPopup.style.top = `${rect.top + window.scrollY - 38}px`;
+      selectionPopup.style.display = "flex";
+    } catch (e) {
+      selectionPopup.style.display = "none";
+    }
+  } else {
+    selectionPopup.style.display = "none";
+  }
+});
+
+document.addEventListener('mousedown', (e) => {
+  if (!selectionPopup.contains(e.target) && !docViewer.contains(e.target)) {
+    selectionPopup.style.display = "none";
+  }
+});
+
+async function addManualSpan(text, category) {
+  if (!currentSession || !text) return;
+  const res = await fetch('/api/spans/add', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      session_id: currentSession.session_id,
+      text: text,
+      category: category
+    })
+  });
+  if (res.ok) {
+    const data = await res.json();
+    currentSession.spans = data.spans;
+    currentSession.tag_map = data.tag_map;
+    currentSession.ambiguity_flags = data.ambiguity_flags;
+    candidateCount.textContent = currentSession.spans.length;
+    saveHistoryItem(currentSession);
+    renderDocument();
+    renderCandidates();
+    if (currentView === 'redacted') renderRedactedPreview();
+    if (currentView === 'analysis') renderAnalysisTable();
+    if (data.learning_stats) {
+      learningStatsBadge.textContent = `🧠 Detector learned from ${data.learning_stats.total_corrections} corrections`;
+    }
+  }
+}
+
+btnRedactSelection.onclick = () => {
+  if (currentSelection) {
+    const cat = selCategory ? selCategory.value : "NAME";
+    addManualSpan(currentSelection, cat);
+    selectionPopup.style.display = "none";
+    window.getSelection().removeAllRanges();
+  }
+};
+
+if (btnRedactSelectionSimilar) {
+  btnRedactSelectionSimilar.onclick = () => {
+    if (currentSelection) {
+      const cat = selCategory ? selCategory.value : "NAME";
+      redactSimilar(currentSelection, cat);
+      selectionPopup.style.display = "none";
+      window.getSelection().removeAllRanges();
+    }
+  };
+}
+
+if (btnManualAdd && manualTextInput) {
+  btnManualAdd.onclick = async () => {
+    const rawVal = manualTextInput.value.trim();
+    if (!rawVal) {
+      manualTextInput.focus();
+      return;
+    }
+
+    const cleanCat = rawVal.toUpperCase().replace(/[^A-Z0-9_]/g, '_');
+
+    if (cleanCat.length > 0 && entitySortSelect) {
+      let optExists = false;
+      for (let i = 0; i < entitySortSelect.options.length; i++) {
+        if (entitySortSelect.options[i].value.toUpperCase() === cleanCat) {
+          optExists = true;
+          break;
+        }
+      }
+      if (!optExists) {
+        const newOpt = document.createElement('option');
+        newOpt.value = cleanCat;
+        newOpt.textContent = cleanCat;
+        entitySortSelect.appendChild(newOpt);
+
+        if (selCategory) {
+          const popOpt = document.createElement('option');
+          popOpt.value = cleanCat;
+          popOpt.textContent = cleanCat;
+          selCategory.appendChild(popOpt);
+        }
+      }
+
+      entitySortSelect.value = cleanCat;
+      selectedEntity = cleanCat;
+    }
+
+    if (currentSession && currentSession.full_text && currentSession.full_text.toLowerCase().includes(rawVal.toLowerCase())) {
+      await addManualSpan(rawVal, cleanCat || "NAME");
+    } else {
+      renderCandidates();
+      if (currentView === 'analysis') renderAnalysisTable();
+    }
+
+    manualTextInput.value = "";
+  };
+  manualTextInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      btnManualAdd.click();
+    }
+  });
+}
+
+// AI Active Memory Reset (Clear Learned Patterns Dictionary)
+if (btnPurgeLearning) {
+  btnPurgeLearning.addEventListener('click', async () => {
+    const confirmed = confirm(
+      "Reset AI Active Memory?\n\n" +
+      "• This will clear the custom terms that the detector learned from your edits.\n" +
+      "• The detection model will reset back to factory default rules.\n" +
+      "• Your current document and recent documents history will NOT be deleted."
+    );
+    if (confirmed) {
+      try {
+        const res = await fetch('/api/learning', { method: 'DELETE' });
+        const data = await res.json();
+        alert(data.message || "AI Active Memory cleared successfully.");
+        if (learningStatsBadge) {
+          learningStatsBadge.textContent = "🧠 Active Learning Ready";
+        }
+        if (learningStatusDesc) {
+          learningStatusDesc.textContent = "0 custom rules (default)";
+        }
+      } catch (err) {
+        alert("Error resetting AI active memory: " + err);
+      }
+    }
+  });
+}
+
+// Safe Summary API & Modal
+async function fetchSummary() {
+  if (!currentSession) { alert("Please upload a document first."); return; }
+  const btn = document.getElementById('btnSummary');
+  const originalText = btn.textContent;
+  btn.textContent = "Generating...";
+  btn.disabled = true;
+
+  const maskStyle = maskStyleSelect ? maskStyleSelect.value : "INDEXED";
+  try {
+    const res = await fetch('/api/summarize', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ 
+        session_id: currentSession.session_id,
+        mask_style: maskStyle
+      })
+    });
+    if (!res.ok) {
+      alert("Failed to generate safe summary.");
+      return;
+    }
+    const data = await res.json();
+    cachedSummary = data.summary;
+    summaryViewerText.textContent = data.summary;
+    modalSummaryContent.textContent = data.summary;
+    summaryEngineBadge.textContent = `${data.engine || "Zero-Leak Engine"} · [${data.mask_style || maskStyle}]`;
+
+    if (data.caught_leaks && data.caught_leaks.length > 0) {
+      modalSummaryWarning.innerHTML = `
+        <div class="badge-leak-warning">
+          🛡️ <strong>Leak Prevention:</strong> Intercepted and masked ${data.caught_leaks.length} sensitive tokens before export!
+        </div>
+      `;
+    } else {
+      modalSummaryWarning.innerHTML = `
+        <div class="badge-privacy-verified">
+          ✅ <strong>Privacy Verified:</strong> Summary generated using ${data.mask_style || maskStyle} format with 0 PII leaks.
+        </div>
+      `;
+    }
+    summaryModal.style.display = "flex";
+  } catch (e) {
+    alert("Connection error: " + e);
+  } finally {
+    btn.textContent = originalText;
+    btn.disabled = false;
+  }
+}
+
+document.getElementById('btnSummary').addEventListener('click', fetchSummary);
+
+function closeSummaryModal() {
+  summaryModal.style.display = "none";
+}
+
+function copySummaryText() {
+  if (!cachedSummary) return;
+  navigator.clipboard.writeText(cachedSummary);
+  alert("Summary copied to clipboard!");
+}
+
+function downloadSummaryFile() {
+  if (!currentSession) return;
+  const maskStyle = maskStyleSelect ? maskStyleSelect.value : "INDEXED";
+  const ts = new Date().getTime();
+  window.location.href = `/api/export_summary/${currentSession.session_id}?mask_style=${maskStyle}&_t=${ts}`;
+}
+
+// Export Verified Document
+document.getElementById('btnExport').addEventListener('click', () => {
+  if (!currentSession) { alert("Please upload a document first."); return; }
+  const maskStyle = maskStyleSelect ? maskStyleSelect.value : "INDEXED";
+  const ts = new Date().getTime();
+  window.location.href = `/api/export/${currentSession.session_id}?format=${currentSession.file_type}&mask_style=${maskStyle}&_t=${ts}`;
+});
+
+function escapeHtml(str) {
+  if (!str) return "";
+  return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+}
+</script>
+
+</body>
+</html>

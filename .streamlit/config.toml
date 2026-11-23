@@ -1,0 +1,13 @@
+[browser]
+gatherUsageStats = false
+serverAddress = "127.0.0.1"
+
+[server]
+headless = true
+enableCORS = false
+enableXsrfProtection = true
+port = 8501
+
+[theme]
+base = "light"
+primaryColor = "#4f46e5"

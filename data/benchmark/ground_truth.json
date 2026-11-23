@@ -1,0 +1,584 @@
+{
+  "doc_01_meeting_notes.txt": {
+    "text": "EXECUTIVE STRATEGY MEETING NOTES\nDate: October 14, 2024\nAttendees: Richa Sharma (Head of Product), R. Sharma (Acting Lead), Vikram Malhotra (Engineering)\nProject Reference: PX-2024-77\nRelease Date: 15/11/2024\n\nDiscussion Points:\n1. The sprint velocity for PX-2024-77 has improved.\n2. Richa Sharma will coordinate with customer success regarding pilot feedback.\n3. Contact email for escalations: richa.sharma@enterprise.in or call +91 98230 11223.\n4. Next sync scheduled for next Tuesday at 10:00 AM.",
+    "spans": [
+      {
+        "text": "Richa Sharma",
+        "type": "NAME",
+        "start_char": 67,
+        "end_char": 79
+      },
+      {
+        "text": "Richa Sharma",
+        "type": "NAME",
+        "start_char": 284,
+        "end_char": 296
+      },
+      {
+        "text": "R. Sharma",
+        "type": "NAME",
+        "start_char": 99,
+        "end_char": 108
+      },
+      {
+        "text": "Vikram Malhotra",
+        "type": "NAME",
+        "start_char": 124,
+        "end_char": 139
+      },
+      {
+        "text": "richa.sharma@enterprise.in",
+        "type": "EMAIL",
+        "start_char": 395,
+        "end_char": 421
+      },
+      {
+        "text": "+91 98230 11223",
+        "type": "PHONE",
+        "start_char": 430,
+        "end_char": 445
+      }
+    ]
+  },
+  "doc_02_medical_intake.txt": {
+    "text": "PATIENT CLINICAL INTAKE\nDate: 12-05-2024\nPatient Name: Anand Kulkarni\nDate of Birth: 1985-08-22\nAadhaar Number: 3678 4590 1234\nMobile: +91 94220 54321\nAddress: 12 Shivaji Nagar, Pune, MH 411005\nVitals: BP 120/80 mmHg, Pulse 72 bpm. Ref # MED-8891.",
+    "spans": [
+      {
+        "text": "Anand Kulkarni",
+        "type": "NAME",
+        "start_char": 55,
+        "end_char": 69
+      },
+      {
+        "text": "3678 4590 1234",
+        "type": "ID",
+        "start_char": 112,
+        "end_char": 126
+      },
+      {
+        "text": "+91 94220 54321",
+        "type": "PHONE",
+        "start_char": 135,
+        "end_char": 150
+      },
+      {
+        "text": "12 Shivaji Nagar, Pune, MH 411005",
+        "type": "ADDRESS",
+        "start_char": 160,
+        "end_char": 193
+      }
+    ]
+  },
+  "doc_03_vendor_invoice.txt": {
+    "text": "VENDOR INVOICE\nInvoice No: INV-2024-9982\nDate: 2024-09-30\nVendor: Acme Solutions Pvt Ltd\nContact: Rajesh Gupta\nEmail: accounts@acmesolutions.com\nAccount Number: 981273645102\nProduct Code: PX-2024-77\nAmount Due: INR 45,000",
+    "spans": [
+      {
+        "text": "Rajesh Gupta",
+        "type": "NAME",
+        "start_char": 98,
+        "end_char": 110
+      },
+      {
+        "text": "accounts@acmesolutions.com",
+        "type": "EMAIL",
+        "start_char": 118,
+        "end_char": 144
+      },
+      {
+        "text": "981273645102",
+        "type": "ID",
+        "start_char": 161,
+        "end_char": 173
+      }
+    ]
+  },
+  "doc_04_offer_letter.txt": {
+    "text": "APPOINTMENT & OFFER LETTER\nCandidate: Priya Nair\nEmployee ID: EMP-9421\nPermanent Account Number (PAN): ABCPN1234K\nOfficial Contact: priya.nair@techfirm.co.in\nReporting Manager: Dr. Arvind Patel\nStart Date: 01-12-2024",
+    "spans": [
+      {
+        "text": "Priya Nair",
+        "type": "NAME",
+        "start_char": 38,
+        "end_char": 48
+      },
+      {
+        "text": "EMP-9421",
+        "type": "ID",
+        "start_char": 62,
+        "end_char": 70
+      },
+      {
+        "text": "ABCPN1234K",
+        "type": "ID",
+        "start_char": 103,
+        "end_char": 113
+      },
+      {
+        "text": "priya.nair@techfirm.co.in",
+        "type": "EMAIL",
+        "start_char": 132,
+        "end_char": 157
+      },
+      {
+        "text": "Dr. Arvind Patel",
+        "type": "NAME",
+        "start_char": 177,
+        "end_char": 193
+      }
+    ]
+  },
+  "doc_05_signature_block.txt": {
+    "text": "Sincerely and Respectfully,\n\nSunil Deshmukh\nManaging Director, Apex Logistics\nDirect Tel: 020-25678901\nObfuscated Email: sunil.deshmukh [at] apexlogistics [dot] com\nOffice: 404 Senapati Bapat Marg, Pune, MH 411016",
+    "spans": [
+      {
+        "text": "Sunil Deshmukh",
+        "type": "NAME",
+        "start_char": 29,
+        "end_char": 43
+      },
+      {
+        "text": "020-25678901",
+        "type": "PHONE",
+        "start_char": 90,
+        "end_char": 102
+      },
+      {
+        "text": "sunil.deshmukh [at] apexlogistics [dot] com",
+        "type": "EMAIL",
+        "start_char": 121,
+        "end_char": 164
+      },
+      {
+        "text": "404 Senapati Bapat Marg, Pune, MH 411016",
+        "type": "ADDRESS",
+        "start_char": 173,
+        "end_char": 213
+      }
+    ]
+  },
+  "doc_07_email_thread.txt": {
+    "text": "From: client.service [at] globalfin dot org\nTo: amit.joshi@bankcorp.in\nDate: November 2, 2024\nSubject: Verification of Beneficiary\n\nDear Amit Joshi,\nPlease confirm registration details for customer S. K. Rao.\nRegistered Phone: 9876543210\nCase Reference: CAS-443912.\nThank you.",
+    "spans": [
+      {
+        "text": "client.service [at] globalfin dot org",
+        "type": "EMAIL",
+        "start_char": 6,
+        "end_char": 43
+      },
+      {
+        "text": "amit.joshi@bankcorp.in",
+        "type": "EMAIL",
+        "start_char": 48,
+        "end_char": 70
+      },
+      {
+        "text": "Amit Joshi",
+        "type": "NAME",
+        "start_char": 137,
+        "end_char": 147
+      },
+      {
+        "text": "S. K. Rao",
+        "type": "NAME",
+        "start_char": 198,
+        "end_char": 207
+      },
+      {
+        "text": "9876543210",
+        "type": "PHONE",
+        "start_char": 227,
+        "end_char": 237
+      }
+    ]
+  },
+  "doc_08_hr_incident.txt": {
+    "text": "INTERNAL HR REPORT - AMBIGUOUS SURNAME TEST\nDate: October 18, 2024\nOfficer: Deepa Menon\nEmployee A: Richa Sharma (Product Lead)\nEmployee B: Rajiv Sharma (Sales Executive)\nWitness: Sharma reported seeing the incident near Floor 3 elevator.\nContact Phone: +91 91234 56789",
+    "spans": [
+      {
+        "text": "Deepa Menon",
+        "type": "NAME",
+        "start_char": 76,
+        "end_char": 87
+      },
+      {
+        "text": "Richa Sharma",
+        "type": "NAME",
+        "start_char": 100,
+        "end_char": 112
+      },
+      {
+        "text": "Rajiv Sharma",
+        "type": "NAME",
+        "start_char": 140,
+        "end_char": 152
+      },
+      {
+        "text": "Sharma",
+        "type": "NAME",
+        "start_char": 106,
+        "end_char": 112
+      },
+      {
+        "text": "Sharma",
+        "type": "NAME",
+        "start_char": 146,
+        "end_char": 152
+      },
+      {
+        "text": "Sharma",
+        "type": "NAME",
+        "start_char": 180,
+        "end_char": 186
+      },
+      {
+        "text": "+91 91234 56789",
+        "type": "PHONE",
+        "start_char": 254,
+        "end_char": 269
+      }
+    ]
+  },
+  "doc_09_bank_statement.txt": {
+    "text": "HDFC BANK CUSTOMER ADVICE\nAccount Holder: Meera Sen\nSavings Account: 50100234567890\nPAN: ABCPS5678M\nBranch: MG Road, Bangalore, KA 560001\nDate of Transaction: 2024-10-15\nTransaction Reference: TXN-998822114",
+    "spans": [
+      {
+        "text": "Meera Sen",
+        "type": "NAME",
+        "start_char": 42,
+        "end_char": 51
+      },
+      {
+        "text": "50100234567890",
+        "type": "ID",
+        "start_char": 69,
+        "end_char": 83
+      },
+      {
+        "text": "ABCPS5678M",
+        "type": "ID",
+        "start_char": 89,
+        "end_char": 99
+      },
+      {
+        "text": "MG Road, Bangalore, KA 560001",
+        "type": "ADDRESS",
+        "start_char": 108,
+        "end_char": 137
+      }
+    ]
+  },
+  "doc_10_consulting_agreement.txt": {
+    "text": "INDEPENDENT CONSULTING AGREEMENT\nThis agreement is made between Nova Analytics and the CFO of a Pune-based firm,\noperating under legal identification number AADHAAR 4589 1234 9012.\nSignee: R. Sharma\nEmail: r.sharma@consultant.in\nNotice Address: 88 Bund Garden Road, Pune, MH 411001",
+    "spans": [
+      {
+        "text": "4589 1234 9012",
+        "type": "ID",
+        "start_char": 165,
+        "end_char": 179
+      },
+      {
+        "text": "R. Sharma",
+        "type": "NAME",
+        "start_char": 189,
+        "end_char": 198
+      },
+      {
+        "text": "r.sharma@consultant.in",
+        "type": "EMAIL",
+        "start_char": 206,
+        "end_char": 228
+      },
+      {
+        "text": "88 Bund Garden Road, Pune, MH 411001",
+        "type": "ADDRESS",
+        "start_char": 245,
+        "end_char": 281
+      }
+    ]
+  },
+  "doc_11_landline_inquiry.txt": {
+    "text": "CUSTOMER SUPPORT DESK CALL LOG\nTicket: TCK-89102\nCaller: Suresh Iyer\nRegistered Landline: 022-24123456\nRegistered Mobile: +91 98200 98200\nQuery: Issue with home delivery to Flat 101, Palm Court, Mumbai, MH 400050.\nAgent ID: AGT-551",
+    "spans": [
+      {
+        "text": "Suresh Iyer",
+        "type": "NAME",
+        "start_char": 57,
+        "end_char": 68
+      },
+      {
+        "text": "022-24123456",
+        "type": "PHONE",
+        "start_char": 90,
+        "end_char": 102
+      },
+      {
+        "text": "+91 98200 98200",
+        "type": "PHONE",
+        "start_char": 122,
+        "end_char": 137
+      },
+      {
+        "text": "Flat 101, Palm Court, Mumbai, MH 400050",
+        "type": "ADDRESS",
+        "start_char": 173,
+        "end_char": 212
+      }
+    ]
+  },
+  "doc_12_executive_bio.txt": {
+    "text": "SPEAKER PROFILE\nName: Tanvi Rao\nDesignation: Vice President at a Mumbai fintech startup\nContact: tanvi.rao [at] fintechleaders dot org\nMobile: +91 98111 22334\nBiography: Tanvi has 15 years experience leading payment gateway security.",
+    "spans": [
+      {
+        "text": "Tanvi Rao",
+        "type": "NAME",
+        "start_char": 22,
+        "end_char": 31
+      },
+      {
+        "text": "tanvi.rao [at] fintechleaders dot org",
+        "type": "EMAIL",
+        "start_char": 97,
+        "end_char": 134
+      },
+      {
+        "text": "+91 98111 22334",
+        "type": "PHONE",
+        "start_char": 143,
+        "end_char": 158
+      }
+    ]
+  },
+  "doc_13_patient_discharge.txt": {
+    "text": "DISCHARGE ADVICE\nPatient: Rohan Roy\nAttending Doctor: Dr. Arvind Patel\nEmergency Contact: +91 99887 76655\nDischarge Date: 18-11-2024\nPrescribed: Tab Paracetamol 650mg TDS x 3 days.\nHospital Registration: HOSP-44120",
+    "spans": [
+      {
+        "text": "Rohan Roy",
+        "type": "NAME",
+        "start_char": 26,
+        "end_char": 35
+      },
+      {
+        "text": "Dr. Arvind Patel",
+        "type": "NAME",
+        "start_char": 54,
+        "end_char": 70
+      },
+      {
+        "text": "+91 99887 76655",
+        "type": "PHONE",
+        "start_char": 90,
+        "end_char": 105
+      }
+    ]
+  },
+  "doc_14_lease_agreement.txt": {
+    "text": "RESIDENTIAL LEASE SUMMARY\nLandlord: Mohan Lal\nTenant: Richa Sharma\nLeased Premises: 204 Kalyani Nagar, Pune, MH 411014\nSecurity Deposit: INR 75,000\nTenant Phone: +91 98230 11223\nTenant Email: richa.sharma@personalmail.org",
+    "spans": [
+      {
+        "text": "Mohan Lal",
+        "type": "NAME",
+        "start_char": 36,
+        "end_char": 45
+      },
+      {
+        "text": "Richa Sharma",
+        "type": "NAME",
+        "start_char": 54,
+        "end_char": 66
+      },
+      {
+        "text": "204 Kalyani Nagar, Pune, MH 411014",
+        "type": "ADDRESS",
+        "start_char": 84,
+        "end_char": 118
+      },
+      {
+        "text": "+91 98230 11223",
+        "type": "PHONE",
+        "start_char": 162,
+        "end_char": 177
+      },
+      {
+        "text": "richa.sharma@personalmail.org",
+        "type": "EMAIL",
+        "start_char": 192,
+        "end_char": 221
+      }
+    ]
+  },
+  "doc_15_travel_itinerary.txt": {
+    "text": "AIRLINE PASSENGER ITINERARY\nPassenger: Alok Kumar\nBooking Reference: PNR-78AZ9\nFrequent Flyer ID: FF-990218\nEmail: alok.kumar@airtravel.com\nMobile: 9845012345\nFlight: AI-804 from DEL to PNQ on 2024-11-25",
+    "spans": [
+      {
+        "text": "Alok Kumar",
+        "type": "NAME",
+        "start_char": 39,
+        "end_char": 49
+      },
+      {
+        "text": "FF-990218",
+        "type": "ID",
+        "start_char": 98,
+        "end_char": 107
+      },
+      {
+        "text": "alok.kumar@airtravel.com",
+        "type": "EMAIL",
+        "start_char": 115,
+        "end_char": 139
+      },
+      {
+        "text": "9845012345",
+        "type": "PHONE",
+        "start_char": 148,
+        "end_char": 158
+      }
+    ]
+  },
+  "doc_16_performance_review.txt": {
+    "text": "ANNUAL APPRAISAL REVIEW\nEmployee Name: Sneha Bhatt\nEmployee Code: EMP-7721\nPAN Number: BHTPS9921L\nManager: Vikram Malhotra\nDepartment: Cloud Operations\nEmail: sneha.bhatt@corpcloud.net",
+    "spans": [
+      {
+        "text": "Sneha Bhatt",
+        "type": "NAME",
+        "start_char": 39,
+        "end_char": 50
+      },
+      {
+        "text": "EMP-7721",
+        "type": "ID",
+        "start_char": 66,
+        "end_char": 74
+      },
+      {
+        "text": "BHTPS9921L",
+        "type": "ID",
+        "start_char": 87,
+        "end_char": 97
+      },
+      {
+        "text": "Vikram Malhotra",
+        "type": "NAME",
+        "start_char": 107,
+        "end_char": 122
+      },
+      {
+        "text": "sneha.bhatt@corpcloud.net",
+        "type": "EMAIL",
+        "start_char": 159,
+        "end_char": 184
+      }
+    ]
+  },
+  "doc_17_support_ticket.txt": {
+    "text": "IT HELPDESK TICKET\nUser Name: Kiran Varma\nIP Address: 192.168.1.105\nWorkstation: WS-PUNE-09\nUser Phone: 020-66778899\nIssue Summary: VPN authentication failure after password reset.\nDate: 2024-11-19",
+    "spans": [
+      {
+        "text": "Kiran Varma",
+        "type": "NAME",
+        "start_char": 30,
+        "end_char": 41
+      },
+      {
+        "text": "192.168.1.105",
+        "type": "ID",
+        "start_char": 54,
+        "end_char": 67
+      },
+      {
+        "text": "020-66778899",
+        "type": "PHONE",
+        "start_char": 104,
+        "end_char": 116
+      }
+    ]
+  },
+  "doc_18_board_minutes.txt": {
+    "text": "MINUTES OF BOARD OF DIRECTORS MEETING\nMeeting held at: 500 Nariman Point, Mumbai, MH 400021\nChairman: Harsh Vardhan\nChief Financial Officer: R. Sharma\nCorporate Secretary: Deepa Menon\nResolution Ref: BR-2024-X4\nContact: secretarial@conglomerate.com",
+    "spans": [
+      {
+        "text": "500 Nariman Point, Mumbai, MH 400021",
+        "type": "ADDRESS",
+        "start_char": 55,
+        "end_char": 91
+      },
+      {
+        "text": "Harsh Vardhan",
+        "type": "NAME",
+        "start_char": 102,
+        "end_char": 115
+      },
+      {
+        "text": "R. Sharma",
+        "type": "NAME",
+        "start_char": 141,
+        "end_char": 150
+      },
+      {
+        "text": "Deepa Menon",
+        "type": "NAME",
+        "start_char": 172,
+        "end_char": 183
+      },
+      {
+        "text": "secretarial@conglomerate.com",
+        "type": "EMAIL",
+        "start_char": 220,
+        "end_char": 248
+      }
+    ]
+  },
+  "doc_06_two_column.pdf": {
+    "text": "CASE REPORT: CLINICAL AUDIT\nAttending Physician:\nDr. Arvind Patel\nPatient Name:\nRicha Sharma\nContact Email:\nricha.sharma@healthclinic.org\nMedical Record: MRN-889012\nEMERGENCY CONTACT & BILLING\nPrimary Contact:\nRajiv Sharma\nEmergency Phone:\n+91 98230 44556\nResidential Address:\n101 Koregaon Park, Pune, MH 411001\nAccount Number: 998811223344\n",
+    "spans": [
+      {
+        "text": "Dr. Arvind Patel",
+        "type": "NAME",
+        "start_char": 49,
+        "end_char": 65
+      },
+      {
+        "text": "Richa Sharma",
+        "type": "NAME",
+        "start_char": 80,
+        "end_char": 92
+      },
+      {
+        "text": "richa.sharma@healthclinic.org",
+        "type": "EMAIL",
+        "start_char": 108,
+        "end_char": 137
+      },
+      {
+        "text": "MRN-889012",
+        "type": "ID",
+        "start_char": 154,
+        "end_char": 164
+      },
+      {
+        "text": "Rajiv Sharma",
+        "type": "NAME",
+        "start_char": 210,
+        "end_char": 222
+      },
+      {
+        "text": "+91 98230 44556",
+        "type": "PHONE",
+        "start_char": 240,
+        "end_char": 255
+      },
+      {
+        "text": "101 Koregaon Park, Pune, MH 411001",
+        "type": "ADDRESS",
+        "start_char": 277,
+        "end_char": 311
+      },
+      {
+        "text": "998811223344",
+        "type": "ID",
+        "start_char": 328,
+        "end_char": 340
+      }
+    ]
+  }
+}

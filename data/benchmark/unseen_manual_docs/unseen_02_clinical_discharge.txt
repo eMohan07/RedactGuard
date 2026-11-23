@@ -1,0 +1,10 @@
+CLINICAL DISCHARGE SUMMARY
+Mount Sinai Community Health System
+Attending Physician: Dr. Eleanor Vance, MD
+Patient Name: Robert Hernandez
+Medical Record: MRN-902188
+Social Security: 123-45-6789
+Emergency Contact: Maria Hernandez (daughter), phone: 312-555-0199
+Residential Address: 742 Evergreen Terrace, Springfield, IL 62704
+Discharge instructions sent to dr.vance@mountsinaihealth.org.
+Vitals at discharge: BP 135/85 mmHg, Pulse 68 bpm, SpO2 98%. Prescribed Atorvastatin 40mg PO daily.

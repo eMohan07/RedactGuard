@@ -1,0 +1,8 @@
+PATIENT CLINICAL INTAKE
+Date: 12-05-2024
+Patient Name: Anand Kulkarni
+Date of Birth: 1985-08-22
+Aadhaar Number: 3678 4590 1234
+Mobile: +91 94220 54321
+Address: 12 Shivaji Nagar, Pune, MH 411005
+Vitals: BP 120/80 mmHg, Pulse 72 bpm. Ref # MED-8891.

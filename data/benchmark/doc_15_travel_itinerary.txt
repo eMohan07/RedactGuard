@@ -1,0 +1,7 @@
+AIRLINE PASSENGER ITINERARY
+Passenger: Alok Kumar
+Booking Reference: PNR-78AZ9
+Frequent Flyer ID: FF-990218
+Email: alok.kumar@airtravel.com
+Mobile: 9845012345
+Flight: AI-804 from DEL to PNQ on 2024-11-25

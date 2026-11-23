@@ -1,0 +1,7 @@
+IT HELPDESK TICKET
+User Name: Kiran Varma
+IP Address: 192.168.1.105
+Workstation: WS-PUNE-09
+User Phone: 020-66778899
+Issue Summary: VPN authentication failure after password reset.
+Date: 2024-11-19

@@ -1,0 +1,7 @@
+RESIDENTIAL LEASE SUMMARY
+Landlord: Mohan Lal
+Tenant: Richa Sharma
+Leased Premises: 204 Kalyani Nagar, Pune, MH 411014
+Security Deposit: INR 75,000
+Tenant Phone: +91 98230 11223
+Tenant Email: richa.sharma@personalmail.org

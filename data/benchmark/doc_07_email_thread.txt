@@ -1,0 +1,10 @@
+From: client.service [at] globalfin dot org
+To: amit.joshi@bankcorp.in
+Date: November 2, 2024
+Subject: Verification of Beneficiary
+
+Dear Amit Joshi,
+Please confirm registration details for customer S. K. Rao.
+Registered Phone: 9876543210
+Case Reference: CAS-443912.
+Thank you.

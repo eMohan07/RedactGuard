@@ -1,0 +1,3 @@
+MUTUAL NONDISCLOSURE AGREEMENT (NDA)
+This Agreement is entered into between Apex Technologies Inc. (represented by Chief Legal Officer Margaret D. Sullivan, reachable at m_sullivan@apextech.com or +1 415 890 4421, residing at 201 Mission St, Suite 1400, San Francisco, CA 94105) and Horizon BioLabs LLC (represented by Managing Director Dr. Kenneth O'Connor, contact: ken.oconnor [at] horizonbio dot io, phone 080-41235678, located at 44 Indiranagar 100ft Rd, Bangalore, KA 560038).
+Tax ID: US-EIN 94-3129881. Entity PAN: AAACB1234A. Both parties agree to protect proprietary source code.

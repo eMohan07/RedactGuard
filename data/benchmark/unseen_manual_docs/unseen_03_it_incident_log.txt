@@ -1,0 +1,9 @@
+SECURITY INCIDENT RESPONSE LOG #INC-2024-8890
+Severity: HIGH
+Reported By: Deepak Verma (Senior Site Reliability Engineer)
+Work Email: deepak.v@cloudscale.net
+Escalation Mobile: +91 97110 99882
+Affected Host IP: 192.168.1.105, Gateway: 10.0.0.1
+Compromised Account: Tariq Al-Mansoor (Employee ID: EMP-5512)
+CISO Contact: Sarah Jenkins (s_jenkins@cloudscale.net)
+Immediate Mitigation: Revoked AWS Access Key AKIAIOSFODNN7EXAMPLE and locked workstation located at Tech Park 4, Bellandur, Bangalore 560103.

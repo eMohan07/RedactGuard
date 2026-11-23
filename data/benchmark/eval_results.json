@@ -1,0 +1,92 @@
+{
+  "synthetic_split": {
+    "split_name": "Synthetic Benchmark (Self-Generated)",
+    "document_count": 18,
+    "precision": 0.9877,
+    "recall": 0.9756,
+    "f1_score": 0.9816,
+    "true_positives": 80,
+    "false_positives": 1,
+    "false_negatives": 2,
+    "sec_per_doc": 0.0494,
+    "missed_pii": [
+      {
+        "document": "doc_08_hr_incident.txt",
+        "text": "Sharma",
+        "type": "NAME"
+      },
+      {
+        "document": "doc_08_hr_incident.txt",
+        "text": "Sharma",
+        "type": "NAME"
+      }
+    ],
+    "false_positive_instances": [
+      {
+        "document": "doc_12_executive_bio.txt",
+        "text": "Tanvi",
+        "category": "NAME",
+        "confidence": 0.8
+      }
+    ]
+  },
+  "unseen_split": {
+    "split_name": "Unseen Manually Written & Public Dataset",
+    "document_count": 5,
+    "precision": 0.9773,
+    "recall": 1.0,
+    "f1_score": 0.9885,
+    "true_positives": 43,
+    "false_positives": 1,
+    "false_negatives": 0,
+    "sec_per_doc": 0.0764,
+    "missed_pii": [],
+    "false_positive_instances": [
+      {
+        "document": "unseen_05_corporate_grievance.txt",
+        "text": "Ananya Roy",
+        "category": "NAME",
+        "confidence": 0.92
+      }
+    ]
+  },
+  "combined_overall": {
+    "split_name": "Combined Overall Benchmark",
+    "document_count": 23,
+    "precision": 0.984,
+    "recall": 0.984,
+    "f1_score": 0.984,
+    "true_positives": 123,
+    "false_positives": 2,
+    "false_negatives": 2,
+    "sec_per_doc": 0.011,
+    "missed_pii": [
+      {
+        "document": "doc_08_hr_incident.txt",
+        "text": "Sharma",
+        "type": "NAME"
+      },
+      {
+        "document": "doc_08_hr_incident.txt",
+        "text": "Sharma",
+        "type": "NAME"
+      }
+    ],
+    "false_positive_instances": [
+      {
+        "document": "doc_12_executive_bio.txt",
+        "text": "Tanvi",
+        "category": "NAME",
+        "confidence": 0.8
+      },
+      {
+        "document": "unseen_05_corporate_grievance.txt",
+        "text": "Ananya Roy",
+        "category": "NAME",
+        "confidence": 0.92
+      }
+    ]
+  },
+  "peak_ram_mb": 0.38,
+  "leak_failures": 0
+}

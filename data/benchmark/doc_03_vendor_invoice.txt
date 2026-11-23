@@ -1,0 +1,9 @@
+VENDOR INVOICE
+Invoice No: INV-2024-9982
+Date: 2024-09-30
+Vendor: Acme Solutions Pvt Ltd
+Contact: Rajesh Gupta
+Email: accounts@acmesolutions.com
+Account Number: 981273645102
+Product Code: PX-2024-77
+Amount Due: INR 45,000

@@ -1,0 +1,70 @@
+{
+  "unseen_01_public_nda.txt": {
+    "text": "MUTUAL NONDISCLOSURE AGREEMENT (NDA)\nThis Agreement is entered into between Apex Technologies Inc. (represented by Chief Legal Officer Margaret D. Sullivan, reachable at m_sullivan@apextech.com or +1 415 890 4421, residing at 201 Mission St, Suite 1400, San Francisco, CA 94105) and Horizon BioLabs LLC (represented by Managing Director Dr. Kenneth O'Connor, contact: ken.oconnor [at] horizonbio dot io, phone 080-41235678, located at 44 Indiranagar 100ft Rd, Bangalore, KA 560038).\nTax ID: US-EIN 94-3129881. Entity PAN: AAACB1234A. Both parties agree to protect proprietary source code.",
+    "spans": [
+      {"text": "Margaret D. Sullivan", "type": "NAME"},
+      {"text": "m_sullivan@apextech.com", "type": "EMAIL"},
+      {"text": "+1 415 890 4421", "type": "PHONE"},
+      {"text": "201 Mission St, Suite 1400, San Francisco, CA 94105", "type": "ADDRESS"},
+      {"text": "Kenneth O'Connor", "type": "NAME"},
+      {"text": "ken.oconnor [at] horizonbio dot io", "type": "EMAIL"},
+      {"text": "080-41235678", "type": "PHONE"},
+      {"text": "44 Indiranagar 100ft Rd, Bangalore, KA 560038", "type": "ADDRESS"},
+      {"text": "AAACB1234A", "type": "ID"}
+    ]
+  },
+  "unseen_02_clinical_discharge.txt": {
+    "text": "CLINICAL DISCHARGE SUMMARY\nMount Sinai Community Health System\nAttending Physician: Dr. Eleanor Vance, MD\nPatient Name: Robert Hernandez\nMedical Record: MRN-902188\nSocial Security: 123-45-6789\nEmergency Contact: Maria Hernandez (daughter), phone: 312-555-0199\nResidential Address: 742 Evergreen Terrace, Springfield, IL 62704\nDischarge instructions sent to dr.vance@mountsinaihealth.org.\nVitals at discharge: BP 135/85 mmHg, Pulse 68 bpm, SpO2 98%. Prescribed Atorvastatin 40mg PO daily.",
+    "spans": [
+      {"text": "Eleanor Vance", "type": "NAME"},
+      {"text": "Robert Hernandez", "type": "NAME"},
+      {"text": "MRN-902188", "type": "ID"},
+      {"text": "123-45-6789", "type": "ID"},
+      {"text": "Maria Hernandez", "type": "NAME"},
+      {"text": "312-555-0199", "type": "PHONE"},
+      {"text": "742 Evergreen Terrace, Springfield, IL 62704", "type": "ADDRESS"},
+      {"text": "dr.vance@mountsinaihealth.org", "type": "EMAIL"}
+    ]
+  },
+  "unseen_03_it_incident_log.txt": {
+    "text": "SECURITY INCIDENT RESPONSE LOG #INC-2024-8890\nSeverity: HIGH\nReported By: Deepak Verma (Senior Site Reliability Engineer)\nWork Email: deepak.v@cloudscale.net\nEscalation Mobile: +91 97110 99882\nAffected Host IP: 192.168.1.105, Gateway: 10.0.0.1\nCompromised Account: Tariq Al-Mansoor (Employee ID: EMP-5512)\nCISO Contact: Sarah Jenkins (s_jenkins@cloudscale.net)\nImmediate Mitigation: Revoked AWS Access Key AKIAIOSFODNN7EXAMPLE and locked workstation located at Tech Park 4, Bellandur, Bangalore 560103.",
+    "spans": [
+      {"text": "Deepak Verma", "type": "NAME"},
+      {"text": "deepak.v@cloudscale.net", "type": "EMAIL"},
+      {"text": "+91 97110 99882", "type": "PHONE"},
+      {"text": "192.168.1.105", "type": "ID"},
+      {"text": "10.0.0.1", "type": "ID"},
+      {"text": "Tariq Al-Mansoor", "type": "NAME"},
+      {"text": "EMP-5512", "type": "ID"},
+      {"text": "Sarah Jenkins", "type": "NAME"},
+      {"text": "s_jenkins@cloudscale.net", "type": "EMAIL"},
+      {"text": "Tech Park 4, Bellandur, Bangalore 560103", "type": "ADDRESS"}
+    ]
+  },
+  "unseen_04_academic_transcript.txt": {
+    "text": "ACADEMIC TRANSCRIPT & RECOMMENDATION\nIndian Institute of Technology\nStudent Name: Sneha R. Deshmukh\nRoll No: 21BCE1042\nStudent ID: STU-88219\nPermanent Address: Flat 402, Sai Heritage, Senapati Bapat Road, Pune, MH 411016\nLandline: 020-25691122\nFaculty Advisor: Prof. V. K. Ramanathan (vk.ramanathan@iit.ac.in)\nCumulative GPA: 9.24/10.0. Course Code: CS-702 Advanced Machine Learning.",
+    "spans": [
+      {"text": "Sneha R. Deshmukh", "type": "NAME"},
+      {"text": "Roll No: 21BCE1042", "type": "ID"},
+      {"text": "STU-88219", "type": "ID"},
+      {"text": "Flat 402, Sai Heritage, Senapati Bapat Road, Pune, MH 411016", "type": "ADDRESS"},
+      {"text": "020-25691122", "type": "PHONE"},
+      {"text": "V. K. Ramanathan", "type": "NAME"},
+      {"text": "vk.ramanathan@iit.ac.in", "type": "EMAIL"}
+    ]
+  },
+  "unseen_05_corporate_grievance.txt": {
+    "text": "CONFIDENTIAL HR MEMORANDUM\nTo: Internal Grievance Committee\nFrom: Ananya Roy (Lead Architect, Employee ID: EMP-1049)\nDate: 04-11-2024\nMeeting Attendees: Ananya Roy, A. Roy (Interim Manager), Suresh K. Nambiar (VP Operations)\nContact Email: suresh.nambiar@synergycorp.com, Mobile: +91 98450 33441\nLegal Counsel: Rachel Adams (rachel (dot) adams (at) synergycorp (dot) com)\nAddress of Incident: Campus 3, Outer Ring Road, Mahadevapura, Bangalore 560048.\nProject Code: PROJ-ALPHA-90. Budget: $150,000.",
+    "spans": [
+      {"text": "Ananya Roy", "type": "NAME"},
+      {"text": "EMP-1049", "type": "ID"},
+      {"text": "A. Roy", "type": "NAME"},
+      {"text": "Suresh K. Nambiar", "type": "NAME"},
+      {"text": "suresh.nambiar@synergycorp.com", "type": "EMAIL"},
+      {"text": "+91 98450 33441", "type": "PHONE"},
+      {"text": "Rachel Adams", "type": "NAME"},
+      {"text": "rachel (dot) adams (at) synergycorp (dot) com", "type": "EMAIL"},
+      {"text": "Campus 3, Outer Ring Road, Mahadevapura, Bangalore 560048", "type": "ADDRESS"}
+    ]
+  }
+}
