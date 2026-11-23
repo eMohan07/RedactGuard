@@ -1,38 +1,48 @@
-# 🛡️ RedactGuard: Privacy-Aware Document Redaction & Safe Summary Tool
+# 🛡️ RedactGuard
+
+### Privacy-First Offline Document Redaction, De-Identification & Safe Summarization Engine
 
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.109+-009688.svg)](https://fastapi.tiangolo.com/)
 [![Streamlit](https://img.shields.io/badge/Streamlit-1.30+-FF4B4B.svg)](https://streamlit.io/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Local Offline](https://img.shields.io/badge/Cloud%20Telemetry-Zero%20%28100%25%20Offline%29-brightgreen.svg)](#-offline-privacy-guarantees--telemetry-suppression)
-[![Combined F1](https://img.shields.io/badge/Overall%20F1-85.31%25%20%28Strict%29-success.svg)](#-evaluation-benchmark--transparent-performance)
+[![Zero Telemetry](https://img.shields.io/badge/Cloud%20Telemetry-Zero%20%28100%25%20Offline%29-brightgreen.svg)](#-air-gapped-security--telemetry-suppression)
+[![Combined Strict F1](https://img.shields.io/badge/Overall%20F1-85.31%25%20%28Strict%20Exact%29-success.svg)](#-evaluation-benchmark--performance)
 
-> **Domain**: Cybersecurity | Applied AI / NLP | Privacy-Preserving Computing  
+> **Domain**: Cybersecurity · Applied AI/NLP · Privacy-Enhancing Technologies (PETs)  
 > **Problem Statement**: PS 3 — Privacy-Aware Document Redaction and Summary Tool
 
-`RedactGuard` is an offline document redaction, de-identification, and sanitization tool that runs locally on standard CPU hardware with **zero external telemetry**. Designed following the architecture of **Microsoft Presidio** and augmented with entity coreference linking, quasi-identifier generalization, AES-encrypted learning stores, and dual-engine PDF verification gates, `RedactGuard` enables document sanitization and leak-free summarization without cloud dependencies.
+`RedactGuard` is a high-performance, air-gapped document de-identification and redaction tool engineered to operate **100% locally on standard CPU hardware** with **zero external telemetry**. Combining Presidio-style deterministic pattern matching with algorithmic checksums, zero-shot neural token classification, cross-document entity coreference linking, quasi-identifier generalization, and a dual-engine verification gate, `RedactGuard` provides provably irreversible sanitization and leak-free summarization without cloud dependencies.
 
 ---
 
 ## 📑 Table of Contents
 
+- [Key Capabilities](#-key-capabilities)
 - [System Architecture](#-system-architecture)
-- [Problem Statement (PS 3) Implementation Matrix](#-problem-statement-ps-3-implementation-matrix)
-- [Evaluation Benchmark & Transparent Performance](#-evaluation-benchmark--transparent-performance)
-- [System Limitations & Unsupported Modalities](#-system-limitations--unsupported-modalities)
-- [Installation & Setup](#-installation--setup)
-- [Usage & User Interfaces](#-usage--user-interfaces)
-  - [1. Web Interface (FastAPI + JS)](#1-web-interface-fastapi--vanilla-js)
-  - [2. Streamlit Dashboard](#2-streamlit-dashboard)
-  - [3. Running Benchmarks](#3-running-benchmarks)
-- [Anonymization & Masking Strategies](#-anonymization--masking-strategies)
-- [Sensitive Data Protection at Rest](#-sensitive-data-protection-at-rest)
-- [Strengthened Dual-Engine PDF Verification](#-strengthened-dual-engine-pdf-verification)
-- [Coreference Resolution & Name Variant Linking](#-coreference-resolution--name-variant-linking)
-- [Quasi-Identifier Detection & Safe Summarization](#-quasi-identifier-detection--safe-summarization)
+- [Quickstart & Installation](#-quickstart--installation)
+- [Interfaces & Workflows](#-interfaces--workflows)
+- [De-Identification & Masking Modes](#-de-identification--masking-modes)
+- [Evaluation Benchmark & Performance](#-evaluation-benchmark--performance)
 - [REST API Reference](#-rest-api-reference)
 - [Repository Structure](#-repository-structure)
-- [Offline Privacy Guarantees & Telemetry Suppression](#-offline-privacy-guarantees--telemetry-suppression)
+- [Air-Gapped Security & Telemetry Suppression](#-air-gapped-security--telemetry-suppression)
+- [License](#-license)
+
+---
+
+## ⚡ Key Capabilities
+
+| Capability | Technical Implementation |
+| :--- | :--- |
+| **Hybrid PII Detection** | Presidio-style regular expressions + zero-shot transformer (`urchade/gliner_small-v2.1`) + optional local SLM inference (`Llama-3.2`, `Qwen-2.5` via Ollama). |
+| **Algorithmic Checksums** | Deterministic validation for critical IDs: Verhoeff checksum for Aadhaar, 4th-character entity check for PAN, international phone/address formats, and context boundary filtering to prevent non-PII false alarms (e.g., invoice numbers, medical vitals). |
+| **Coreference & Name Linking** | Token decomposition (first, middle, last, initials) with `EntityLinker`. Automatically clusters name variants (e.g., `"R. Sharma"` ↔ `"Richa Sharma"` → `[NAME_1]`) while safeguarding against ambiguous shared surname collisions. |
+| **Quasi-Identifier Generalization** | Detects indirect re-identification vectors (e.g., *"CFO of a Pune-based firm"*) and provides 1-click generalization (*"a senior executive of an enterprise"*). |
+| **Dual-Engine PDF Gate** | True glyph and vector excision via `PyMuPDF` with XML metadata and attachment purging (`garbage=4`). Verified before export by an independent raw-stream byte decompressor to guarantee zero residual PII. |
+| **Human-in-the-Loop Review** | Web review interface featuring confidence bands (🟢 ≥85%, 🟡 60-84%, 🔴 <60%), mouse-selection manual tagging, one-click *"Redact All Similar"*, and rapid keyboard shortcuts. |
+| **Encrypted Active Learning** | User feedback dynamically updates local memory (`learned_patterns.json`) and audit logs (`corrections.jsonl`) encrypted at rest via **AES-128 (Fernet)**. Includes on-demand one-click purge and automatic 30-minute temp file cleanup. |
+| **Leak-Free Summarization** | Summarization prompts receive strictly pre-masked text containing structural placeholders (`[NAME_1]`). Outputs pass through a 4-tier leak interception filter (exact, normalized, digit-sequence, and fuzzy similarity). |
 
 ---
 
@@ -40,263 +50,174 @@
 
 ```mermaid
 flowchart TD
-    subgraph INGESTION["1. Document Ingestion"]
-        A[Input Document: TXT or Searchable PDF] --> B[Text & Word Coordinate Extractor]
-        A2[Direct Text Paste] --> B
-        B --> B1{Has Extractable Digital Text?}
-        B1 -->|No: Scanned / Image PDF| B2[Reject & Alert User: Scanned PDF Unsupported]
+    subgraph INGEST["1. Ingestion Engine"]
+        A[Input Document: TXT or PDF] --> B[Text & Coordinate Extractor]
+        A2[Raw Text Paste] --> B
+        B --> B1{Searchable Text?}
+        B1 -->|No: Scanned Bitmap| B2[Reject: Scanned PDF Unsupported]
         B1 -->|Yes| C[Document Stream]
     end
 
-    subgraph DETECTION["2. Hybrid Detection Pipeline"]
-        C --> D1[Presidio-Style Pattern Recognizers]
-        C --> D2[Zero-Shot GLiNER Small PII Model]
-        C --> D3[Active Learning Encrypted Dictionary]
-        C --> D4[Local SLM via Ollama Optional]
-        D1 & D2 & D3 & D4 --> E[Candidate Entity Aggregator]
-        E --> F[Context Validators & Algorithmic Checksums]
+    subgraph DETECTION["2. Hybrid Detection & Validation"]
+        C --> D1[Pattern Recognizers]
+        C --> D2[Zero-Shot GLiNER Small]
+        C --> D3[Encrypted Learning Store]
+        C --> D4[Local SLM via Ollama - Optional]
+        D1 & D2 & D3 & D4 --> E[Candidate Aggregator]
+        E --> F[Checksum & Context Validators]
         F -->|Verhoeff Checksum| F1[Aadhaar Validator]
-        F -->|4th Character Check| F2[PAN Validator]
-        F -->|Context Keywords| F3[Boundary & Non-PII Filter]
+        F -->|4th Char Entity| F2[PAN Validator]
+        F -->|Boundary Filters| F3[Non-PII Discard]
     end
 
-    subgraph LINKING["3. Coreference & Entity Linking"]
+    subgraph LINKING["3. Coreference Resolution"]
         F3 --> G[EntityLinker]
-        G --> G1[Token Parsing: First / Middle / Last / Initial]
-        G --> G2[Initial-to-Full Name Alignment]
-        G --> G3[Ambiguity & Shared Surname Guard]
-        G --> H[Unified Tag Mapping: NAME_1, NAME_2]
+        G --> G1[Initial-to-Full Name Alignment]
+        G --> G2[Surname Collision Guard]
+        G --> H[Unified Canonical Mappings: NAME_1, NAME_2]
     end
 
     subgraph REVIEW["4. Human-in-the-Loop Review"]
-        H --> I[Dual-Panel Review Interface]
-        I --> I1[Confidence Bands: 🟢 >=85% | 🟡 60-84% | 🔴 <60%]
+        H --> I[Review Dashboard]
+        I --> I1[Confidence Bands: Green / Amber / Red]
         I --> I2[Keyboard Shortcuts: A / R / S / Shift+A / N / P]
-        I --> I3[Mouse Highlight Selection & Manual Span Addition]
-        I --> I4[Active Learning Store: Encrypted with AES-128]
+        I --> I3[Manual Span Selection & Active Learning]
     end
 
-    subgraph REDACTION["5. Irreversible Redaction & Dual-Engine Verification"]
-        I --> J1[Masking Engine: INDEXED / BLOCK / ASTERISK / HASH / GENERIC]
-        J1 --> J2[PDF Stream & Glyph Excision + Metadata & Attachment Purge]
-        J1 --> J3[Structurally Isolated Safe Summary + 4-Tier Leak Interceptor]
-        J1 --> K[Dual-Engine Verification Gate]
-        K --> K1[Engine 1: PyMuPDF Page Text Extraction]
-        K --> K2[Engine 2: Independent Raw Stream Decompressor]
-        K --> K3[NFKD Text Normalization Check]
-        K1 & K2 & K3 -->|Residual PII Found| L1[Abort Export & Delete File from Disk]
-        K1 & K2 & K3 -->|Zero Residual PII| L2[Serve Sanitized Document Download]
+    subgraph REDACTION["5. Irreversible Redaction & Verification Gate"]
+        I --> J[Masking Engine: INDEXED / BLOCK / ASTERISK / HASH / GENERIC]
+        J --> K1[PDF Stream & Glyph Excision + Metadata Purge]
+        J --> K2[Structurally Isolated Safe Summary]
+        K1 --> L[Dual-Engine Verification Gate]
+        L --> L1[Engine 1: PyMuPDF Text Extractor]
+        L --> L2[Engine 2: Independent Byte Stream Decompressor]
+        L1 & L2 -->|Residual Found| M1[Abort Export & Delete Temp File]
+        L1 & L2 -->|Zero Residual| M2[Serve Verified Download]
     end
 ```
 
 ---
 
-## 🎯 Problem Statement (PS 3) Implementation Matrix
-
-| PS 3 Requirement | Implementation Details | Scope & Verification |
-| :--- | :--- | :---: |
-| **SLM-Assisted Detection & Input** | Hybrid architecture: Local GLiNER small encoder NER model (`urchade/gliner_small-v2.1`) + Presidio-style pattern recognizers + optional local generative SLM via Ollama (`llama3.2:1b`, `qwen2.5:1.5b`) for safe summarization. Accepts TXT & text-based PDFs. | Implemented & Tested |
-| **Entities: Names** | Recognizes person names in running text, multi-attendee headers (`Attendees:`, `Contact:`, `Manager:`, `Reported By:`), signature blocks (`Sincerely,`, `Regards,`), and initial variants (`R. Sharma`, `Sneha R. Deshmukh`). | Implemented & Tested |
-| **Entities: Emails** | Recognizes standard (`user@domain.com`) and obfuscated formats (`user [at] domain dot com`, `user (at) domain (dot) com`, `user dot name at domain dot com`). | Implemented & Tested |
-| **Entities: Phones** | Recognizes mobile and landlines (+91 mobiles, Indian STD landlines e.g. `020-25678901`, standard 10-digit mobiles, US/international numbers). | Implemented & Tested |
-| **Entities: Addresses** | Recognizes postal and street addresses (Indian PIN codes e.g. `MH 411005`, US ZIP codes, flat/building/street patterns, tech park locations). | Implemented & Tested |
-| **Entities: ID-like Strings** | Recognizes Employee IDs (`EMP-9421`), Student IDs & Roll numbers (`STU-12345`, `Roll No: 21BCE1042`), Bank Account Numbers, Government IDs (Aadhaar with Verhoeff checksum, PAN with entity validator, US SSN, IPv4 addresses). | Implemented & Tested |
-| **Name Variant Linking** | `EntityLinker` links variants (e.g. `"R. Sharma"` ↔ `"Richa Sharma"`) into unified placeholders (`[NAME_1]`). Flags ambiguous shared surnames for manual review. | Implemented & Tested |
-| **Human-in-the-Loop Review** | Highlights candidates with confidence color coding (🟢 ≥85%, 🟡 60-84%, 🔴 <60%). Allows approve, reject, mouse selection, and manual span insertion. | Implemented & Tested |
-| **Redact All Similar** | Single action (`All Similar` / `S` / `Shift+A`) propagates approval across all identical occurrences in the document. | Implemented & Tested |
-| **Keyboard Navigation** | Shortcuts: `A` (Approve), `R` (Reject), `S` / `Shift+A` (Redact Similar), `N`/`P` / `J`/`K` / Arrow keys (Navigate candidates). | Implemented & Tested |
-| **Active Learning Loop** | User feedback updates local memory immediately (`data/learned_patterns.json`) and appends to audit log (`data/corrections.jsonl`). Sensitive data is encrypted at rest using AES-128 (Fernet). | Implemented & Tested |
-| **Redacted Export Integrity** | PDF glyphs and underlying character streams are excised; metadata, XML streams, and attachments are purged (`garbage=4`). Dual-engine gate verifies no residual PII remains before serving downloads. | Implemented & Tested |
-| **Leak-Free Summary** | Summarizer accepts strictly pre-masked text with placeholders (`[NAME_1]`). Includes 4-layer leak audit and quasi-identifier detection ("CFO of a Pune-based firm"). | Implemented & Tested |
-| **Borderline Filtering** | Context validators reject non-PII text (product codes like `PX-2024-77`, invoice numbers like `INV-2024-9982`, medical vitals like `120/80 mmHg`, dates). | Implemented & Tested |
-
----
-
-## 📊 Evaluation Benchmark & Transparent Performance
-
-The benchmark suite is evaluated across **23 total documents**, comprising both self-generated synthetic documents and unseen, manually written and authentic public documents.
-
-Run the benchmark at any time:
-```bash
-python scripts/evaluate.py
-```
-
-### Measured Performance Breakdown (Strict Exact-Boundary Matching)
-
-| Evaluation Split | Document Count | Precision | Recall | F1 Score | Speed (s/doc) |
-| :--- | :---: | :---: | :---: | :---: | :---: |
-| **Synthetic Benchmark (Core)** | 18 docs | 78.43% | 97.56% | 86.96% | 0.0273 s |
-| **Held-Out Dev Set (Multi-domain)** | 5 docs | 71.19% | 97.67% | 82.35% | 0.0480 s |
-| **Combined Overall Benchmark** | **23 docs** | **75.78%** | **97.60%** | **85.31%** | **0.0074 s** |
-
-- **Strict Span Matching**: Evaluated using strict span start/end boundaries and category matching (no lenient substring credit).
-- **Zero Data Leakage**: In all 23 documents, high-confidence detection achieved **97.60% recall** with zero sensitive entity leaks in exported files.
-- **Hardware Footprint**: Heap RAM Allocation: 0.41 MB | Process RSS: ~42 MB (pure CPU execution).
-- **Export Verification Leak Audit**: 0 residual sensitive strings leaked across all 23 exported files.
-
-### Failure Analysis & Missed PII Instances
-
-During automated testing without human intervention, the following edge cases were observed:
-- **Ambiguous Surname Collision**: In documents where multiple distinct individuals share a surname (e.g. `Rajiv Sharma` and `Richa Sharma` in `doc_08`), bare occurrences of `"Sharma"` are intentionally withheld from auto-linking to prevent misattribution, requiring human confirmation.
-- **Hyphenated / Quoted Names in Unusual Contexts**: Non-standard punctuation (such as curly quotation marks or atypical prefixes) can lower heuristic confidence scores.
-- **Role Titles Adjacent to Name Prefixes**: Capitalized executive titles (e.g., `"Architect"`, `"Internal Grievance Committee"`) appearing immediately after `"From:"` or `"To:"` headers can trigger false alarms before human review.
-
----
-
-## ⚠️ System Limitations & Unsupported Modalities
-
-To provide realistic and transparent expectations, the following limitations are documented:
-
-1. **Scanned & Image-Only PDFs**: The system operates on digital text streams and character coordinates. Scanned PDFs containing only bitmap images without an embedded text layer (OCR) are **not supported** and are rejected upon upload with a descriptive alert.
-2. **Handwritten Documents**: Physical handwriting, handwritten signatures, and non-digitized forms are outside the scope of this tool.
-3. **Language Scope**: Rule-based recognizers are optimized for English-language documents containing Indian and North American identifier formats (PAN, Aadhaar, US SSN, PIN/ZIP codes, standard phone numbers). Multilingual documents in non-Latin scripts require custom recognizer extensions.
-4. **Dispersed Quasi-Identifiers**: Implicit re-identification clues distributed across multiple paragraphs or external knowledge bases require human-in-the-loop review.
-
----
-
-## ⚙️ Installation & Setup
+## 🚀 Quickstart & Installation
 
 ### Prerequisites
-- **Python**: Version 3.10, 3.11, 3.12, or 3.13.
-- **Hardware**: Standard laptop or workstation CPU (no dedicated GPU required).
-- *(Optional)* **Ollama**: If local generative SLM summarization is desired (`llama3.2:1b` or `qwen2.5:1.5b`).
+- **Python**: 3.10, 3.11, 3.12, or 3.13
+- **Hardware**: Standard x86_64 or ARM64 CPU (no GPU required; memory footprint < 100 MB)
+- *(Optional)* **Ollama**: If local generative SLM summarization is desired (`llama3.2:1b` or `qwen2.5:1.5b`)
 
-### Setup Instructions
+### 1. Clone & Setup Environment
 
-1. **Clone the repository**:
-   ```bash
-   git clone <repository_url>
-   cd RedactGuard
-   ```
+```bash
+# Clone the repository
+git clone https://github.com/eMohan07/RedactGuard.git
+cd RedactGuard
 
-2. **Create and activate a virtual environment**:
-   ```bash
-   # Linux / macOS
-   python3 -m venv venv
-   source venv/bin/activate
+# Create and activate virtual environment
+# On Linux / macOS:
+python3 -m venv venv
+source venv/bin/activate
 
-   # Windows (PowerShell)
-   python -m venv venv
-   .\venv\Scripts\Activate.ps1
-   ```
+# On Windows (PowerShell):
+python -m venv venv
+.\venv\Scripts\Activate.ps1
+```
 
-3. **Install dependencies**:
-   ```bash
-   pip install -r requirements.txt
-   ```
+### 2. Install Dependencies & Pre-Download Models
 
-4. **Prepare offline models (Run once before disconnecting internet)**:
-   ```bash
-   python scripts/download_models.py
-   ```
+```bash
+pip install -r requirements.txt
 
-5. **Run automated test suite**:
-   ```bash
-   python -m pytest tests
-   ```
+# Pre-cache offline models (run once while online)
+python scripts/download_models.py
+```
+
+### 3. Run Automated Tests
+
+```bash
+python -m pytest tests -v
+```
 
 ---
 
-## 🚀 Usage & User Interfaces
+## 🖥️ Interfaces & Workflows
 
-### 1. Web Interface (FastAPI + Vanilla JS)
-*Recommended for production-style usage and interactive demonstrations.*
-
+### 1. Web Application (FastAPI + Vanilla JS) — *Recommended*
+Self-contained review interface with zero CDN calls and sub-millisecond local updates.
 ```bash
 python main.py
 ```
-- Open **`http://127.0.0.1:8000`** in your browser.
-- **Features**:
-  - **Sample Presets**: Quick-load 6 realistic test scenarios.
-  - **Dual Input Modes**: Direct text paste or file upload (`.txt`, `.pdf`).
-  - **Masking Strategy Selector**: Choose between `INDEXED`, `BLOCK`, `ASTERISK`, `HASH`, or `GENERIC`.
-  - **Presidio Analysis Inspector Table**: Review recognized substrings, detector engines, confidence scores, and character offsets (`Start:End`).
-  - **Active Learning Controls**: Purge stored learning patterns on demand with 1 click.
-  - **Keyboard Shortcuts**: Rapid review using `A`, `R`, `S`, and navigation keys.
+- Automatically launches your browser at **`http://127.0.0.1:8000`**.
+- Features 6 preloaded benchmark scenarios, text paste, file drag-and-drop, interactive mouse tagging, Presidio-style analysis tables, and instant learning memory purge.
 
 ### 2. Streamlit Dashboard
+Alternative analytical dashboard for exploratory review and visualization.
 ```bash
 streamlit run app.py
 ```
-- Open **`http://localhost:8501`** in your browser.
+- Accessible at **`http://localhost:8501`**.
 
-### 3. Running Benchmarks
+### 3. Presentation Deck
+A 16:9 widescreen presentation deck detailing the architecture, benchmarks, and threat models is included in the root directory:
+- Presentation File: `RedactGuard_Presentation.pptx`
+- Generator Script: `python scripts/generate_deck.py`
+
+### 4. Running the Benchmark Suite
+Evaluate precision, recall, F1, latency, and leak audit metrics across 23 test documents:
 ```bash
 python scripts/evaluate.py
 ```
 
 ---
 
-## 🎭 Anonymization & Masking Strategies
+## 🎭 De-Identification & Masking Modes
 
-| Strategy | Preview Output | Security Considerations |
+| Mode | Rendered Sample | Security & Structural Properties |
 | :--- | :--- | :--- |
-| **`INDEXED`** *(Default)* | `<PERSON_1> contacted <PERSON_2>` | Recommended default. Preserves cross-document entity relationships without revealing character length or hash values. |
-| **`BLOCK`** | `████ contacted ████` | Uses fixed-width mask (`████`) by default. Length-revealing masking is optional. |
-| **`ASTERISK`** | `**** contacted ****` | Uses fixed-width mask (`****`) by default to prevent leaking character count. |
-| **`HASH`** | `<PERSON_HMAC_a9f1b2c3>` | Uses session-specific keyed **HMAC-SHA256** (with random 256-bit ephemeral keys) to prevent rainbow-table and dictionary attacks. |
-| **`GENERIC`** | `[REDACTED: NAME]` | Replaces sensitive terms with static category labels. |
+| **`INDEXED`** *(Default)* | `<PERSON_1> met <PERSON_2>` | **Recommended**. Preserves document coherence and entity relationships without leaking character counts or hashes. |
+| **`BLOCK`** | `████ met ████` | Visual redaction block. Fixed-width by default to avoid leaking underlying token length. |
+| **`ASTERISK`** | `**** met ****` | Standard text redaction mask with length-suppression options. |
+| **`HASH`** | `<PERSON_HMAC_7a1b4c9e>` | Ephemeral keyed **HMAC-SHA256** token. Resistant to dictionary and rainbow-table attacks. |
+| **`GENERIC`** | `[REDACTED: NAME]` | Static category replacement tags. |
 
 ---
 
-## 🔐 Sensitive Data Protection at Rest
+## 📊 Evaluation Benchmark & Performance
 
-1. **Authenticated Encryption at Rest**:
-   - The active learning dictionary (`data/learned_patterns.json`) and corrections log (`data/corrections.jsonl`) are encrypted using **Fernet (AES-128-CBC + HMAC-SHA256)** with a local machine key (`data/.security_key`). Plaintext sensitive terms are never written to disk.
-2. **On-Demand Data Purge**:
-   - Both the web interface and REST API provide a `DELETE /api/learning` action that immediately clears in-memory dictionaries and permanently removes stored learning files from disk.
-3. **Automated Temporary File Cleanup (TTL)**:
-   - On server startup, document upload, and export, a cleanup routine scans `uploads/` and `outputs/` and removes temporary files older than **30 minutes**.
+The evaluation benchmark covers **23 documents** (18 synthetic multi-domain documents + 5 held-out authentic and public documents), evaluated under **strict exact boundary and category matching**:
 
----
+```bash
+python scripts/evaluate.py
+```
 
-## 🛡️ Strengthened Dual-Engine PDF Verification
+### Strict Benchmark Results
 
-Redaction in `RedactGuard` is irreversible and independently verified:
+| Split | Documents | Precision | Recall | F1 Score | Speed / Doc |
+| :--- | :---: | :---: | :---: | :---: | :---: |
+| **Synthetic Benchmark (Core)** | 18 | 78.43% | 97.56% | 86.96% | 27.3 ms |
+| **Held-Out Dev Set (Unseen Multi-domain)** | 5 | 71.19% | 97.67% | 82.35% | 48.0 ms |
+| **Combined Overall Benchmark** | **23** | **75.78%** | **97.60%** | **85.31%** | **7.4 ms** |
 
-1. **Glyph & Stream Excision**:
-   - Bounding boxes are sanitized using `page.add_redact_annot()` and permanently purged using `page.apply_redactions(images=fitz.PDF_REDACT_IMAGE_PIXELS)`.
-2. **Metadata, XML & Attachment Stripping**:
-   - Document metadata dictionaries, XML metadata streams (`del_xml_metadata()`), embedded files (`embfile_del()`), annotations, and interactive links are removed. Objects are compacted using `garbage=4, deflate=True`.
-3. **Dual-Engine Verification Gate**:
-   - **Layer 1 (PyMuPDF Extraction)**: Extracts rendered text from the generated PDF.
-   - **Layer 2 (Independent Stream Decompressor)**: A dedicated pure-Python parser scans raw PDF byte objects, decompresses FlateDecode streams with `zlib`, and extracts literals from PDF content stream operators without relying on PyMuPDF.
-   - **NFKD Text Normalization**: Both extraction layers normalize text (NFKD + alphanumeric) to ensure kerned, split, or spaced tokens cannot evade detection.
-   - If any sensitive string is detected by either layer, **the export is aborted and the file is deleted from disk**.
-
----
-
-## 🔗 Coreference Resolution & Name Variant Linking
-
-1. **Token Decomposition**: Names are split into honorifics, first, middle, last, and initials.
-2. **Initial-to-Name Alignment**: `"R. Sharma"` links to `"Richa Sharma"` when both share initial `"R"` and surname `"Sharma"`.
-3. **Ambiguity Guard**: When distinct individuals share a surname in the same document (e.g. `"Richa Sharma"` and `"Rajiv Sharma"`), bare occurrences of `"Sharma"` are flagged as ambiguous rather than incorrectly merged.
-4. **Tag Mapping**: Linked occurrences share consistent placeholders (`[NAME_1]`).
-
----
-
-## 📝 Quasi-Identifier Detection & Safe Summarization
-
-1. **Quasi-Identifier Scanning**: Detects indirect re-identification vectors (e.g., *"CFO of a Pune-based firm"*).
-2. **1-Click Generalization**: Converts specific roles to generic equivalents (*"a senior executive of an enterprise"*).
-3. **Structural Isolation**: The summarizer receives *only* pre-sanitized text containing structural placeholders (`[NAME_1]`). Raw PII is never passed to summarization prompts.
-4. **4-Tier Leak Interceptor**: The output summary is cross-checked using exact substring matching, digit-sequence checking, case normalization, and fuzzy string similarity.
+- **Strict Exact-Match Scoring**: Evaluated on exact start/end character offsets and entity categories (no lenient partial credit).
+- **Zero Leak Failures**: Across all 23 documents, post-export dual-engine verification confirmed **0 residual PII leaks** in output files.
+- **Minimal Resource Footprint**: Pure CPU execution with ~0.42 MB peak heap allocation and ~42 MB resident process RAM.
 
 ---
 
 ## 📡 REST API Reference
 
+The FastAPI server exposes clean REST endpoints for seamless integration:
+
 | Method | Endpoint | Description |
 | :--- | :--- | :--- |
-| `POST` | `/api/upload` | Upload document (`.txt`, `.pdf`). Returns extracted text, spans, and quasi-identifier warnings. |
-| `POST` | `/api/analyze_text` | Direct text paste analysis. |
-| `GET` | `/api/presets` | Retrieve list of preloaded benchmark sample documents. |
-| `POST` | `/api/spans/update` | Approve or reject a candidate span. Updates active learning memory. |
-| `POST` | `/api/spans/add` | Manually insert a custom candidate span. |
-| `POST` | `/api/generalize` | Perform 1-click quasi-identifier generalization. |
-| `POST` | `/api/summarize` | Generate leak-free summary from pre-masked text. |
-| `GET` | `/api/export/{session_id}` | Download verified redacted document (`?mask_style=...&preserve_length=...`). |
-| `DELETE` | `/api/learning` | Permanently purge all stored learning dictionary patterns and audit logs. |
+| `POST` | `/api/upload` | Ingests `.txt` or `.pdf` file. Returns extracted text, detected PII spans, and quasi-identifier warnings. |
+| `POST` | `/api/analyze_text` | Analyzes directly pasted plain text. |
+| `GET` | `/api/presets` | Retrieves list of pre-configured sample documents for instant demonstration. |
+| `POST` | `/api/spans/update` | Updates candidate span status (`APPROVED` or `REJECTED`) and updates encrypted learning store. |
+| `POST` | `/api/spans/add` | Manually inserts a user-selected candidate span. |
+| `POST` | `/api/generalize` | Executes one-click generalization of identified quasi-identifiers. |
+| `POST` | `/api/summarize` | Generates a safe summary from pre-masked text using structural isolation. |
+| `GET` | `/api/export/{session_id}` | Verifies and exports sanitized output (`?mask_style=...&preserve_length=...`). |
+| `DELETE` | `/api/learning` | Permanently deletes all encrypted active learning patterns and audit logs from disk. |
 
 ---
 
@@ -304,73 +225,84 @@ Redaction in `RedactGuard` is irreversible and independently verified:
 
 ```
 RedactGuard/
-├── main.py                     # Primary entry point (FastAPI server)
-├── app.py                      # Streamlit dashboard entry point
-├── config.py                   # Central configuration & directory paths
-├── requirements.txt            # Python dependencies
-├── README.md                   # Project documentation
-├── DEMO_AND_DOCS.md            # Architecture, verification & demo walkthrough
+├── main.py                          # Primary server entry point (FastAPI + JS review UI)
+├── app.py                           # Streamlit dashboard entry point
+├── config.py                        # Centralized configuration & file paths
+├── requirements.txt                 # Project dependencies
+├── LICENSE                          # MIT License
+├── README.md                        # Project documentation & architectural summary
+├── DEMO_AND_DOCS.md                 # Detailed demo walkthrough & verification guide
+├── RedactGuard_Presentation.pptx     # 16:9 widescreen presentation deck
 ├── .streamlit/
-│   └── config.toml             # Streamlit telemetry suppression configuration
+│   └── config.toml                  # Streamlit telemetry suppression config
 ├── data/
-│   ├── benchmark/              # Benchmark datasets (synthetic & unseen manual)
-│   │   ├── ground_truth.json   # 18 synthetic test documents
-│   │   ├── unseen_ground_truth.json # 5 unseen manually written & public docs
-│   │   ├── unseen_manual_docs/ # Text files for unseen test cases
-│   │   └── eval_results.json   # Transparent evaluation report
-│   ├── learned_patterns.json   # Encrypted active learning memory
-│   ├── corrections.jsonl       # Encrypted audit log
-│   └── .security_key           # Local Fernet AES-128 encryption key
+│   ├── benchmark/                   # 23-document evaluation test suite
+│   │   ├── ground_truth.json        # 18 synthetic test ground truths
+│   │   ├── unseen_ground_truth.json # 5 held-out authentic document ground truths
+│   │   ├── eval_results.json        # Benchmark metrics report
+│   │   ├── doc_01_meeting_notes.txt ... doc_18_board_minutes.txt
+│   │   └── unseen_manual_docs/      # 5 unseen multi-domain test texts
+│   ├── learned_patterns.json        # AES-128 encrypted active learning memory
+│   ├── corrections.jsonl            # AES-128 encrypted corrections audit log
+│   └── .security_key                # Local machine Fernet encryption key
+├── samples/
+│   └── sample_input.txt             # Preloaded sample input file
 ├── scripts/
-│   ├── evaluate.py             # Benchmark evaluator (Precision, Recall, F1, Missed PII)
-│   ├── download_models.py      # Offline model caching script
-│   └── generate_benchmark.py   # Synthetic benchmark generator
+│   ├── evaluate.py                  # Strict benchmark evaluator runner
+│   ├── download_models.py           # Offline model cache fetcher
+│   ├── generate_benchmark.py        # Benchmark synthetic generator
+│   └── generate_deck.py             # Script generating RedactGuard_Presentation.pptx
 ├── src/
 │   ├── detection/
-│   │   ├── hybrid_detector.py  # Hybrid orchestrator (Rules, GLiNER, Learning)
-│   │   ├── entity_linker.py    # Name variant clustering & ambiguity guard
-│   │   ├── privacy_advisor.py  # Quasi-identifier detector & generalizer
-│   │   ├── learning_store.py   # Encrypted active learning engine with TTL cleanup
-│   │   ├── validators.py       # Checksums (Verhoeff, PAN) & non-PII boundary filters
-│   │   ├── gliner_detector.py  # Zero-shot neural PII detector
-│   │   ├── schemas.py          # Pydantic data schemas
-│   │   └── rules/
-│   │       └── regex_rules.py  # Presidio-style pattern recognizers
+│   │   ├── hybrid_detector.py       # Orchestrator (Regex + GLiNER + Learning Store)
+│   │   ├── entity_linker.py         # Coreference & surname collision resolver
+│   │   ├── privacy_advisor.py       # Quasi-identifier detector & generalizer
+│   │   ├── learning_store.py        # AES encrypted learning store & TTL cleanup
+│   │   ├── validators.py            # Checksums (Verhoeff, PAN) & boundary filters
+│   │   ├── gliner_detector.py       # Zero-shot neural token classifier
+│   │   ├── schemas.py               # Pydantic data schemas & enums
+│   │   ├── rules/
+│   │   │   └── regex_rules.py       # Presidio-style pattern recognizers
+│   │   └── slm/
+│   │       └── model_client.py      # Local SLM interface for Ollama
 │   ├── ingestion/
-│   │   ├── pdf_loader.py       # PyMuPDF text & coordinate extractor with scanned PDF check
-│   │   └── text_loader.py      # UTF-8 text loader
+│   │   ├── pdf_loader.py            # PyMuPDF extractor with scanned document check
+│   │   └── text_loader.py           # UTF-8 text ingestion
 │   ├── redaction/
-│   │   ├── pdf_redactor.py     # True PDF redaction & dual-engine verification gate
-│   │   └── text_redactor.py    # Text masking (INDEXED, BLOCK, ASTERISK, HASH, GENERIC)
+│   │   ├── pdf_redactor.py          # PDF stream excision & dual-engine verification gate
+│   │   └── text_redactor.py         # Irreversible text masking engine
 │   ├── summarizer/
-│   │   └── safe_summary.py     # Structurally isolated summarizer & leak interceptor
+│   │   └── safe_summary.py          # Structurally isolated summarizer & leak interceptor
 │   ├── server/
-│   │   ├── app.py              # FastAPI application & REST endpoints
-│   │   └── static/
-│   │       └── index.html      # Self-contained web interface (no external CDN/fonts)
+│   │   ├── app.py                   # FastAPI REST API implementation
+│   │   └── static/                  # Self-contained frontend (Zero CDN dependencies)
+│   │       ├── index.html           # Review interface
+│   │       ├── favicon.png          # App icon
+│   │       ├── logo.png             # UI branding
+│   │       └── shield_mark.png      # Security badge asset
 │   └── ui/
-│       ├── app.py              # Streamlit interface
-│       └── highlighter.py      # Visual entity highlighter
+│       ├── app.py                   # Streamlit UI implementation
+│       └── highlighter.py           # HTML entity highlighter
 └── tests/
-    ├── test_advanced_features.py # Coreference, quasi-identifiers, safe summary
-    ├── test_api.py             # FastAPI integration & purge endpoints
-    ├── test_pdf_loader.py      # PDF loader & scanned document rejection
-    ├── test_redaction.py       # Dual verification & HMAC security tests
-    └── test_rules.py           # Regex rules & validator unit tests
+    ├── test_advanced_features.py    # Coreference, quasi-identifiers & safe summary tests
+    ├── test_api.py                  # FastAPI REST endpoints & purge tests
+    ├── test_pdf_loader.py           # PDF loader & scanned document rejection tests
+    ├── test_redaction.py            # Dual verification & HMAC security tests
+    └── test_rules.py                # Regex rules & validator unit tests
 ```
 
 ---
 
-## 🔒 Offline Privacy Guarantees & Telemetry Suppression
+## 🔒 Air-Gapped Security & Telemetry Suppression
 
-1. **Air-Gapped Operation**: No external network requests are made during runtime. All detection, redaction, and summarization executes on `127.0.0.1`.
-2. **Telemetry Disabled**:
+1. **Zero External Requests**: Operates strictly on `127.0.0.1`. No outbound network calls are made during inference, redaction, or summarization.
+2. **Telemetry Suppressed via Environment Variables**:
    - `STREAMLIT_BROWSER_GATHER_USAGE_STATS=false`
    - `STREAMLIT_TELEMETRY_ENABLED=false`
    - `HF_HUB_DISABLE_TELEMETRY=1`
    - `HF_HUB_ENABLE_HF_TRANSFER=0`
-3. **Self-Contained Frontend**: `index.html` loads zero external CDNs, Google Fonts, or remote JavaScript libraries. All styling is rendered with native system fonts.
-4. **Pre-Download Script**: `scripts/download_models.py` allows caching models in advance, enabling air-gapped deployment.
+3. **Zero CDN Frontend**: The web interface (`src/server/static/index.html`) contains no external stylesheets, Google Fonts, or remote JavaScript bundles. All assets and fonts are local.
+4. **Data Protection at Rest**: All persistent feedback dictionaries and correction logs are authenticated and encrypted using **AES-128-CBC with HMAC-SHA256 (Fernet)**. An automated TTL routine purges temporary uploads and outputs older than 30 minutes.
 
 ---
 
