@@ -173,14 +173,13 @@ async def analyze_direct_text(req: DirectTextRequest):
     )
     
     spans = detector.detect(doc_data.full_text, use_slm=req.use_slm)
-    # Review Gating: auto-accept high confidence (>= 0.85); leave low/medium confidence pending review
+    # Human-in-the-loop review gating for written text:
+    # All candidate entities require human verification (approved -> PII, rejected -> excluded)
     for s in spans:
-        if s.source == "manual":
-            s.accepted = True
-        else:
-            s.accepted = (s.confidence >= 0.85)
+        s.accepted = False
+        s.rejected_by_user = False
     warnings = PrivacyAdvisor.scan_warnings(doc_data.full_text)
-    tag_map, ambiguity_flags = EntityLinker.cluster_entities([s for s in spans if s.accepted])
+    tag_map, ambiguity_flags = EntityLinker.cluster_entities(spans)
     
     session_id = str(uuid.uuid4())
     sessions[session_id] = {
@@ -240,6 +239,7 @@ class UpdateSpanRequest(BaseModel):
     span_id: str
     accepted: bool
     category: Optional[str] = None
+    rejected_by_user: Optional[bool] = None
 
 @app.post("/api/spans/update")
 async def update_span(req: UpdateSpanRequest):
@@ -252,6 +252,11 @@ async def update_span(req: UpdateSpanRequest):
         raise HTTPException(status_code=404, detail="Span not found")
 
     target_span.accepted = req.accepted
+    if req.rejected_by_user is not None:
+        target_span.rejected_by_user = req.rejected_by_user
+    else:
+        target_span.rejected_by_user = not req.accepted
+
     if req.category:
         target_span.category = req.category
 
@@ -264,13 +269,21 @@ async def update_span(req: UpdateSpanRequest):
         filename=sess["doc_data"].filename
     )
 
-    # Linked name variants move together as one person
+    # Linked name variants move together only if they share the exact same entity tag
     if target_span.category == "NAME":
+        target_tag = sess.get("tag_map", {}).get(target_span.id)
+        ambig_ids = {a["span_id"] for a in sess.get("ambiguity_flags", [])}
         for s in sess["spans"]:
             if s.category == "NAME" and s.id != target_span.id:
-                if EntityLinker.are_name_variants(target_span.text, s.text):
-                    s.accepted = req.accepted
-                    learning_store.record_correction(s.text, s.category, action=action, filename=sess["doc_data"].filename)
+                s_tag = sess.get("tag_map", {}).get(s.id)
+                # Distinct entities with different ID references must NEVER override each other
+                if target_tag and s_tag and target_tag != s_tag:
+                    continue
+                if target_span.id not in ambig_ids and s.id not in ambig_ids:
+                    if EntityLinker.are_name_variants(target_span.text, s.text):
+                        s.accepted = req.accepted
+                        s.rejected_by_user = target_span.rejected_by_user
+                        learning_store.record_correction(s.text, s.category, action=action, filename=sess["doc_data"].filename)
 
     tag_map, ambiguity_flags = EntityLinker.cluster_entities([s for s in sess["spans"] if s.accepted])
     sess["tag_map"] = tag_map
@@ -570,8 +583,16 @@ async def generate_summary(req: SummarizeRequest):
     summarizer = SafeSummarizer(model=req.model)
     raw_summary, engine = summarizer.summarize_redacted_only(redacted_text)
     
+    # Pass user-suppressed and rejected terms so audit never re-flags rejected entities
+    suppressed = set(learning_store.suppressed)
+    for s in sess["spans"]:
+        if not s.accepted or getattr(s, "rejected_by_user", False):
+            suppressed.add(s.text.strip().lower())
+
     # Audit summary against all removed PII
-    purged_summary, caught_leaks = summarizer.audit_summary_leaks(raw_summary, sess["spans"])
+    purged_summary, caught_leaks = summarizer.audit_summary_leaks(
+        raw_summary, sess["spans"], suppressed_terms=suppressed
+    )
 
     # Also scan summary for quasi-identifiers
     summary_warnings = PrivacyAdvisor.scan_warnings(purged_summary)
@@ -579,11 +600,18 @@ async def generate_summary(req: SummarizeRequest):
     sess["summary"] = purged_summary
     sess["summary_mask_style"] = mask_style
 
+    approved_spans = [s for s in sess["spans"] if s.accepted and not getattr(s, "rejected_by_user", False)]
+    category_counts: Dict[str, int] = {}
+    for s in approved_spans:
+        category_counts[s.category] = category_counts.get(s.category, 0) + 1
+
     return {
         "summary": purged_summary,
         "engine": engine,
         "mask_style": mask_style,
         "caught_leaks": caught_leaks,
+        "total_masked_count": len(approved_spans),
+        "category_counts": category_counts,
         "summary_warnings": [w.__dict__ for w in summary_warnings]
     }
 
@@ -602,7 +630,15 @@ async def export_summary_file(session_id: str, mask_style: str = "INDEXED", pres
     )
     summarizer = SafeSummarizer()
     raw_summary, _ = summarizer.summarize_redacted_only(redacted_text)
-    purged_summary, _ = summarizer.audit_summary_leaks(raw_summary, sess["spans"])
+
+    suppressed = set(learning_store.suppressed)
+    for s in sess["spans"]:
+        if not s.accepted or getattr(s, "rejected_by_user", False):
+            suppressed.add(s.text.strip().lower())
+
+    purged_summary, _ = summarizer.audit_summary_leaks(
+        raw_summary, sess["spans"], suppressed_terms=suppressed
+    )
     sess["summary"] = purged_summary
     sess["summary_mask_style"] = mask_style
 
@@ -633,6 +669,7 @@ async def batch_update_spans(req: BatchUpdateRequest):
     for s in sess["spans"]:
         if req.category is None or s.category == req.category:
             s.accepted = req.accepted
+            s.rejected_by_user = not req.accepted
 
     tag_map, ambiguity_flags = EntityLinker.cluster_entities([s for s in sess["spans"] if s.accepted])
     sess["tag_map"] = tag_map

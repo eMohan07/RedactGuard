@@ -130,8 +130,8 @@ Document Title:"""
 
     def _generate_extractive_summary(self, sanitized_text: str, warnings_count: int = 0) -> str:
         """
-        Synthesizes an executive summary directly from sanitized sentences,
-        prioritizing substantive findings, actions, and placeholder entity references.
+        Synthesizes an executive summary directly from the actual sanitized sentences of the file,
+        faithfully capturing document meaning, findings, actions, and placeholder entity references.
         Guaranteed to contain zero ungeneralized quasi-identifiers or leaked entities.
         """
         lines = [line.strip() for line in sanitized_text.splitlines() if line.strip()]
@@ -150,7 +150,7 @@ Document Title:"""
         elif len(first_line) <= 80 and not first_line.endswith(":"):
             title = first_line
 
-        # Extract structured details and candidate narrative sentences
+        # Extract structured details and candidate narrative sentences from the actual file
         structured_details = []
         candidate_sentences = []
 
@@ -165,46 +165,56 @@ Document Title:"""
                         structured_details.append(f"{k}: {v}")
                 continue
 
-            for sent in re.split(r"(?<=[.!?])\s+", line_clean):
-                sent_clean = sent.strip()
-                if len(sent_clean) >= 20 and not sent_clean.startswith("#"):
+            # Split sentences on punctuation or take substantive clauses
+            sents = [s.strip() for s in re.split(r"(?<=[.!?])\s+", line_clean) if s.strip()]
+            for sent_clean in sents:
+                if len(sent_clean) >= 10 and not sent_clean.startswith("#"):
                     candidate_sentences.append(sent_clean)
 
         KEY_TOPIC_WORDS = {
             "agreed", "diagnosed", "reported", "decided", "discussed", "finding", 
             "summary", "incident", "approved", "payment", "due", "status", "scheduled", 
             "recommended", "resolved", "action", "reviewed", "plan", "treatment", 
-            "confirmed", "concluded", "advised", "condition", "complaint", "assessment"
+            "confirmed", "concluded", "advised", "condition", "complaint", "assessment",
+            "meeting", "project", "contract", "record", "request", "issue", "notes"
         }
 
         # Score sentences: boost for substantive action words and entity placeholder mentions
         scored_sentences = []
         for s in candidate_sentences:
-            score = 0
+            score = 1
             words = set(s.lower().split())
             score += len(words.intersection(KEY_TOPIC_WORDS)) * 3
             entity_refs = len(re.findall(r"\[[A-Z]+(?:_\d+)?\]|<[A-Z_]+_HMAC_[a-f0-9]+>|█+|\*+", s))
             score += entity_refs * 2
-            if len(s) > 40:
+            if len(s) > 30:
                 score += 1
             scored_sentences.append((score, s))
 
         scored_sentences.sort(key=lambda x: -x[0])
-        top_selected = [s for score, s in scored_sentences[:3]]
+        top_selected = [s for score, s in scored_sentences[:4]]
         
-        # Re-order according to document appearance
-        ordered_selected = [s for s in candidate_sentences if s in top_selected][:3]
+        # Re-order according to document appearance to preserve natural narrative flow
+        ordered_selected = [s for s in candidate_sentences if s in top_selected][:4]
         if not ordered_selected:
-            ordered_selected = candidate_sentences[:2] if candidate_sentences else [lines[0]]
+            ordered_selected = candidate_sentences[:3] if candidate_sentences else [lines[0]]
 
-        # Clean paragraph synthesis
+        # Faithful narrative synthesis from actual file sentences
         overview_paragraph = " ".join(ordered_selected)
-        if not overview_paragraph or len(overview_paragraph) < 15:
-            overview_paragraph = "De-identified operational record containing verified structured fields with zero residual direct PII entities."
 
-        # Count placeholders
-        entities_found = set(re.findall(r"\[[A-Z]+(?:_\d+)?\]|<[A-Z_]+_HMAC_[a-f0-9]+>|█+|\*+", sanitized_text))
-        direct_count = len(entities_found)
+        # Count all masked placeholder instances in the sanitized document text
+        masked_tokens = re.findall(r"\[[A-Z]+(?:_\d+)?\]|<[A-Z_]+_HMAC_[a-f0-9]+>|█+|\*+", sanitized_text)
+        total_masked_count = len(masked_tokens)
+        
+        category_breakdown: Dict[str, int] = {}
+        for tok in masked_tokens:
+            cat_match = re.search(r"\[([A-Z]+)", tok) or re.search(r"<([A-Z]+)_", tok)
+            cat_name = cat_match.group(1) if cat_match else "MASKED_VALUE"
+            category_breakdown[cat_name] = category_breakdown.get(cat_name, 0) + 1
+
+        breakdown_lines = [f"• {cat}: {cnt} instance(s) masked" for cat, cnt in sorted(category_breakdown.items())]
+        if not breakdown_lines:
+            breakdown_lines = ["• None: 0 sensitive items detected/masked in this document"]
 
         # Assemble clean, properly aligned sections
         sections = [
@@ -217,22 +227,40 @@ Document Title:"""
 
         sections.append(
             f"\nPrivacy & Entity Protection:\n"
-            f"• Direct Identifiers: {direct_count} unique entity instances de-identified via canonical tags.\n"
+            f"• Direct Identifiers: {total_masked_count} word/token instances de-identified via canonical tags.\n"
             f"• Quasi-Identifiers: {warnings_count} indirect re-identification vectors neutralized via contextual generalization."
+        )
+
+        sections.append(
+            f"\n================================================================================\n"
+            f"SUMMARY OF MASKED ENTITIES:\n"
+            f"Total Words/Entities Masked: {total_masked_count}\n"
+            + "\n".join(breakdown_lines) + "\n"
+            f"================================================================================"
         )
 
         return "\n".join(sections)
 
-    def audit_summary_leaks(self, summary: str, removed_spans: List[DetectedSpan]) -> Tuple[str, List[Dict[str, Any]]]:
+    def audit_summary_leaks(
+        self, 
+        summary: str, 
+        removed_spans: List[DetectedSpan], 
+        suppressed_terms: Any = None
+    ) -> Tuple[str, List[Dict[str, Any]]]:
         """
         Comprehensive Multi-Layer Summary Audit:
         1. Exact, case-insensitive, fuzzy, and digit-sequence checks against all approved removed spans.
         2. Quasi-identifier scan and neutralization on summary text.
-        3. Autonomous rule-based PII scan on summary (catches undetected or hallucinated PII).
+        3. Autonomous rule-based PII scan on summary (honoring human-rejected / suppressed terms).
         """
         purged = summary
         caught_leaks: List[Dict[str, Any]] = []
         summary_digits = re.findall(r"\d{6,}", summary)
+
+        suppressed_set = set()
+        if suppressed_terms:
+            if isinstance(suppressed_terms, (set, list, tuple)):
+                suppressed_set = {str(t).strip().lower() for t in suppressed_terms}
 
         # 1. Audit against all removed approved spans
         for span in removed_spans:
@@ -305,9 +333,12 @@ Document Title:"""
                 "type": "quasi_generalization"
             })
 
-        # 3. Autonomous scan for any unflagged/hallucinated PII in the summary
+        # 3. Autonomous scan for any unflagged/hallucinated PII in the summary (ignoring human-rejected terms)
         detected_in_summary = detect_by_rules(purged)
         for s in detected_in_summary:
+            term_lower = s.text.strip().lower()
+            if suppressed_set and (term_lower in suppressed_set or any(st in term_lower or term_lower in st for st in suppressed_set)):
+                continue
             if s.text not in [cl["text"] for cl in caught_leaks]:
                 caught_leaks.append({
                     "text": s.text,

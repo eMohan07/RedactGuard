@@ -129,13 +129,14 @@ class EntityLinker:
             # Exactly one person fits -> Auto-link!
             if len(unique_matching_clusters) == 1:
                 clusters[unique_matching_clusters[0]].append((s, p))
-            # Two or more people share surname -> Flag ambiguity!
+            # Two or more people share surname -> Flag ambiguity and count as distinct entity!
             elif len(unique_matching_clusters) > 1:
                 ambiguity_flags.append({
                     "span_id": s.id,
                     "text": s.text,
-                    "reason": f"Ambiguous name '{s.text}' matches multiple individuals sharing a surname. Manual verification required."
+                    "reason": f"Ambiguous name '{s.text}' matches multiple individuals sharing a surname. Counted as separate entity."
                 })
+                clusters.append([(s, p)])
             else:
                 # Independent single person
                 clusters.append([(s, p)])
@@ -146,8 +147,9 @@ class EntityLinker:
             for s, _ in cluster:
                 span_tags[s.id] = tag
 
-        # 5. Assign other categories (EMAIL_1, PHONE_1, etc.)
-        for cat in ["EMAIL", "PHONE", "ADDRESS", "ID"]:
+        # 5. Assign all other categories (EMAIL_1, PHONE_1, ID_1, ORGANIZATION_1, etc.)
+        other_categories = sorted(list(set(s.category for s in spans if s.category != "NAME")))
+        for cat in other_categories:
             cat_spans = [s for s in spans if s.category == cat]
             unique_vals: Dict[str, str] = {}
             count = 0

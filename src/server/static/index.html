@@ -206,9 +206,15 @@
     flex-shrink: 0;
   }
   #sidebar.collapsed {
-    width: 0px;
-    overflow: hidden;
-    border-right: none;
+    width: 0px !important;
+    min-width: 0px !important;
+    max-width: 0px !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    border-right: none !important;
+    overflow: hidden !important;
+    opacity: 0;
+    pointer-events: none;
   }
 
   .sidebar-header {
@@ -760,7 +766,7 @@
     box-shadow: 0 0 8px rgba(16, 163, 127, 0.45);
   }
   #sidebar.collapsed + .sidebar-splitter {
-    display: none;
+    display: none !important;
   }
 
   /* Workspace Splitter - Sleek Minimal Draggable Divider */
@@ -1013,17 +1019,42 @@
   body.light-theme .warning-text h4 { color: #a16207; }
   .warning-text p { font-size: 0.78rem; color: var(--text-secondary); }
 
-  /* Selection popup */
+  /* Selection Permission Card */
   #selectionPopup {
     position: absolute;
     display: none;
     background: var(--card-bg);
     border: 1px solid var(--border);
     color: var(--text-primary);
-    padding: 6px 10px;
-    border-radius: 8px;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.25);
-    z-index: 100;
+    padding: 12px 14px;
+    border-radius: 10px;
+    box-shadow: 0 14px 36px rgba(0,0,0,0.45);
+    z-index: 1000;
+    width: 320px;
+    max-width: 95vw;
+    flex-direction: column;
+    gap: 8px;
+  }
+  #selectionPopup .popup-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 6px;
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: var(--text-primary);
+  }
+  #selectionPopup .popup-body {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    line-height: 1.45;
+  }
+  #selectionPopup .popup-actions {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-top: 4px;
   }
 
   /* Modal */
@@ -1434,25 +1465,38 @@
                 <button class="btn-primary btn-sm" onclick="downloadSummaryFile()">📥 Download Clean Summary (.txt)</button>
               </div>
             </div>
+            <div id="summaryViewerMaskStats" style="display:none; margin-bottom: 14px;"></div>
             <div id="summaryViewerText" style="white-space: pre-wrap; word-break: break-word; color: var(--text-primary); font-family: var(--font-sans); font-size: 0.92rem;">Click "Safe Summary" at the top to generate a privacy-preserving summary.</div>
           </div>
 
-          <!-- Selection Popup -->
-          <div id="selectionPopup" style="display: none; align-items: center; gap: 6px;">
-            <span id="selectedTextSnippet" style="margin-right: 4px; font-weight: 600; font-size: 0.78rem;"></span>
-            <select id="selCategory" style="padding: 3px 6px; border-radius: 4px; font-size: 0.75rem;">
-              <option value="NAME">NAME</option>
-              <option value="EMAIL">EMAIL</option>
-              <option value="PHONE">PHONE</option>
-              <option value="ADDRESS">ADDRESS</option>
-              <option value="ID">ID</option>
-              <option value="ORGANIZATION">ORGANIZATION</option>
-              <option value="FINANCIAL">FINANCIAL</option>
-              <option value="CONFIDENTIAL">CONFIDENTIAL</option>
-              <option value="DATE">DATE</option>
-            </select>
-            <button id="btnRedactSelection" class="btn-sm btn-primary" title="Redact only this specific selected occurrence">+ Add (This Only)</button>
-            <button id="btnRedactSelectionSimilar" class="btn-sm btn-outline" title="Redact all occurrences of this text across the entire document & remember in active learning">+ All Similar (Document-Wide)</button>
+          <!-- Selection Permission Card Popup -->
+          <div id="selectionPopup" style="display: none;">
+            <div class="popup-header">
+              <span>🛡️ Add Sensitive Entity?</span>
+              <button id="btnCancelSelection" type="button" style="background:none; border:none; cursor:pointer; font-size:1.1rem; color:var(--text-muted); line-height:1;" title="Dismiss">✕</button>
+            </div>
+            <div class="popup-body">
+              <div>Add <strong id="selectedTextSnippet" style="color:var(--gpt-green); font-family:var(--font-mono); word-break:break-all;"></strong> as a sensitive PII entity?</div>
+              <div style="margin-top:6px; display:flex; align-items:center; gap:6px;">
+                <label for="selCategory" style="font-size:0.75rem; font-weight:600; color:var(--text-muted); min-width:44px;">Type:</label>
+                <select id="selCategory" style="flex:1; padding:4px 8px; border-radius:6px; font-size:0.78rem; background:var(--input-bg); color:var(--text-primary); border:1px solid var(--border);">
+                  <option value="NAME">NAME (Person)</option>
+                  <option value="EMAIL">EMAIL</option>
+                  <option value="PHONE">PHONE</option>
+                  <option value="ADDRESS">ADDRESS</option>
+                  <option value="ID">ID (Passport / SSN)</option>
+                  <option value="ORGANIZATION">ORGANIZATION</option>
+                  <option value="FINANCIAL">FINANCIAL</option>
+                  <option value="CONFIDENTIAL">CONFIDENTIAL</option>
+                  <option value="DATE">DATE</option>
+                </select>
+              </div>
+            </div>
+            <div class="popup-actions">
+              <button id="btnRedactSelection" class="btn-sm btn-primary" style="flex:1; font-weight:700;" title="Redact only this specific selected occurrence">✓ Add as PII</button>
+              <button id="btnRedactSelectionSimilar" class="btn-sm btn-outline" style="font-size:0.73rem; padding:3px 7px;" title="Redact all occurrences across document">+ All Similar</button>
+              <button id="btnRejectSelection" class="btn-sm btn-outline" style="border-color:#ef4444; color:#ef4444; font-size:0.73rem; padding:3px 7px; font-weight:600;" title="Reject / Exclude this selection from redaction">✗ Reject / Exclude</button>
+            </div>
           </div>
         </div>
       </div>
@@ -1593,7 +1637,10 @@ const candidateCount = document.getElementById('candidateCount');
 const selectionPopup = document.getElementById('selectionPopup');
 const btnRedactSelection = document.getElementById('btnRedactSelection');
 const btnRedactSelectionSimilar = document.getElementById('btnRedactSelectionSimilar');
+const btnRejectSelection = document.getElementById('btnRejectSelection');
+const btnCancelSelection = document.getElementById('btnCancelSelection');
 const selectedTextSnippet = document.getElementById('selectedTextSnippet');
+const summaryViewerMaskStats = document.getElementById('summaryViewerMaskStats');
 const learningStatsBadge = document.getElementById('learningStatsBadge');
 const legendBar = document.getElementById('legendBar');
 const summaryModal = document.getElementById('summaryModal');
@@ -1611,15 +1658,40 @@ const manualTextInput = document.getElementById('manualTextInput');
 const selCategory = document.getElementById('selCategory');
 const btnPurgeLearning = document.getElementById('btnPurgeLearning');
 
-// Sidebar toggle & New doc handlers
+// Sidebar toggle & collapse handlers
+let isDraggingSidebarSplitter = false;
+const sidebarSplitter = document.getElementById('sidebarSplitter');
+let sidebarWidth = parseInt(localStorage.getItem('redactguard_sidebar_width') || '260');
+
+function setSidebarCollapsed(collapsed) {
+  if (!sidebar) return;
+  if (collapsed) {
+    sidebar.classList.add('collapsed');
+    sidebar.style.width = '0px';
+    localStorage.setItem('redactguard_sidebar_collapsed', '1');
+  } else {
+    sidebar.classList.remove('collapsed');
+    sidebar.style.width = sidebarWidth + 'px';
+    localStorage.setItem('redactguard_sidebar_collapsed', '0');
+  }
+}
+
+function toggleSidebarCollapse() {
+  if (!sidebar) return;
+  const isCurrentlyCollapsed = sidebar.classList.contains('collapsed');
+  setSidebarCollapsed(!isCurrentlyCollapsed);
+}
+
 if (btnToggleSidebar) {
-  btnToggleSidebar.addEventListener('click', () => {
-    sidebar.classList.toggle('collapsed');
+  btnToggleSidebar.addEventListener('click', (e) => {
+    e.stopPropagation();
+    toggleSidebarCollapse();
   });
 }
 if (btnHeaderSidebarToggle) {
-  btnHeaderSidebarToggle.addEventListener('click', () => {
-    sidebar.classList.toggle('collapsed');
+  btnHeaderSidebarToggle.addEventListener('click', (e) => {
+    e.stopPropagation();
+    toggleSidebarCollapse();
   });
 }
 
@@ -1672,11 +1744,6 @@ function applyPanelSizing() {
   panelCandidates.style.flex = `0 0 calc(100% - ${panelSplitPercent}% - 14px)`;
 }
 
-// Sidebar Draggable Splitter (Resize sample docs panel left/right)
-let isDraggingSidebarSplitter = false;
-const sidebarSplitter = document.getElementById('sidebarSplitter');
-let sidebarWidth = parseInt(localStorage.getItem('redactguard_sidebar_width') || '260');
-
 function applySidebarWidth(w) {
   sidebarWidth = Math.max(220, Math.min(620, Math.round(w)));
   if (sidebar && !sidebar.classList.contains('collapsed')) {
@@ -1684,9 +1751,15 @@ function applySidebarWidth(w) {
   }
 }
 
-// Restore saved sidebar width on page load
-if (localStorage.getItem('redactguard_sidebar_width')) {
-  applySidebarWidth(parseInt(localStorage.getItem('redactguard_sidebar_width')));
+// Restore saved sidebar width and state on page load
+if (localStorage.getItem('redactguard_sidebar_collapsed') === '1') {
+  setSidebarCollapsed(true);
+} else {
+  if (localStorage.getItem('redactguard_sidebar_width')) {
+    applySidebarWidth(parseInt(localStorage.getItem('redactguard_sidebar_width')));
+  } else if (sidebar) {
+    sidebar.style.width = sidebarWidth + 'px';
+  }
 }
 
 if (sidebarSplitter) {
@@ -1968,6 +2041,10 @@ async function analyzeTextDirectly(text, filename) {
     saveHistoryItem(currentSession);
     switchView('highlights');
     renderAll();
+    const pendingCount = (currentSession.spans || []).filter(s => !s.accepted && !s.rejected_by_user).length;
+    if (pendingCount > 0) {
+      showToast(`🟡 Human Verification Required: ${pendingCount} candidate entities detected. Review each: [✓ Approve] to mask as PII, or [✗ Reject] to exclude.`);
+    }
   } catch (err) {
     alert("Connection error: " + err);
   }
@@ -2216,11 +2293,11 @@ function renderAnalysisTable() {
     
     let statusText;
     if (s.rejected_by_user) {
-      statusText = `<span style="color:#ef4444; text-decoration:line-through; font-size:0.75rem;">Excluded</span> <button class="btn-outline btn-sm" style="padding:1px 5px; font-size:0.68rem; margin-left:4px;" onclick="toggleSpan('${s.id}', true)">Undo</button>`;
+      statusText = `<span style="color:#ef4444; text-decoration:line-through; font-size:0.75rem;">Excluded</span> <button class="btn-outline btn-sm" style="padding:1px 5px; font-size:0.68rem; margin-left:4px;" onclick="toggleSpan('${s.id}', true, false)">Undo</button>`;
     } else if (isPending) {
-      statusText = `<button class="btn-primary btn-sm" style="background:#ca8a04; border-color:#eab308; color:#ffffff; font-size:0.72rem; padding:2px 8px; font-weight:700;" onclick="toggleSpan('${s.id}', true)">🟡 Approve</button> <button class="btn-outline btn-sm" style="border-color:#ef4444; color:#ef4444; font-size:0.72rem; padding:2px 6px; margin-left:4px;" onclick="rejectSpan('${s.id}')">✗</button>`;
+      statusText = `<button class="btn-primary btn-sm" style="background:#ca8a04; border-color:#eab308; color:#ffffff; font-size:0.72rem; padding:2px 8px; font-weight:700;" onclick="toggleSpan('${s.id}', true, false)">🟡 Approve</button> <button class="btn-outline btn-sm" style="border-color:#ef4444; color:#ef4444; font-size:0.72rem; padding:2px 6px; margin-left:4px;" onclick="rejectSpan('${s.id}')">✗</button>`;
     } else {
-      statusText = `<span style="color:#22c55e; font-weight:600; font-size:0.75rem;">🟢 Approved</span> <button class="btn-outline btn-sm" style="padding:1px 5px; font-size:0.68rem; margin-left:4px;" onclick="rejectSpan('${s.id}')">Undo</button>`;
+      statusText = `<span style="color:#22c55e; font-weight:600; font-size:0.75rem;">🟢 Approved</span> <button class="btn-outline btn-sm" style="border-color:#ef4444; color:#ef4444; padding:1px 5px; font-size:0.68rem; margin-left:4px;" onclick="rejectSpan('${s.id}')">Reject</button>`;
     }
 
     tr.innerHTML = `
@@ -2300,11 +2377,19 @@ function renderDocument() {
     const styles = getStyleForSpan(s);
     const tag = getMaskTag(s);
     const isActive = (s.id === selectedSpanId) ? "active" : "";
-    const badgeText = styles.isPending 
-      ? `${tag} · 🟡 ${Math.round(s.confidence * 100)}% Pending`
-      : `${tag} · ${Math.round(s.confidence * 100)}%`;
+    let badgeText;
+    if (s.rejected_by_user) {
+      badgeText = "✗ Excluded";
+    } else if (styles.isPending) {
+      badgeText = `${tag} · 🟡 ${Math.round(s.confidence * 100)}% Pending`;
+    } else {
+      badgeText = `${tag} · ${Math.round(s.confidence * 100)}%`;
+    }
+    const hlTitle = s.rejected_by_user 
+      ? '✗ Excluded from redaction (Click to review)' 
+      : (styles.isPending ? '🟡 Pending Human Review: Click to inspect & approve' : 'Click to inspect/edit');
 
-    html += `<span class="highlight-span ${isActive} ${styles.isPending ? 'pending-highlight' : ''}" id="hl_${s.id}" style="${styles.style}" onclick="handleSpanClick('${s.id}')" title="${styles.isPending ? '🟡 Pending Human Review: Click to inspect & approve' : 'Click to inspect/edit'}">`
+    html += `<span class="highlight-span ${isActive} ${styles.isPending ? 'pending-highlight' : ''}" id="hl_${s.id}" style="${styles.style}" onclick="handleSpanClick('${s.id}')" title="${hlTitle}">`
           + `<span>${escapeHtml(text.substring(s.start_char, s.end_char))}</span>`
           + `<span class="badge-tag" style="background:${styles.badgeBg}; font-size:0.68rem; padding:2px 6px;">${badgeText}</span>`
           + `</span>`;
@@ -2364,15 +2449,22 @@ function getStyleForSpan(s) {
 function handleSpanClick(spanId) {
   focusSpan(spanId);
   const span = currentSession.spans.find(s => s.id === spanId);
-  if (span && !span.accepted && !span.rejected_by_user) {
-    showToast(`🟡 Selected '${span.text}' for review. Click [Approve] or [Reject] in sidebar.`);
+  if (span) {
+    if (!span.accepted && !span.rejected_by_user) {
+      showToast(`🟡 Selected '${span.text}' for review. Click [Approve] or [Reject] in sidebar.`);
+    } else if (span.rejected_by_user) {
+      showToast(`✗ Selected excluded '${span.text}'. Click [Undo] or checkbox in sidebar to re-approve.`);
+    }
   }
 }
 
 async function rejectSpan(spanId) {
   const span = currentSession.spans.find(s => s.id === spanId);
-  if (span) span.rejected_by_user = true;
-  await toggleSpan(spanId, false);
+  if (span) {
+    span.rejected_by_user = true;
+    span.accepted = false;
+  }
+  await toggleSpan(spanId, false, true);
 }
 
 function renderCandidates() {
@@ -2413,15 +2505,34 @@ function renderCandidates() {
     return;
   }
 
+  const pendingItems = list.filter(s => !s.accepted && !s.rejected_by_user);
+  if (pendingItems.length > 0) {
+    const banner = document.createElement('div');
+    banner.style.cssText = "background: rgba(234, 179, 8, 0.12); border: 1px solid #eab308; border-radius: 8px; padding: 10px 12px; margin-bottom: 12px; font-size: 0.78rem;";
+    banner.innerHTML = `
+      <div style="font-weight: 700; color: #fde047; margin-bottom: 4px;">🟡 Human Verification Required (${pendingItems.length} Pending)</div>
+      <div style="color: var(--text-secondary); margin-bottom: 8px; font-size: 0.74rem;">Verify detected items. Click [✓ Approve] to confirm as PII, or [✗ Reject] to exclude false positives.</div>
+      <div style="display: flex; gap: 8px;">
+        <button class="btn-primary btn-sm" style="background:#ca8a04; border-color:#eab308; font-size:0.73rem; padding:3px 10px;" onclick="approveAllPending()">✓ Approve All Pending</button>
+        <button class="btn-outline btn-sm" style="border-color:#ef4444; color:#ef4444; font-size:0.73rem; padding:3px 10px;" onclick="rejectAllPending()">✗ Reject All Pending</button>
+      </div>
+    `;
+    candidatesList.appendChild(banner);
+  }
+
   list.forEach((s) => {
     const isTargetEntity = (selectedEntity !== "ALL" && s.category.toUpperCase() === selectedEntity.toUpperCase());
     const isPending = (!s.accepted && !s.rejected_by_user);
+    const isExcluded = (!s.accepted && s.rejected_by_user);
     const card = document.createElement('div');
     card.className = `candidate-card ${s.id === selectedSpanId ? 'active' : ''} ${isPending ? 'pending-card' : ''}`;
     card.id = `card_${s.id}`;
     if (isPending) {
       card.style.borderLeft = "4px solid #eab308";
       card.style.background = "rgba(234, 179, 8, 0.08)";
+    } else if (isExcluded) {
+      card.style.borderLeft = "4px solid #ef4444";
+      card.style.opacity = "0.78";
     } else if (isTargetEntity) {
       card.style.borderLeft = "3.5px solid var(--gpt-green)";
     }
@@ -2434,24 +2545,35 @@ function renderCandidates() {
     const confBadge = s.confidence >= 0.85 ? "🟢" : (s.confidence >= 0.60 ? "🟡" : "🔴");
     const isAmbig = ambigIds.has(s.id);
     const matchBadge = isTargetEntity ? `<span style="background:var(--gpt-green); color:#ffffff; padding:1px 6px; border-radius:3px; font-family:var(--font-mono); font-size:0.64rem; font-weight:700; margin-left:6px;">★ MATCH</span>` : '';
+    const tagBadgeText = isExcluded 
+      ? `✗ Excluded` 
+      : `${tag} ${confBadge} ${Math.round(s.confidence * 100)}%${isPending ? ' · 🟡 PENDING' : ''}${matchBadge}`;
 
     card.innerHTML = `
       <div class="candidate-header">
-        <span class="candidate-text" style="${isPending ? 'color:#fde047; font-weight:700;' : ''}">${escapeHtml(s.text)}</span>
-        <span class="candidate-tag" style="${isPending ? 'border-color:#ca8a04; color:#fde047; background:rgba(234,179,8,0.25);' : ''}">${tag} ${confBadge} ${Math.round(s.confidence * 100)}%${isPending ? ' · 🟡 PENDING' : ''}${matchBadge}</span>
+        <span class="candidate-text" style="${isPending ? 'color:#fde047; font-weight:700;' : (isExcluded ? 'text-decoration:line-through; color:var(--text-muted);' : '')}">${escapeHtml(s.text)}</span>
+        <span class="candidate-tag" style="${isPending ? 'border-color:#ca8a04; color:#fde047; background:rgba(234,179,8,0.25);' : (isExcluded ? 'border-color:#ef4444; color:#ef4444; background:rgba(239,68,68,0.12);' : '')}">${tagBadgeText}</span>
       </div>
       ${isPending ? `<div style="background:rgba(234,179,8,0.15); border:1px solid rgba(234,179,8,0.35); color:#fde047; font-size:0.73rem; padding:4px 8px; border-radius:6px; margin-bottom:6px;">🟡 <strong>Pending Human Review</strong>: Heuristic or borderline match. Confirm before removal.</div>` : ''}
+      ${isExcluded ? `<div style="background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.25); color:#ef4444; font-size:0.73rem; padding:4px 8px; border-radius:6px; margin-bottom:6px;">✗ <strong>Excluded from Redaction</strong>: Marked as intentional exception.</div>` : ''}
       ${isAmbig ? `<div class="warning-box" style="padding:4px 8px; font-size:0.74rem; margin-bottom:6px;">⚠️ Shared surname matches multiple persons. Manual review advised.</div>` : ''}
       <div style="font-size: 0.72rem; color: var(--text-muted); font-family: var(--font-mono); margin-bottom: 6px;">Source: ${escapeHtml(s.source || 'rule')}</div>
       <div class="candidate-actions" style="display:flex; align-items:center; gap:8px;">
         ${isPending ? `
-          <button class="btn-primary btn-sm" style="background:#ca8a04; border-color:#eab308; color:#ffffff; font-weight:700; padding:3px 10px;" onclick="event.stopPropagation(); toggleSpan('${s.id}', true)">✓ Approve</button>
+          <button class="btn-primary btn-sm" style="background:#ca8a04; border-color:#eab308; color:#ffffff; font-weight:700; padding:3px 10px;" onclick="event.stopPropagation(); toggleSpan('${s.id}', true, false)">✓ Approve</button>
           <button class="btn-outline btn-sm" style="border-color:#ef4444; color:#ef4444; padding:3px 9px;" onclick="event.stopPropagation(); rejectSpan('${s.id}')">✗ Reject</button>
+        ` : isExcluded ? `
+          <label style="display:flex; align-items:center; gap:6px; font-size:0.8rem; cursor:pointer;" onclick="event.stopPropagation();">
+            <input type="checkbox" onchange="toggleSpan('${s.id}', this.checked, !this.checked)">
+            <span style="font-weight:600; color:var(--text-muted); text-decoration:line-through;">Excluded</span>
+          </label>
+          <button class="btn-outline btn-sm" style="border-color:#22c55e; color:#22c55e; padding:2px 8px; font-size:0.75rem;" onclick="event.stopPropagation(); toggleSpan('${s.id}', true, false)">↩ Undo</button>
         ` : `
           <label style="display:flex; align-items:center; gap:6px; font-size:0.8rem; cursor:pointer;" onclick="event.stopPropagation();">
-            <input type="checkbox" ${s.accepted ? "checked" : ""} onchange="toggleSpan('${s.id}', this.checked)">
+            <input type="checkbox" ${s.accepted ? "checked" : ""} onchange="toggleSpan('${s.id}', this.checked, !this.checked)">
             <span style="font-weight:600; color:var(--text-primary);">${s.accepted ? "🟢 Approved" : "Excluded"}</span>
           </label>
+          <button class="btn-outline btn-sm" style="border-color:#ef4444; color:#ef4444; padding:2px 8px; font-size:0.75rem; margin-left:4px;" onclick="event.stopPropagation(); rejectSpan('${s.id}')">✗ Reject</button>
         `}
         <button class="btn-outline btn-sm" style="margin-left:auto; border-radius:6px; padding:3px 9px;" onclick="event.stopPropagation(); redactSimilarById('${s.id}')">All Similar</button>
       </div>
@@ -2478,11 +2600,23 @@ function focusSpan(spanId) {
   if (activeCard) activeCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
 
-async function toggleSpan(spanId, accepted) {
+async function toggleSpan(spanId, accepted, rejectedByUser = null) {
+  const isRejected = (rejectedByUser !== null) ? rejectedByUser : !accepted;
+  const localSpan = (currentSession && currentSession.spans) ? currentSession.spans.find(s => s.id === spanId) : null;
+  if (localSpan) {
+    localSpan.accepted = accepted;
+    localSpan.rejected_by_user = isRejected;
+  }
+  const payload = {
+    session_id: currentSession.session_id,
+    span_id: spanId,
+    accepted: accepted,
+    rejected_by_user: isRejected
+  };
   const res = await fetch('/api/spans/update', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ session_id: currentSession.session_id, span_id: spanId, accepted: accepted })
+    body: JSON.stringify(payload)
   });
   if (res.ok) {
     const data = await res.json();
@@ -2570,6 +2704,50 @@ document.getElementById('btnDeselectAll').onclick = async () => {
   }
 };
 
+async function approveAllPending() {
+  if (!currentSession || !currentSession.spans) return;
+  const res = await fetch('/api/spans/batch_update', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ session_id: currentSession.session_id, accepted: true })
+  });
+  if (res.ok) {
+    const data = await res.json();
+    currentSession.spans = data.spans;
+    currentSession.tag_map = data.tag_map;
+    currentSession.ambiguity_flags = data.ambiguity_flags;
+    cachedSummary = "";
+    saveHistoryItem(currentSession);
+    renderDocument();
+    renderCandidates();
+    if (currentView === 'redacted') renderRedactedPreview();
+    if (currentView === 'analysis') renderAnalysisTable();
+    showToast("✓ Approved all pending entities as PII");
+  }
+}
+
+async function rejectAllPending() {
+  if (!currentSession || !currentSession.spans) return;
+  const res = await fetch('/api/spans/batch_update', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ session_id: currentSession.session_id, accepted: false })
+  });
+  if (res.ok) {
+    const data = await res.json();
+    currentSession.spans = data.spans;
+    currentSession.tag_map = data.tag_map;
+    currentSession.ambiguity_flags = data.ambiguity_flags;
+    cachedSummary = "";
+    saveHistoryItem(currentSession);
+    renderDocument();
+    renderCandidates();
+    if (currentView === 'redacted') renderRedactedPreview();
+    if (currentView === 'analysis') renderAnalysisTable();
+    showToast("✗ Rejected all pending entities");
+  }
+}
+
 // Mouse Text Selection for Redaction
 let currentSelection = "";
 docViewer.addEventListener('mouseup', () => {
@@ -2582,16 +2760,32 @@ docViewer.addEventListener('mouseup', () => {
   }
   if (str && str.length > 1) {
     currentSelection = str;
-    selectedTextSnippet.textContent = `"${str.substring(0, 24)}"`;
+    selectedTextSnippet.textContent = `"${str.length > 28 ? str.substring(0, 28) + '...' : str}"`;
     // Smart default: if capitalized name or title, default category to NAME
     if (/^(?:(?:Dr\.|Mr\.|Mrs\.|Ms\.|Prof\.)\s+)?[A-Z][a-z]+(?:\s+[A-Z][a-z]+)*$/i.test(str) || /^[A-Z]\.\s*[A-Z][a-z]+$/.test(str)) {
       if (selCategory) selCategory.value = "NAME";
+    } else if (/@|\.(?:com|org|net|edu|gov|io)\b/i.test(str)) {
+      if (selCategory) selCategory.value = "EMAIL";
+    } else if (/(?:\+\d{1,3}[\s-]?)?\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}/.test(str)) {
+      if (selCategory) selCategory.value = "PHONE";
+    } else if (/\b\d{1,2}[/-]\d{1,2}[/-]\d{2,4}\b|\b(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\s+\d{1,2}/i.test(str)) {
+      if (selCategory) selCategory.value = "DATE";
     }
     try {
       const range = sel.getRangeAt(0);
       const rect = range.getBoundingClientRect();
-      selectionPopup.style.left = `${rect.left + window.scrollX}px`;
-      selectionPopup.style.top = `${rect.top + window.scrollY - 38}px`;
+      const popupWidth = 320;
+      let left = rect.left + window.scrollX;
+      if (left + popupWidth > window.innerWidth - 20) {
+        left = window.innerWidth - popupWidth - 20;
+      }
+      if (left < 10) left = 10;
+      let top = rect.top + window.scrollY - 135;
+      if (top < 10) {
+        top = rect.bottom + window.scrollY + 10;
+      }
+      selectionPopup.style.left = `${left}px`;
+      selectionPopup.style.top = `${top}px`;
       selectionPopup.style.display = "flex";
     } catch (e) {
       selectionPopup.style.display = "none";
@@ -2600,6 +2794,13 @@ docViewer.addEventListener('mouseup', () => {
     selectionPopup.style.display = "none";
   }
 });
+
+if (btnCancelSelection) {
+  btnCancelSelection.onclick = () => {
+    selectionPopup.style.display = "none";
+    window.getSelection().removeAllRanges();
+  };
+}
 
 document.addEventListener('mousedown', (e) => {
   if (!selectionPopup.contains(e.target) && !docViewer.contains(e.target)) {
@@ -2650,6 +2851,36 @@ if (btnRedactSelectionSimilar) {
     if (currentSelection) {
       const cat = selCategory ? selCategory.value : "NAME";
       redactSimilar(currentSelection, cat);
+      selectionPopup.style.display = "none";
+      window.getSelection().removeAllRanges();
+    }
+  };
+}
+
+if (btnRejectSelection) {
+  btnRejectSelection.onclick = async () => {
+    if (currentSelection && currentSession) {
+      const selLower = currentSelection.toLowerCase().trim();
+      const matchedSpans = (currentSession.spans || []).filter(s => 
+        s.text.toLowerCase().trim() === selLower ||
+        s.text.toLowerCase().includes(selLower) ||
+        selLower.includes(s.text.toLowerCase().trim())
+      );
+      if (matchedSpans.length > 0) {
+        for (const ms of matchedSpans) {
+          await rejectSpan(ms.id);
+        }
+        showToast(`✗ Rejected ${matchedSpans.length} item(s)`);
+      } else {
+        try {
+          await fetch('/api/learning/allowlist', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ term: currentSelection, category: selCategory ? selCategory.value : "NAME" })
+          });
+          showToast(`✗ Added "${currentSelection}" to suppressed list`);
+        } catch (e) {}
+      }
       selectionPopup.style.display = "none";
       window.getSelection().removeAllRanges();
     }
@@ -2767,18 +2998,48 @@ async function fetchSummary() {
       summaryBadgeViewer.textContent = `${data.engine || "Zero-Leak Engine"} · [${data.mask_style || maskStyle}]`;
     }
 
+    const maskedCount = data.total_masked_count !== undefined ? data.total_masked_count : 0;
+    const catEntries = Object.entries(data.category_counts || {});
+    const catTags = catEntries.length > 0 
+      ? catEntries.map(([k, v]) => `<span style="background:var(--border); padding:2px 8px; border-radius:4px; font-weight:600; font-family:var(--font-mono); font-size:0.75rem;">${v} ${k}</span>`).join(' ')
+      : '<span style="color:var(--text-muted); font-size:0.75rem;">None</span>';
+
+    const maskStatsCard = `
+      <div style="background:var(--card-bg); border:1px solid var(--border); border-radius:8px; padding:10px 14px; margin-top:10px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px;">
+        <div style="display:flex; align-items:center; gap:10px;">
+          <span style="font-size:1.3rem;">🔒</span>
+          <div>
+            <div style="font-size:0.84rem; font-weight:700; color:var(--text-primary);">Total Masked Entities: <span style="color:var(--gpt-green);">${maskedCount}</span></div>
+            <div style="font-size:0.76rem; color:var(--text-secondary); margin-top:3px; display:flex; gap:6px; flex-wrap:wrap; align-items:center;">
+              Breakdown: ${catTags}
+            </div>
+          </div>
+        </div>
+        <div style="font-size:0.73rem; color:var(--text-muted); font-family:var(--font-mono); background:var(--panel-header-bg); padding:3px 8px; border-radius:4px; border:1px solid var(--border);">
+          Strict Air-Gapped Privacy
+        </div>
+      </div>
+    `;
+
     if (data.caught_leaks && data.caught_leaks.length > 0) {
       modalSummaryWarning.innerHTML = `
         <div class="badge-leak-warning">
           🛡️ <strong>Leak Prevention:</strong> Intercepted and masked ${data.caught_leaks.length} sensitive tokens before export!
         </div>
+        ${maskStatsCard}
       `;
     } else {
       modalSummaryWarning.innerHTML = `
         <div class="badge-privacy-verified">
           ✅ <strong>Privacy Verified:</strong> Summary generated using ${data.mask_style || maskStyle} format with 0 PII leaks.
         </div>
+        ${maskStatsCard}
       `;
+    }
+
+    if (summaryViewerMaskStats) {
+      summaryViewerMaskStats.style.display = "block";
+      summaryViewerMaskStats.innerHTML = maskStatsCard;
     }
     summaryModal.style.display = "flex";
   } catch (e) {
@@ -2812,10 +3073,10 @@ function downloadSummaryFile() {
 document.getElementById('btnExport').addEventListener('click', () => {
   if (!currentSession) { alert("Please upload a document first."); return; }
   
-  // Review Gating Check: warn if any detected items are unreviewed / excluded
-  const pendingReview = (currentSession.spans || []).filter(s => !s.accepted && s.confidence >= 0.60);
+  // Review Gating Check: warn if any detected items are unreviewed / pending
+  const pendingReview = (currentSession.spans || []).filter(s => !s.accepted && !s.rejected_by_user);
   if (pendingReview.length > 0) {
-    const proceed = confirm(`Review Gate Notice: There are ${pendingReview.length} detected candidate(s) currently excluded from redaction.\n\nDo you want to proceed with export anyway?`);
+    const proceed = confirm(`Review Gate Notice: There are ${pendingReview.length} detected candidate(s) still pending human verification.\n\nDo you want to proceed with export anyway?`);
     if (!proceed) return;
   }
 
@@ -2840,12 +3101,12 @@ document.addEventListener('keydown', (e) => {
   if (key === 'A') {
     if (selectedSpanId) {
       e.preventDefault();
-      toggleSpan(selectedSpanId, true);
+      toggleSpan(selectedSpanId, true, false);
     }
   } else if (key === 'R') {
     if (selectedSpanId) {
       e.preventDefault();
-      toggleSpan(selectedSpanId, false);
+      rejectSpan(selectedSpanId);
     }
   } else if (key === 'S') {
     if (selectedSpanId) {

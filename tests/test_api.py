@@ -172,3 +172,42 @@ def test_manual_add_matches_all_similar_in_doc():
     # All occurrences in document should be matched and accepted
     matching_spans = [s for s in spans if "Malhotra" in s["text"] and s["accepted"]]
     assert len(matching_spans) >= 2, "Manual addition must automatically select all occurrences and related name variants across the document"
+
+def test_reject_span_and_rejected_by_user_flag():
+    sample_text = "Doctor: Anita Roy. Email: anita@hospital.org. Phone: 9876543210."
+    files = {"file": ("reject_test.txt", sample_text.encode("utf-8"), "text/plain")}
+    upload_res = client.post("/api/upload", files=files)
+    assert upload_res.status_code == 200
+    data = upload_res.json()
+    session_id = data["session_id"]
+    spans = data["spans"]
+    assert len(spans) > 0
+
+    target_span = spans[0]
+    span_id = target_span["id"]
+
+    # Reject the target span
+    rej_res = client.post("/api/spans/update", json={
+        "session_id": session_id,
+        "span_id": span_id,
+        "accepted": False,
+        "rejected_by_user": True
+    })
+    assert rej_res.status_code == 200
+    updated_spans = rej_res.json()["spans"]
+    rejected = next(s for s in updated_spans if s["id"] == span_id)
+    assert rejected["accepted"] is False
+    assert rejected["rejected_by_user"] is True
+
+    # Re-approve the target span
+    app_res = client.post("/api/spans/update", json={
+        "session_id": session_id,
+        "span_id": span_id,
+        "accepted": True,
+        "rejected_by_user": False
+    })
+    assert app_res.status_code == 200
+    reapproved = next(s for s in app_res.json()["spans"] if s["id"] == span_id)
+    assert reapproved["accepted"] is True
+    assert reapproved["rejected_by_user"] is False
+

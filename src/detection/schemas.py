@@ -13,6 +13,7 @@ class DetectedSpan(BaseModel):
     source: str = Field(default="rule", description="rule, gliner, slm, or manual")
     confidence: float = Field(default=1.0, description="Detection confidence score")
     accepted: bool = Field(default=True, description="Whether user accepted this redaction")
+    rejected_by_user: bool = Field(default=False, description="Whether user explicitly rejected this redaction")
 
 class WordBox(BaseModel):
     text: str
